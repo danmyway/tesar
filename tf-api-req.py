@@ -1,5 +1,4 @@
 # !/bin/python3
-import os
 import json
 import requests
 from envparse import env
