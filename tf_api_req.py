@@ -3,13 +3,14 @@ import json
 import requests
 from envparse import env
 from pathlib import Path
+from brew_api import get_task_id
 
 env.read_envfile(str(Path(__file__) / ".env"))
 
 artifact_base_url = 'http://artifacts.osci.redhat.com/testing-farm'
 
 
-def submit_test():
+def submit_test(task_id=None):
     """
     Payload documentation > https://testing-farm.gitlab.io/api/#operation/requestsPost
     """
@@ -32,7 +33,7 @@ def submit_test():
           },
           "artifacts": [
             {
-              "id": env.str("ARTIFACT_ID"),
+              "id": str(task_id),
               "type": env.str("ARTIFACT_TYPE"),
               "packages": [
                 env.str("PACKAGES")
@@ -57,10 +58,14 @@ def submit_test():
     print('Test info: {url}/{id}'.format(
         url=env.str("ENDPOINT"), id=response.json()['id'],
     ))
-    print('Test status: {url}/{id}'.format(
+    print('Test status: {url}/{id}\n'.format(
         url=artifact_base_url, id=response.json()['id']
     ))
 
 
 if __name__ == "__main__":
-    submit_test()
+    if len(get_task_id()) > 1:
+        for task_id in get_task_id():
+            submit_test(task_id)
+    else:
+        submit_test(get_task_id())
