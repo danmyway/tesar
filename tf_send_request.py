@@ -14,6 +14,7 @@ artifact_base_url = "http://artifacts.osci.redhat.com/testing-farm"
 el7_distros = ["centos-7", "oraclelinux-7"]
 el8_distros = ["centos-8", "oraclelinux-8"]
 
+
 def submit_test(args):
     """
     Payload documentation > https://testing-farm.gitlab.io/api/#operation/requestsPost
@@ -68,7 +69,3 @@ def submit_test(args):
             url=artifact_base_url, id=response.json()["id"]
         )
     )
-
-
-
-

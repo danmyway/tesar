@@ -17,8 +17,8 @@ session = BuildProxy(config)
 
 def get_copr_info():
     owner = "@oamg"
-    project = 'convert2rhel'
-    pr_hash = 'pr451'
+    project = "convert2rhel"
+    pr_hash = "pr451"
     query = session.get_list(owner, project)
     copr_info = []
     # Get *only* the last build for given pull request
