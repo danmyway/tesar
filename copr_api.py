@@ -1,7 +1,11 @@
+#!/usr/bin/env python3
+
 from copr.v3 import BuildProxy
 from envparse import env
 from pathlib import Path
 import logging
+from tf_send_request import COMPOSE_MAPPING
+
 
 env.read_envfile(str(Path(__file__) / ".env"))
 
@@ -18,27 +22,31 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 console_handler = logging.StreamHandler()
 console_handler.setLevel(logging.INFO)
-console_handler.setFormatter(logging.Formatter("[%(levelname)s] - %(message)s"))
+console_handler.setFormatter(logging.Formatter("%(levelname)s | %(message)s"))
 logger.addHandler(console_handler)
 
 
-def get_copr_info(package, pr_reference, owner="@oamg"):
+def get_info(package, reference):
+    owner = "@oamg"
+    artifact_module = COMPOSE_MAPPING
     build_baseurl = f"https://copr.fedorainfracloud.org/coprs/g/oamg/{package}/build/"
     pr_baseurl = f"https://github.com/oamg/{package}/pull/"
     query = session.get_list(owner, package)
-    copr_info = []
+    info = []
     # Get **only the last** build for given pull request
-    if pr_reference == "master" or pr_reference == "main":
-        logger.info(f"Getting copr build info for referenced {pr_reference}.")
+    if reference == "master" or reference == "main":
+        logger.info(f"Getting copr build info for referenced {reference}.")
     else:
-        logger.info(
-            f"Getting copr build info for referenced {str.upper(pr_reference)}."
-        )
-        logger.info(f"LINK: {pr_baseurl}{pr_reference[2:]}")
-    for last in range(1):
-        for build in query:
-            try:
-                # Get build with pull request number
+        logger.info(f"Getting copr build info for referenced {str.upper(reference)}.")
+        logger.info(f"LINK: {pr_baseurl}{reference[2:]}")
+
+    for build in query:
+        try:
+            # Get build with pull request number
+            if (
+                build.source_package["url"] is not None
+                and reference in build.source_package["url"]
+            ):
                 if build.state == "running":
                     logger.warning(
                         f"There is currently {build.state} build task, consider waiting for completion."
@@ -46,7 +54,7 @@ def get_copr_info(package, pr_reference, owner="@oamg"):
                     logger.info(f"{build_baseurl[:-1]}" + "s/")
                 elif (
                     package == "convert2rhel"
-                    and pr_reference in build.source_package["url"]
+                    and reference in build.source_package["url"]
                 ):
                     # Exclude epel-6 chroot
                     build.chroots.remove("epel-6-x86_64")
@@ -63,11 +71,25 @@ def get_copr_info(package, pr_reference, owner="@oamg"):
                     )
                     logger.info(f"LINK: {build_baseurl}{build.id}")
                     # Get string to use as artifact id
-                    for chroot in build.chroots:
-                        copr_info.append(f"{build.id}:{chroot}")
-                    return copr_info
-            except TypeError:
-                logger.warning(
-                    "The PR reference might not be correct. Please check again."
-                )
-                raise
+                    for distro in COMPOSE_MAPPING:
+                        for version in distro:
+                            copr_info_dict = {
+                                "build_id": None,
+                                "compose": None,
+                                "chroot": None,
+                            }
+                            copr_info_dict["compose"] = version["compose"]
+                            for chroot in build.chroots:
+                                if version["chroot"] == chroot:
+                                    copr_info_dict["chroot"] = version["chroot"]
+                                    copr_info_dict["build_id"] = f"{build.id}:{chroot}"
+                                    logger.info(
+                                        f"Assigning copr build id {build.id} for testing on {copr_info_dict['compose']} to test batch."
+                                    )
+
+                            info.append(copr_info_dict)
+
+                    return info
+        except TypeError:
+            logger.warning("The PR reference might not be correct. Please check again.")
+            raise

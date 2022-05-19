@@ -1,4 +1,5 @@
-# !/bin/python3
+#!/usr/bin/env python3
+
 import json
 import requests
 from envparse import env
@@ -8,6 +9,26 @@ from pathlib import Path
 env.read_envfile(str(Path(__file__) / ".env"))
 
 artifact_base_url = "http://artifacts.osci.redhat.com/testing-farm"
+
+
+COMPOSE_MAPPING = [
+    [
+        {"compose": "CentOS-8-latest", "distro": "centos-8", "chroot": "epel-8-x86_64"},
+        {
+            "compose": "Oracle-Linux-8.5",
+            "distro": "oraclelinux-8",
+            "chroot": "epel-8-x86_64",
+        },
+    ],
+    [
+        {"compose": "CentOS-7-latest", "distro": "centos-7", "chroot": "epel-7-x86_64"},
+        {
+            "compose": "Oracle-Linux-7.9",
+            "distro": "oraclelinux-7",
+            "chroot": "epel-7-x86_64",
+        },
+    ],
+]
 
 
 def submit_test(

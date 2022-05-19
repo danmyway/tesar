@@ -1,6 +1,7 @@
-# !/bin/python3
+#!/usr/bin/env python3
 import koji
 import logging
+from tf_send_request import COMPOSE_MAPPING
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -35,27 +36,40 @@ def get_brew_task_and_compose(package, reference):
 
     logger.info("Checking for available builds.")
     for i in range(len(tasks)):
-        logger.info(f"Available build task ID {tasks[i]} for {volume_names[i]} assigned.")
+        logger.info(
+            f"Available build task ID {tasks[i]} for {volume_names[i]} assigned."
+        )
         logger.info(f"LINK: {brewbuild_baseurl}{tasks[i]}")
 
     return {tasks[i]: volume_names[i] for i in range(len(tasks))}
 
 
-def get_brew_info(package, reference):
-    brew_info = {}
+def get_info(package, reference):
+    brew_dict = {}
+    info = []
     for task_id, volume_name in get_brew_task_and_compose(package, reference).items():
         if volume_name == "rhel-8":
-            brew_info[task_id] = el8_composes
+            brew_dict[task_id] = el8_composes
         if volume_name == "rhel-7":
-            brew_info[task_id] = el7_composes
+            brew_dict[task_id] = el7_composes
 
-    for task_id in brew_info:
-        for compose in brew_info[task_id]:
-            logger.info(f"Assigning build id {task_id} for testing on {compose} to test batch.")
+    for task_id in brew_dict:
+        for compose in brew_dict[task_id]:
+            brew_info_dict = {
+                "build_id": None,
+                "compose": None,
+                "chroot": None,
+            }
+            logger.info(
+                f"Assigning build id {task_id} for testing on {compose} to test batch."
+            )
+            brew_info_dict["build_id"] = task_id
+            brew_info_dict["compose"] = compose
+            for distro in COMPOSE_MAPPING:
+                for version in distro:
+                    if compose == version["compose"]:
+                        brew_info_dict["chroot"] = version["chroot"]
+            info.append(brew_info_dict)
 
+    return info
 
-    return brew_info
-
-
-if __name__ == "__main__":
-    print(get_brew_info())
