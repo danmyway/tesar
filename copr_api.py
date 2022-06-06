@@ -77,8 +77,10 @@ def get_info(package, reference):
                                 "build_id": None,
                                 "compose": None,
                                 "chroot": None,
+                                "distro": None,
                             }
                             copr_info_dict["compose"] = version["compose"]
+                            copr_info_dict["distro"] = version["distro"]
                             for chroot in build.chroots:
                                 if version["chroot"] == chroot:
                                     copr_info_dict["chroot"] = version["chroot"]

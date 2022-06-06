@@ -13,7 +13,7 @@ logger.addHandler(console_handler)
 session = koji.ClientSession("https://brewhub.engineering.redhat.com/brewhub")
 session.gssapi_login()
 
-el8_composes = ["CentOS-8-latest", "Oracle-Linux-8.5"]
+el8_composes = ["CentOS-8-latest", "Oracle-Linux-8.5", "CentOS-8.4", "Oracle-Linux-8.4"]
 el7_composes = ["CentOS-7-latest", "Oracle-Linux-7.9"]
 
 brewbuild_baseurl = "https://brewweb.engineering.redhat.com/brew/taskinfo?taskID="
@@ -59,6 +59,7 @@ def get_info(package, reference):
                 "build_id": None,
                 "compose": None,
                 "chroot": None,
+                "distro": None,
             }
             logger.info(
                 f"Assigning build id {task_id} for testing on {compose} to test batch."
@@ -69,7 +70,7 @@ def get_info(package, reference):
                 for version in distro:
                     if compose == version["compose"]:
                         brew_info_dict["chroot"] = version["chroot"]
+                        brew_info_dict["distro"] = version["distro"]
             info.append(brew_info_dict)
 
     return info
-

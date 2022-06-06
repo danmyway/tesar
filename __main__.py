@@ -111,10 +111,16 @@ To run whole set of plans use /plans or /plans/tier""",
         return 99
 
     for plan in args.plans:
-        info = artifact_module.get_info(PACKAGE_MAPPING[args.package], str.lower(args.reference))
+        info = artifact_module.get_info(
+            PACKAGE_MAPPING[args.package], str.lower(args.reference)
+        )
         for build in info:
             logger.info(
-                f"Sending tests for {args.artifact_type} build for {build['compose']} to the testing farm."
+                f"\nSending test plan "
+                + "\033[1;3m"
+                + plan.split("/")[-1]
+                + "\033[0m"
+                + f" for {args.artifact_type} build for {build['compose']} to the testing farm."
             )
             submit_test(
                 args.git_url,
@@ -126,7 +132,7 @@ To run whole set of plans use /plans or /plans/tier""",
                 str(build["build_id"]),
                 ARTIFACT_MAPPING[args.artifact_type],
                 PACKAGE_MAPPING[args.package],
-                build["chroot"],
+                build["distro"],
                 args.architecture,
             )
 
