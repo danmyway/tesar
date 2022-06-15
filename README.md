@@ -2,9 +2,9 @@ TESAR
 =
 ### Testing farm API requests dispatcher
 #### Send requests to the Testing farm API through command line interface
-Posting requests to Testing farm requires some json payload manipulation, which is inconvenient and might be time consuming.<br>
-For example to be able to send request to test on three different composes you would need to edit 'compose', 'id' and 'distro' in the example payload below twice!<br>
-To be able to send request for testing just two individual test plans on three composes, you would even need to change the 'name' three times as well.<br>
+Posting requests to the Testing farm requires some json payload manipulation, which is inconvenient and might be time-consuming.<br><br>
+For example, to be able to send a request to test on three different composes you would need to edit 'compose', 'id' and 'distro' in the example payload below twice!<br>
+To be able to send request for testing just two individual test plans on three composes, you would even need to change the 'name' three times as well.<br><br>
 That is six changes and six `https POST` commands sent to command line.<br>
 That is IMHO **exactly six times more**, than it should be. 
 
@@ -78,13 +78,13 @@ https://testing-farm.gitlab.io/api/
 
 #### Testing farm API key
 
-To be able to send requests to Testing Farm API you need to obtain the API key.
+To be able to send requests to Testing Farm API, you need to obtain the API key.
 Please, kindly refer to [testing farm onboarding](https://docs.testing-farm.io/general/0.1/onboarding.html)
 to request the API key.
 
 #### Copr API token
 
-To be able to obtain build information for copr builds you need to obtain the [API token here](https://copr.fedorainfracloud.org/api/).<br>
+To be able to obtain build information for copr builds, you need to obtain the [API token here](https://copr.fedorainfracloud.org/api/).<br>
 Please note, that you will need to log in with your Fedora Account to be able to see the API config information.<br>
 **The copr API token is valid for 180 days.**
 
@@ -113,7 +113,7 @@ CentOS-8.4
 Oracle-Linux-8.4
 ```
 
-### List globaly available composes
+### List globally available composes
 
 #### Public ranch
 
@@ -124,4 +124,5 @@ https://api.dev.testing-farm.io/v0.1/composes
 #### Private ranch
 
 `curl -s https://gitlab.cee.redhat.com/baseos-qe/citool-config/-/raw/production/variables-composes.yaml | grep 'compose:' | tr -s ' '`
+
 
