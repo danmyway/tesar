@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import koji
 import logging
-from tf_send_request import COMPOSE_MAPPING
+from dispatcher.tf_send_request import COMPOSE_MAPPING
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -13,8 +13,11 @@ logger.addHandler(console_handler)
 session = koji.ClientSession("https://brewhub.engineering.redhat.com/brewhub")
 session.gssapi_login()
 
-el8_composes = ["CentOS-8-latest", "Oracle-Linux-8.5", "CentOS-8.4", "Oracle-Linux-8.4"]
-el7_composes = ["CentOS-7-latest", "Oracle-Linux-7.9"]
+epel_composes = {
+    "rhel-8": ["CentOS-8-latest", "Oracle-Linux-8.5", "CentOS-8.4", "Oracle-Linux-8.4"],
+    "rhel-7": ["CentOS-7-latest", "Oracle-Linux-7.9"],
+}
+
 
 brewbuild_baseurl = "https://brewweb.engineering.redhat.com/brew/taskinfo?taskID="
 
@@ -44,14 +47,18 @@ def get_brew_task_and_compose(package, reference):
     return {tasks[i]: volume_names[i] for i in range(len(tasks))}
 
 
-def get_info(package, reference):
+def get_info(package, reference, composes):
     brew_dict = {}
     info = []
+    compose_selection = []
+
+    for compose in composes:
+        compose_selection.append(COMPOSE_MAPPING.get(compose).get("compose"))
+
     for task_id, volume_name in get_brew_task_and_compose(package, reference).items():
-        if volume_name == "rhel-8":
-            brew_dict[task_id] = el8_composes
-        if volume_name == "rhel-7":
-            brew_dict[task_id] = el7_composes
+        brew_dict[task_id] = list(
+            set(compose_selection).intersection(epel_composes.get(volume_name))
+        )
 
     for task_id in brew_dict:
         for compose in brew_dict[task_id]:
@@ -66,11 +73,15 @@ def get_info(package, reference):
             )
             brew_info_dict["build_id"] = task_id
             brew_info_dict["compose"] = compose
-            for distro in COMPOSE_MAPPING:
-                for version in distro:
-                    if compose == version["compose"]:
-                        brew_info_dict["chroot"] = version["chroot"]
-                        brew_info_dict["distro"] = version["distro"]
+            for compose_choice in composes:
+                if COMPOSE_MAPPING.get(compose_choice).get("compose") == compose:
+                    brew_info_dict["chroot"] = COMPOSE_MAPPING.get(compose_choice).get(
+                        "chroot"
+                    )
+                    brew_info_dict["distro"] = COMPOSE_MAPPING.get(compose_choice).get(
+                        "distro"
+                    )
+
             info.append(brew_info_dict)
 
     return info

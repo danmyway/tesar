@@ -4,7 +4,7 @@ from copr.v3 import BuildProxy
 from envparse import env
 from pathlib import Path
 import logging
-from tf_send_request import COMPOSE_MAPPING
+from dispatcher.tf_send_request import COMPOSE_MAPPING
 
 
 env.read_envfile(str(Path(__file__) / ".env"))
@@ -26,9 +26,8 @@ console_handler.setFormatter(logging.Formatter("%(levelname)s | %(message)s"))
 logger.addHandler(console_handler)
 
 
-def get_info(package, reference):
+def get_info(package, reference, composes):
     owner = "@oamg"
-    artifact_module = COMPOSE_MAPPING
     build_baseurl = f"https://copr.fedorainfracloud.org/coprs/g/oamg/{package}/build/"
     pr_baseurl = f"https://github.com/oamg/{package}/pull/"
     query = session.get_list(owner, package)
@@ -71,25 +70,31 @@ def get_info(package, reference):
                     )
                     logger.info(f"LINK: {build_baseurl}{build.id}")
                     # Get string to use as artifact id
-                    for distro in COMPOSE_MAPPING:
-                        for version in distro:
-                            copr_info_dict = {
-                                "build_id": None,
-                                "compose": None,
-                                "chroot": None,
-                                "distro": None,
-                            }
-                            copr_info_dict["compose"] = version["compose"]
-                            copr_info_dict["distro"] = version["distro"]
-                            for chroot in build.chroots:
-                                if version["chroot"] == chroot:
-                                    copr_info_dict["chroot"] = version["chroot"]
-                                    copr_info_dict["build_id"] = f"{build.id}:{chroot}"
-                                    logger.info(
-                                        f"Assigning copr build id {build.id} for testing on {copr_info_dict['compose']} to test batch."
-                                    )
 
-                            info.append(copr_info_dict)
+                    copr_info_dict = {
+                        "build_id": None,
+                        "compose": None,
+                        "chroot": None,
+                        "distro": None,
+                    }
+                    for distro in composes:
+                        copr_info_dict["compose"] = COMPOSE_MAPPING.get(distro).get(
+                            "compose"
+                        )
+                        copr_info_dict["distro"] = COMPOSE_MAPPING.get(distro).get(
+                            "distro"
+                        )
+                        for chroot in build.chroots:
+                            if COMPOSE_MAPPING.get(distro).get("chroot") == chroot:
+                                copr_info_dict["chroot"] = COMPOSE_MAPPING.get(
+                                    distro
+                                ).get("chroot")
+                                copr_info_dict["build_id"] = f"{build.id}:{chroot}"
+                                logger.info(
+                                    f"Assigning copr build id {build.id} for testing on {copr_info_dict['compose']} to test batch."
+                                )
+
+                        info.append(copr_info_dict)
 
                     return info
         except TypeError:

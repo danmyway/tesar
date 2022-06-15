@@ -3,22 +3,13 @@
 import sys
 import importlib
 import argparse
-from tf_send_request import submit_test
+from dispatcher.tf_send_request import (
+    submit_test,
+    PACKAGE_MAPPING,
+    ARTIFACT_MAPPING,
+    COMPOSE_MAPPING,
+)
 import logging
-
-
-# def get_log():
-#     logger = logging.getLogger(__name__)
-#     logger.setLevel(logging.INFO)
-#     if not logger.hasHandlers():
-#         console_handler = logging.StreamHandler()
-#         console_handler.setLevel(logging.INFO)
-#         console_handler.setFormatter(logging.Formatter("%(levelname)s | %(message)s"))
-#         logger.addHandler(console_handler)
-#     return logger
-#
-#
-# logger = get_log()
 
 
 def main():
@@ -31,11 +22,8 @@ def main():
         logger.addHandler(console_handler)
     # return logger
 
-    ARTIFACT_MAPPING = {"brew": "redhat-brew-build", "copr": "fedora-copr-build"}
-    PACKAGE_MAPPING = {"c2r": "convert2rhel", "leapp": "leapp"}
-
     parser = argparse.ArgumentParser(
-        description="Send requests to testing farm.",
+        description="Send requests to testing farm conveniently.",
         formatter_class=argparse.RawTextHelpFormatter,
     )
     parser.add_argument(
@@ -51,21 +39,21 @@ def main():
         choices=PACKAGE_MAPPING.keys(),
         default=next(iter(PACKAGE_MAPPING.keys())),
         help="""Choose package to test e.g. %(choices)s.
-Default: '%(default)s'.""",
+    Default: '%(default)s'.""",
     )
 
     parser.add_argument(
         "-ref",
         "--reference",
         help="""For brew: Specify the reference version to find the correct artifact (e.g. 0.1-2, 0.1.2).
-For copr: Specify the pull request reference to find the correct artifact (e.g. pr123, main, master, ...).""",
+    For copr: Specify the pull request reference to find the correct artifact (e.g. pr123, main, master, ...).""",
     )
 
     parser.add_argument(
         "-git",
         "--git_url",
         help="""Provide reference to git repository containing the plans metadata tree. 
-Use any format acceptable by the git clone command.""",
+    Use any format acceptable by the git clone command.""",
     )
 
     parser.add_argument(
@@ -73,16 +61,16 @@ Use any format acceptable by the git clone command.""",
         "--branch",
         default="master",
         help="""Branch, tag or commit specifying the desired git revision. 
-This is used to perform a git checkout in the repository. 
-Default: '%(default)s'""",
+    This is used to perform a git checkout in the repository. 
+    Default: '%(default)s'""",
     )
     parser.add_argument(
         "-gp",
         "--git_path",
         default=".",
         help="""Path to the metadata tree root. 
-Should be relative to the git repository root provided in the url parameter. 
-Default: '%(default)s'""",
+    Should be relative to the git repository root provided in the url parameter. 
+    Default: '%(default)s'""",
     )
 
     parser.add_argument(
@@ -90,7 +78,7 @@ Default: '%(default)s'""",
         "--architecture",
         default="x86_64",
         help="""Choose suitable architecture. 
-Default: '%(default)s'.""",
+    Default: '%(default)s'.""",
     )
 
     parser.add_argument(
@@ -99,21 +87,42 @@ Default: '%(default)s'.""",
         required=True,
         nargs="+",
         help="""Specify a test plan or multiple plans to request at testing farm. 
-To run whole set of plans use /plans or /plans/tier""",
+    To run whole set of plans use /plans/ or /plans/tier*/""",
+    )
+
+    parser.add_argument(
+        "-c",
+        "--compose",
+        nargs="+",
+        default=COMPOSE_MAPPING.keys(),
+        choices=COMPOSE_MAPPING.keys(),
+        help="""Choose composes to run tests on. 
+        Default: '%(default)s'.""",
     )
 
     args = parser.parse_args()
 
     try:
-        artifact_module = importlib.import_module(args.artifact_type + "_api")
+        artifact_module = importlib.import_module(
+            "dispatcher." + args.artifact_type + "_api"
+        )
     except ImportError:
         logger.error("Artifact_module could not be loaded!")
         return 99
 
     for plan in args.plans:
-        info = artifact_module.get_info(
-            PACKAGE_MAPPING[args.package], str.lower(args.reference)
-        )
+
+        if args.compose:
+            info = artifact_module.get_info(
+                PACKAGE_MAPPING[args.package], str.lower(args.reference), args.compose
+            )
+        else:
+            info = artifact_module.get_info(
+                PACKAGE_MAPPING[args.package],
+                str.lower(args.reference),
+                COMPOSE_MAPPING.keys(),
+            )
+
         for build in info:
             logger.info(
                 f"\nSending test plan "
