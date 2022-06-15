@@ -2,11 +2,7 @@
 
 import json
 import requests
-from envparse import env
-from pathlib import Path
-
-
-env.read_envfile(str(Path(__file__) / ".env"))
+import configparser
 
 TESTINGFARM_ENDPOINT = "https://api.dev.testing-farm.io/v0.1/requests"
 
@@ -49,6 +45,12 @@ COMPOSE_MAPPING = {
 }
 
 
+getconfig = configparser.ConfigParser()
+getconfig.read("dispatcher/.config")
+
+API_KEY = getconfig.get("testing-farm", "API_KEY")
+
+
 def submit_test(
     git_url,
     git_branch,
@@ -61,7 +63,7 @@ def submit_test(
     package,
     tmt_distro,
     tmt_architecture,
-    api_key=env.str("API_KEY"),
+    api_key=API_KEY,
 ):
     """
     Payload documentation > https://testing-farm.gitlab.io/api/#operation/requestsPost

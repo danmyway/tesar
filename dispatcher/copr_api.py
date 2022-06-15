@@ -1,19 +1,18 @@
 #!/usr/bin/env python3
 
 from copr.v3 import BuildProxy
-from envparse import env
-from pathlib import Path
+import configparser
 import logging
 from dispatcher.tf_send_request import COMPOSE_MAPPING
 
-
-env.read_envfile(str(Path(__file__) / ".env"))
+getconfig = configparser.ConfigParser()
+getconfig.read("dispatcher/.config")
 
 config = {
-    "copr_url": env.str("COPR_URL"),
-    "login": env.str("COPR_LOGIN"),
-    "token": env.str("COPR_TOKEN"),
-    "username": env.str("COPR_USERNAME"),
+    "copr_url": getconfig.get("copr-cli", "COPR_URL"),
+    "login": getconfig.get("copr-cli", "COPR_LOGIN"),
+    "token": getconfig.get("copr-cli", "COPR_TOKEN"),
+    "username": getconfig.get("copr-cli", "COPR_USERNAME"),
 }
 
 session = BuildProxy(config)
