@@ -97,6 +97,7 @@ Documentation then will be available at `/usr/share/doc/python-copr/html/ClientV
 ```shell
 $ dnf install brew-koji
 $ dnf install python-copr, python-copr-docs
+$ dnf install python-kerberos, python-requests, python-requests-kerberos, make, krb5-devel, gcc, python3-devel, redhat-rpm-config
 ```
 
 # Run 
