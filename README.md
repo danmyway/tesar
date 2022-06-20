@@ -16,8 +16,79 @@ With this script, you will be able to do all of the above with just one command!
 $ python tesar.py copr --package c2r -ref pr123 -git https://github.com/oamg/convert2rhel -b main -p /plans/tier0/basic_sanity_checks /plans/tier1/rhsm -c cos84 cos7 ol8
 ```
 
+# Prerequisites
 
-## Examples
+### API configuration
+
+#### Testing farm API key
+
+To be able to send requests to Testing Farm API, you need to obtain the API key.
+Please, kindly refer to [testing farm onboarding](https://docs.testing-farm.io/general/0.1/onboarding.html)
+to request the API key.<br>
+Add the obtained api_key to the config file as instructed below.
+
+#### Copr API token
+
+To be able to obtain build information for copr builds, you need to obtain the [API token here](https://copr.fedorainfracloud.org/api/).<br>
+Please note, that you will need to log in with your Fedora Account to be able to see the API config information.<br>
+Add the obtained API credentials to the config file `~/.config/tesar`<br>
+**The copr API token is valid for 180 days.**
+
+### Packages
+
+To be able to get information for brew-builds and copr-builds this script uses the `brew-koji` and
+`python-copr` packages. <br>
+If needed, install `python-copr-docs` for code documentation for the python-copr package.<br>
+Documentation then will be available at `/usr/share/doc/python-copr/html/ClientV3.html`
+It is also recommended to install `python-kerberos`, `python-requests`, `python-requests-kerberos`, `make`, `krb5-devel`, `gcc`, `python3-devel`, `redhat-rpm-config` to be able to run the script.
+```shell
+$ dnf install brew-koji
+$ dnf install python-copr, python-copr-docs
+$ dnf install python-kerberos, python-requests, python-requests-kerberos, make, krb5-devel, gcc, python3-devel, redhat-rpm-config
+```
+
+# Run 
+
+### Install
+
+#### Clone
+Clone repository to your local machine.
+```shell
+# ssh
+$ git clone git@gitlab.cee.redhat.com:ddiblik/tesar.git
+# https
+$ git clone https://gitlab.cee.redhat.com/ddiblik/tesar.git
+```
+#### Install
+Change directory to the cloned folder, run virtual environment and install the package.
+```shell
+$ cd ~/tesar
+$ pipenv --site-packages shell
+$ pip install .
+```
+#### Set up configuration file
+Set up config file with obtained testing farm API key and copr API credentials replacing {values} with correct credentials
+```shell
+touch ~/.config/tesar && printf "[copr-cli]\nCOPR_LOGIN={your copr login}\nCOPR_USERNAME={your copr username}\nCOPR_TOKEN={your copr api token}\nCOPR_URL=https://copr.fedorainfracloud.org\n[testing-farm]\nAPI_KEY={your testing farm api key}" > ~/.config/tesar
+```
+or copy provided file and edit with your favourite editor, e.g.
+```shell
+cp ./dispatcher/tesar ~/.config/tesar 
+vim ~/.config/tesar
+```
+Config file template
+```
+[copr-cli]
+COPR_LOGIN=
+COPR_USERNAME=
+COPR_TOKEN=
+COPR_URL=https://copr.fedorainfracloud.org
+[testing-farm]
+API_KEY=
+```
+### Run
+After that you should be able to run the script by running `tesar` command.
+#### Examples
 
 ```shell 
 # Test copr build for PR#123 with plan basic_sanity_check on CentOS 8.4 
@@ -34,11 +105,13 @@ $ python tesar.py brew --package c2r -ref 0.12-3 -git https://github.com/oamg/co
 
 ```
 
+
+
 ## Currently used payload
-Link to the testing farm payload documentation:
 
-https://testing-farm.gitlab.io/api/
-
+Link to the testing farm payload documentation:<br>
+https://testing-farm.gitlab.io/api/ <br>
+For convert2RHEL testing we are currently using this form of payload:
 ```json lines
     payload = {
         "api_key": api_key,
@@ -72,38 +145,6 @@ https://testing-farm.gitlab.io/api/
     }
 ```
 
-# Prerequisites
-
-### API configuration
-
-#### Testing farm API key
-
-To be able to send requests to Testing Farm API, you need to obtain the API key.
-Please, kindly refer to [testing farm onboarding](https://docs.testing-farm.io/general/0.1/onboarding.html)
-to request the API key.
-
-#### Copr API token
-
-To be able to obtain build information for copr builds, you need to obtain the [API token here](https://copr.fedorainfracloud.org/api/).<br>
-Please note, that you will need to log in with your Fedora Account to be able to see the API config information.<br>
-**The copr API token is valid for 180 days.**
-
-### Packages
-
-To be able to get information for brew-builds and copr-builds this script uses the `brew-koji` and
-`python-copr` packages. <br>
-If needed, install `python-copr-docs` for code documentation for the python-copr package.<br>
-Documentation then will be available at `/usr/share/doc/python-copr/html/ClientV3.html`
-It is also recommended to install `python-kerberos`, `python-requests`, `python-requests-kerberos`, `make`, `krb5-devel`, `gcc`, `python3-devel`, `redhat-rpm-config` to be able to run the script.
-```shell
-$ dnf install brew-koji
-$ dnf install python-copr, python-copr-docs
-$ dnf install python-kerberos, python-requests, python-requests-kerberos, make, krb5-devel, gcc, python3-devel, redhat-rpm-config
-```
-
-# Run 
-
-WIP
 
 ## Currently mapped composes
 ```
@@ -126,5 +167,3 @@ https://api.dev.testing-farm.io/v0.1/composes
 #### Private ranch
 
 `curl -s https://gitlab.cee.redhat.com/baseos-qe/citool-config/-/raw/production/variables-composes.yaml | grep 'compose:' | tr -s ' '`
-
-

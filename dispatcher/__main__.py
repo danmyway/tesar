@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
+import os
 import importlib
 import argparse
 from dispatcher.tf_send_request import (
@@ -99,6 +100,15 @@ def main():
         help="""Choose composes to run tests on. 
         Default: '%(default)s'.""",
     )
+
+    # TODO tesar file path
+    # parser.add_argument(
+    #     "-cfg",
+    #     "--config_file",
+    #     default=os.path.expanduser('~/.tesar/tesar'),
+    #     help="""Change path to tesar file.
+    #     Default: '%(default)s'.""",
+    # )
 
     args = parser.parse_args()
 
