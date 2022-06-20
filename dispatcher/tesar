@@ -2,6 +2,6 @@
 COPR_LOGIN=
 COPR_USERNAME=
 COPR_TOKEN=
-COPR_URL=
+COPR_URL=https://copr.fedorainfracloud.org
 [testing-farm]
 API_KEY=

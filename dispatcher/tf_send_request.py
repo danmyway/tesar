@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import json
+import os
 import requests
 import configparser
 
@@ -46,7 +47,7 @@ COMPOSE_MAPPING = {
 
 
 getconfig = configparser.ConfigParser()
-getconfig.read("dispatcher/.config")
+getconfig.read(os.path.expanduser("~/.config/tesar"))
 
 API_KEY = getconfig.get("testing-farm", "API_KEY")
 

@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 
 from copr.v3 import BuildProxy
+import os
 import configparser
 import logging
 from dispatcher.tf_send_request import COMPOSE_MAPPING
 
 getconfig = configparser.ConfigParser()
-getconfig.read("dispatcher/.config")
+getconfig.read(os.path.expanduser("~/.config/tesar"))
+
 
 config = {
     "copr_url": getconfig.get("copr-cli", "COPR_URL"),
@@ -14,6 +16,7 @@ config = {
     "token": getconfig.get("copr-cli", "COPR_TOKEN"),
     "username": getconfig.get("copr-cli", "COPR_USERNAME"),
 }
+
 
 session = BuildProxy(config)
 
