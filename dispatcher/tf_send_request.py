@@ -125,7 +125,12 @@ def submit_test(
             )
         )
         print(
-            "Test status: {url}/{id}\n".format(
+            "Test pipeline log: {url}/{id}/pipeline.log\n".format(
+                url=ARTIFACT_BASE_URL, id=response.json()["id"]
+            )
+        )
+        print(
+            "Test results: {url}/{id}\n".format(
                 url=ARTIFACT_BASE_URL, id=response.json()["id"]
             )
         )

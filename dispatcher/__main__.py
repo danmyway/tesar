@@ -53,6 +53,7 @@ def main():
     parser.add_argument(
         "-git",
         "--git_url",
+        required=True,
         help="""Provide reference to git repository containing the plans metadata tree. 
     Use any format acceptable by the git clone command.""",
     )
