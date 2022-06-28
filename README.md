@@ -34,7 +34,7 @@ Please note, that you will need to log in with your Fedora Account to be able to
 Add the obtained API credentials to the config file `~/.config/tesar`<br>
 **The copr API token is valid for 180 days.**
 
-### Packages
+### Package dependencies
 
 To be able to get information for brew-builds and copr-builds this script uses the `brew-koji` and
 `python-copr` packages. <br>
@@ -42,9 +42,7 @@ If needed, install `python-copr-docs` for code documentation for the python-copr
 Documentation then will be available at `/usr/share/doc/python-copr/html/ClientV3.html`
 It is also recommended to install `python-kerberos`, `python-requests`, `python-requests-kerberos`, `make`, `krb5-devel`, `gcc`, `python3-devel`, `redhat-rpm-config` to be able to run the script.
 ```shell
-$ dnf install brew-koji
-$ dnf install python-copr, python-copr-docs
-$ dnf install python-kerberos, python-requests, python-requests-kerberos, make, krb5-devel, gcc, python3-devel, redhat-rpm-config
+$ dnf install brew-koji python-copr python-kerberos python-requests python-requests-kerberos make krb5-devel gcc python3-devel redhat-rpm-config
 ```
 
 # Run 
