@@ -85,21 +85,22 @@ COPR_URL=https://copr.fedorainfracloud.org
 API_KEY=
 ```
 ### Run
-After that you should be able to run the script by running `tesar` command.
+If you installed the script via `pip install .` you should be able to run the script by running `tesar` command.<br>
+Otherwise run with `python tesar.py`.
 #### Examples
 
 ```shell 
 # Test copr build for PR#123 with plan basic_sanity_check on CentOS 8.4 
-$ python tesar.py copr --package c2r -ref pr123 -git https://github.com/oamg/convert2rhel -b main -p /plans/tier0/basic_sanity_checks -c cos84
+$ tesar copr --package c2r -ref pr123 -git https://github.com/oamg/convert2rhel -b main -p /plans/tier0/basic_sanity_checks -c cos84
 
 # Specify which composes you want to run test plan (in this case tier0)
-$ python tesar.py copr --package c2r -ref pr123 -git https://gitlab.cee.redhat.com/xyz/tmt-plans -b testing -p /plans/tier0/ -c ol7 cos8
+$ tesar copr --package c2r -ref pr123 -git https://gitlab.cee.redhat.com/xyz/tmt-plans -b testing -p /plans/tier0/ -c ol7 cos8
  
 # Run every test plan for brew build 0.12-3 on all composes
-$ python tesar.py brew --package c2r -ref 0.12-3 -git https://github.com/oamg/convert2rhel -b main -p /plans/ 
+$ tesar brew --package c2r -ref 0.12-3 -git https://github.com/oamg/convert2rhel -b main -p /plans/ 
 
 # Specify more individual test plans
-$ python tesar.py brew --package c2r -ref 0.12-3 -git https://github.com/oamg/convert2rhel -b main -p /plans/tier0/basic_sanity_checks /plans/tier1/rhsm 
+$ tesar brew --package c2r -ref 0.12-3 -git https://github.com/oamg/convert2rhel -b main -p /plans/tier0/basic_sanity_checks /plans/tier1/rhsm 
 
 ```
 
