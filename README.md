@@ -36,13 +36,13 @@ Add the obtained API credentials to the config file `~/.config/tesar`<br>
 
 ### Package dependencies
 
-To be able to get information for brew-builds and copr-builds this script uses the `brew-koji` and
+To be able to get information for brew-builds and copr-builds this script uses the `brewkoji` and
 `python-copr` packages. <br>
-If needed, install `python-copr-docs` for code documentation for the python-copr package.<br>
+If needed, install `python-copr-doc` for code documentation for the python-copr package.<br>
 Documentation then will be available at `/usr/share/doc/python-copr/html/ClientV3.html`
 It is also recommended to install `python-kerberos`, `python-requests`, `python-requests-kerberos`, `make`, `krb5-devel`, `gcc`, `python3-devel`, `redhat-rpm-config` to be able to run the script.
 ```shell
-$ dnf install brew-koji python-copr python-kerberos python-requests python-requests-kerberos make krb5-devel gcc python3-devel redhat-rpm-config
+$ dnf install brewkoji python-copr python-copr-doc python-kerberos python-requests python-requests-kerberos make krb5-devel gcc python3-devel redhat-rpm-config
 ```
 
 # Run 
