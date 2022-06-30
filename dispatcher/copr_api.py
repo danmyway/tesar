@@ -1,31 +1,11 @@
 #!/usr/bin/env python3
 
 from copr.v3 import BuildProxy
-import os
-import configparser
-import logging
-from dispatcher.tf_send_request import COMPOSE_MAPPING
+from dispatcher.__init__ import COMPOSE_MAPPING, get_logging, get_config
 
-getconfig = configparser.ConfigParser()
-getconfig.read(os.path.expanduser("~/.config/tesar"))
-
-
-config = {
-    "copr_url": getconfig.get("copr-cli", "COPR_URL"),
-    "login": getconfig.get("copr-cli", "COPR_LOGIN"),
-    "token": getconfig.get("copr-cli", "COPR_TOKEN"),
-    "username": getconfig.get("copr-cli", "COPR_USERNAME"),
-}
-
-
-session = BuildProxy(config)
-
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-console_handler = logging.StreamHandler()
-console_handler.setLevel(logging.INFO)
-console_handler.setFormatter(logging.Formatter("%(levelname)s | %(message)s"))
-logger.addHandler(console_handler)
+testing_farm_api_key, copr_config = get_config()
+session = BuildProxy(copr_config)
+logger = get_logging()
 
 
 def get_info(package, reference, composes):
