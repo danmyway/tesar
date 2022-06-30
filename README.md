@@ -1,3 +1,27 @@
+# Table of contents
+1. [Introduction](#tesar)
+2. [Prerequisites](#prerequisites)
+    1. [API configuration](#api-configuration)
+        1. [Testing farm API key](#testing-farm-api-key)
+        2. [Copr API token](#copr-api-token)
+    2. [Package dependencies](#package-dependencies)
+3. [Setup](#setup)
+    1. [Installation](#installation)
+        1. [Clone](#clone)
+        2. [Install](#install)
+        3. [Set up configuration file](#set-up-configuration-file)
+            1. [Config file template](#config-file-template)
+    2. [Run](#run)
+        1. [Examples](#examples)
+4. [Currently used variables](#currently-used-variables)
+    1. [Payload](#payload)
+    2. [Mapped composes](#mapped-composes)
+        1. [List globally available composes](#list-globally-available-composes)
+            1. [Public ranch](#public-ranch)
+            2. [Private ranch](#private-ranch)
+    
+
+
 TESAR
 =
 ### Testing farm API requests dispatcher
@@ -45,9 +69,9 @@ It is also recommended to install `python-kerberos`, `python-requests`, `python-
 $ dnf install brewkoji python-copr python-copr-doc python-kerberos python-requests python-requests-kerberos make krb5-devel gcc python3-devel redhat-rpm-config
 ```
 
-# Run 
+# Setup
 
-### Install
+### Installation
 
 #### Clone
 Clone repository to your local machine.
@@ -74,7 +98,7 @@ or copy provided file and edit with your favourite editor, e.g.
 cp ./dispatcher/tesar ~/.config/tesar 
 vim ~/.config/tesar
 ```
-Config file template
+Config file template <a name="config-file-template"></a>
 ```
 [copr-cli]
 COPR_LOGIN=
@@ -105,8 +129,9 @@ $ tesar brew --package c2r -ref 0.12-3 -git https://github.com/oamg/convert2rhel
 ```
 
 
+# Currently used variables
 
-## Currently used payload
+## Payload
 
 Link to the testing farm payload documentation:<br>
 https://testing-farm.gitlab.io/api/ <br>
@@ -145,7 +170,7 @@ For convert2RHEL testing we are currently using this form of payload:
 ```
 
 
-## Currently mapped composes
+## Mapped composes
 ```
 CentOS-8-latest
 Oracle-Linux-8.5
@@ -156,7 +181,8 @@ Oracle-Linux-8.4
 ```
 
 ### List globally available composes
-
+Testing farm has many available composes on both public and private ranch.<br>
+To list them use commands bellow.
 #### Public ranch
 
 https://api.dev.testing-farm.io/v0.1/composes
