@@ -1,14 +1,8 @@
 #!/usr/bin/env python3
 import koji
-import logging
-from dispatcher.tf_send_request import COMPOSE_MAPPING
+from dispatcher.__init__ import COMPOSE_MAPPING, get_logging
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-console_handler = logging.StreamHandler()
-console_handler.setLevel(logging.INFO)
-console_handler.setFormatter(logging.Formatter("[%(levelname)s] - %(message)s"))
-logger.addHandler(console_handler)
+logger = get_logging()
 
 session = koji.ClientSession("https://brewhub.engineering.redhat.com/brewhub")
 session.gssapi_login()
@@ -17,7 +11,6 @@ epel_composes = {
     "rhel-8": ["CentOS-8-latest", "Oracle-Linux-8.5", "CentOS-8.4", "Oracle-Linux-8.4"],
     "rhel-7": ["CentOS-7-latest", "Oracle-Linux-7.9"],
 }
-
 
 brewbuild_baseurl = "https://brewweb.engineering.redhat.com/brew/taskinfo?taskID="
 

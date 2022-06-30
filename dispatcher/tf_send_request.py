@@ -1,55 +1,10 @@
 #!/usr/bin/env python3
 
 import json
-import os
 import requests
-import configparser
+from dispatcher.__init__ import TESTING_FARM_ENDPOINT, ARTIFACT_BASE_URL, get_config
 
-TESTINGFARM_ENDPOINT = "https://api.dev.testing-farm.io/v0.1/requests"
-
-ARTIFACT_BASE_URL = "http://artifacts.osci.redhat.com/testing-farm"
-
-ARTIFACT_MAPPING = {"brew": "redhat-brew-build", "copr": "fedora-copr-build"}
-PACKAGE_MAPPING = {"c2r": "convert2rhel", "leapp": "leapp"}
-
-COMPOSE_MAPPING = {
-    "cos8": {
-        "compose": "CentOS-8-latest",
-        "distro": "centos-8",
-        "chroot": "epel-8-x86_64",
-    },
-    "ol8": {
-        "compose": "Oracle-Linux-8.5",
-        "distro": "oraclelinux-8",
-        "chroot": "epel-8-x86_64",
-    },
-    "cos7": {
-        "compose": "CentOS-7-latest",
-        "distro": "centos-7",
-        "chroot": "epel-7-x86_64",
-    },
-    "ol7": {
-        "compose": "Oracle-Linux-7.9",
-        "distro": "oraclelinux-7",
-        "chroot": "epel-7-x86_64",
-    },
-    "cos84": {
-        "compose": "CentOS-8.4",
-        "distro": "centos-8.4",
-        "chroot": "epel-8-x86_64",
-    },
-    "ol84": {
-        "compose": "Oracle-Linux-8.4",
-        "distro": "oraclelinux-8.4",
-        "chroot": "epel-8-x86_64",
-    },
-}
-
-
-getconfig = configparser.ConfigParser()
-getconfig.read(os.path.expanduser("~/.config/tesar"))
-
-API_KEY = getconfig.get("testing-farm", "API_KEY")
+testing_farm_api_key, copr_config = get_config()
 
 
 def submit_test(
@@ -64,7 +19,7 @@ def submit_test(
     package,
     tmt_distro,
     tmt_architecture,
-    api_key=API_KEY,
+    api_key=testing_farm_api_key,
 ):
     """
     Payload documentation > https://testing-farm.gitlab.io/api/#operation/requestsPost
@@ -101,7 +56,7 @@ def submit_test(
         ],
     }
 
-    response = requests.post(TESTINGFARM_ENDPOINT, json=payload)
+    response = requests.post(TESTING_FARM_ENDPOINT, json=payload)
 
     # TODO DEBUG logger
     # print(
@@ -120,7 +75,7 @@ def submit_test(
     try:
         print(
             "Test info: {url}/{id}".format(
-                url=TESTINGFARM_ENDPOINT,
+                url=TESTING_FARM_ENDPOINT,
                 id=response.json()["id"],
             )
         )
