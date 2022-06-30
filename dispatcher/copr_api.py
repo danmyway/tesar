@@ -96,7 +96,7 @@ def get_info(package, reference, composes):
                                     f"Assigning copr build id {build.id} for testing on {copr_info_dict['compose']} to test batch."
                                 )
 
-                        info.append(copr_info_dict)
+                        info.append(copr_info_dict.copy())
 
                     return info
         except TypeError:

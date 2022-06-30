@@ -82,6 +82,6 @@ def get_info(package, reference, composes):
                         "distro"
                     )
 
-            info.append(brew_info_dict)
+            info.append(brew_info_dict.copy())
 
     return info
