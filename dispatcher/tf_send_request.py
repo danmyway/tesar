@@ -1,10 +1,20 @@
 #!/usr/bin/env python3
 
 import json
+import sys
+
 import requests
-from dispatcher.__init__ import TESTING_FARM_ENDPOINT, ARTIFACT_BASE_URL, get_config
+from dispatcher.__init__ import (
+    TESTING_FARM_ENDPOINT,
+    ARTIFACT_BASE_URL,
+    get_config,
+    get_arguments,
+    get_datetime,
+)
 
 testing_farm_api_key, copr_config = get_config()
+args = get_arguments()
+output_divider = 20 * "="
 
 
 def submit_test(
@@ -58,41 +68,70 @@ def submit_test(
 
     response = requests.post(TESTING_FARM_ENDPOINT, json=payload)
 
-    # TODO DEBUG logger
-    # print(
-    #     "Status: {status}, Payload: {payload}\n".format(
-    #         status=response.status_code,
-    #         payload=json.dumps(response.json()),
-    #     )
-    # )
-    # TODO DEBUG logger prettify
-    # print(
-    #     "Status: {status}, Payload: {payload}\n".format(
-    #         status=response.status_code,
-    #         payload=json.dumps(response.json(), indent=2, sort_keys=True),
-    #     )
-    # )
+    print_test_info = (
+        output_divider
+        + "\033[1m\033[92m\n{compose}\n   {plan}\033[0m\n      Test info: {url}/{id}\n".format(
+            url=TESTING_FARM_ENDPOINT,
+            id=response.json()["id"],
+            compose=response.json()["environments"][0]["os"]["compose"],
+            plan=response.json()["test"]["fmf"]["name"],
+        )
+        + output_divider
+    )
+    print_test_pipeline_log = (
+        output_divider
+        + "\033[1m\033[92m\n{compose}\n   {plan}\033[0m\n      Test pipeline log: {url}/{id}/pipeline.log\n".format(
+            url=ARTIFACT_BASE_URL,
+            id=response.json()["id"],
+            compose=response.json()["environments"][0]["os"]["compose"],
+            plan=response.json()["test"]["fmf"]["name"],
+        )
+        + output_divider
+    )
+    print_test_results = (
+        output_divider
+        + "\033[1m\033[92m\n{compose}\n   {plan}\033[0m\n      Test results: {url}/{id}\n".format(
+            url=ARTIFACT_BASE_URL,
+            id=response.json()["id"],
+            compose=response.json()["environments"][0]["os"]["compose"],
+            plan=response.json()["test"]["fmf"]["name"],
+        )
+        + output_divider
+    )
+    print_key_error = (
+        output_divider
+        + "\033[1m\033[92m\n{compose}\n   {plan}\033[0m\n      Status: {status}, Message: {message}\n".format(
+            status=response.status_code,
+            message=json.dumps(response.json(), indent=2, sort_keys=True),
+            compose=response.json()["environments"][0]["os"]["compose"],
+            plan=response.json()["test"]["fmf"]["name"],
+        )
+        + output_divider
+    )
+    print_payload = (
+        output_divider
+        + "\033[1m\033[92m\n{compose}\n   {plan}\033[0m\n      Status: {status}, Payload: {payload}\n".format(
+            status=response.status_code,
+            payload=json.dumps(response.json()),
+            compose=response.json()["environments"][0]["os"]["compose"],
+            plan=response.json()["test"]["fmf"]["name"],
+        )
+        + output_divider
+    )
+    print_payload_prettify = (
+        output_divider
+        + "\033[1m\033[92m\n{compose}\n   {plan}\033[0m\n      Status: {status}, Payload: {payload}\n".format(
+            status=response.status_code,
+            payload=json.dumps(response.json(), indent=2, sort_keys=True),
+            compose=response.json()["environments"][0]["os"]["compose"],
+            plan=response.json()["test"]["fmf"]["name"],
+        )
+        + output_divider
+    )
+
     try:
-        print(
-            "Test info: {url}/{id}".format(
-                url=TESTING_FARM_ENDPOINT,
-                id=response.json()["id"],
-            )
-        )
-        print(
-            "Test pipeline log: {url}/{id}/pipeline.log\n".format(
-                url=ARTIFACT_BASE_URL, id=response.json()["id"]
-            )
-        )
-        print(
-            "Test results: {url}/{id}\n".format(
-                url=ARTIFACT_BASE_URL, id=response.json()["id"]
-            )
-        )
+        print(print_test_info)
+        print(print_test_pipeline_log)
+        print(print_test_results)
     except KeyError:
-        print(
-            "Status: {status}, Message: {message}\n".format(
-                status=response.status_code,
-                message=json.dumps(response.json(), indent=2, sort_keys=True),
-            )
-        )
+        print(print_key_error)
