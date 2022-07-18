@@ -1,19 +1,20 @@
 #!/usr/bin/env python3
-
+import contextlib
 import sys
 import importlib
 from dispatcher.tf_send_request import submit_test
 from dispatcher.__init__ import (
     get_logging,
-    parse_arguments,
+    get_arguments,
     PACKAGE_MAPPING,
     ARTIFACT_MAPPING,
     COMPOSE_MAPPING,
+    get_datetime,
 )
 
 
 logger = get_logging()
-args = parse_arguments()
+args = get_arguments()
 
 
 def main():
@@ -40,7 +41,7 @@ def main():
 
         for build in info:
             logger.info(
-                f"\nSending test plan "
+                f"Sending test plan "
                 + "\033[1;3m"
                 + plan.split("/")[-1]
                 + "\033[0m"

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+from datetime import datetime
 import logging
 import configparser
 import os
@@ -46,6 +47,11 @@ COMPOSE_MAPPING = {
 }
 
 
+def get_datetime():
+    datetime_str = datetime.now().strftime("%Y%m%d_%H%M%S")
+    return datetime_str
+
+
 def get_config():
     getconfig = configparser.ConfigParser()
     getconfig.read(os.path.expanduser("~/.config/tesar"))
@@ -71,7 +77,7 @@ def get_logging():
     return logger
 
 
-def parse_arguments():
+def get_arguments():
     parser = argparse.ArgumentParser(
         description="Send requests to testing farm conveniently.",
         formatter_class=argparse.RawTextHelpFormatter,
@@ -84,17 +90,15 @@ def parse_arguments():
     )
 
     parser.add_argument(
-        "--package",
-        required=True,
+        "package",
         choices=PACKAGE_MAPPING.keys(),
-        default=next(iter(PACKAGE_MAPPING.keys())),
-        help="""Choose package to test e.g. %(choices)s.
-    Default: '%(default)s'.""",
+        help="Choose package to test e.g. %(choices)s."
     )
 
     parser.add_argument(
         "-ref",
         "--reference",
+        required=True,
         help="""For brew: Specify the reference version to find the correct artifact (e.g. 0.1-2, 0.1.2).
     For copr: Specify the pull request reference to find the correct artifact (e.g. pr123, main, master, ...).""",
     )
@@ -103,7 +107,7 @@ def parse_arguments():
         "-git",
         "--git_url",
         required=True,
-        help="""Provide reference to git repository containing the plans metadata tree. 
+        help="""Provide url to git repository containing the plans metadata tree. 
     Use any format acceptable by the git clone command.""",
     )
 
@@ -159,6 +163,11 @@ def parse_arguments():
     #     help="""Change path to tesar file.
     #     Default: '%(default)s'.""",
     # )
+
+    # TODO log - log the links
+    parser.add_argument(
+        "-l", "--log", action="store_true", help="Log the artifact links into a file."
+    )
 
     args = parser.parse_args()
     return args
