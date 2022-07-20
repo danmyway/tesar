@@ -20,7 +20,7 @@ COMPOSE_MAPPING = {
         "chroot": "epel-8-x86_64",
     },
     "ol8": {
-        "compose": "Oracle-Linux-8.5",
+        "compose": "Oracle-Linux-8.6",
         "distro": "oraclelinux-8",
         "chroot": "epel-8-x86_64",
     },
@@ -45,6 +45,18 @@ COMPOSE_MAPPING = {
         "chroot": "epel-8-x86_64",
     },
 }
+
+
+class FormatText:
+    purple = "\033[95m"
+    cyan = "\033[96m"
+    darkcyan = "\033[36m"
+    blue = "\033[94m"
+    green = "\033[92m"
+    yellow = "\033[93m"
+    red = "\033[91m"
+    bold = "\033[1m"
+    end = "\033[0m"
 
 
 def get_datetime():
@@ -92,7 +104,7 @@ def get_arguments():
     parser.add_argument(
         "package",
         choices=PACKAGE_MAPPING.keys(),
-        help="Choose package to test e.g. %(choices)s."
+        help="Choose package to test e.g. %(choices)s.",
     )
 
     parser.add_argument(

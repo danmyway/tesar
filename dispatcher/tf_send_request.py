@@ -1,15 +1,13 @@
 #!/usr/bin/env python3
 
 import json
-import sys
-
 import requests
 from dispatcher.__init__ import (
     TESTING_FARM_ENDPOINT,
     ARTIFACT_BASE_URL,
     get_config,
     get_arguments,
-    get_datetime,
+    FormatText,
 )
 
 testing_farm_api_key, copr_config = get_config()
@@ -67,66 +65,50 @@ def submit_test(
     }
 
     response = requests.post(TESTING_FARM_ENDPOINT, json=payload)
+    tf_url = TESTING_FARM_ENDPOINT
+    artifact_url = ARTIFACT_BASE_URL
+    task_id = response.json()["id"]
+    compose = response.json()["environments"][0]["os"]["compose"]
+    plan = response.json()["test"]["fmf"]["name"]
+    err_message = json.dumps(response.json(), indent=2, sort_keys=True)
+    payload = json.dumps(response.json())
+    payload_pretty = json.dumps(response.json(), indent=2, sort_keys=True)
+    status = response.status_code
 
     print_test_info = (
-        output_divider
-        + "\033[1m\033[92m\n{compose}\n   {plan}\033[0m\n      Test info: {url}/{id}\n".format(
-            url=TESTING_FARM_ENDPOINT,
-            id=response.json()["id"],
-            compose=response.json()["environments"][0]["os"]["compose"],
-            plan=response.json()["test"]["fmf"]["name"],
-        )
-        + output_divider
+        f"{output_divider}{FormatText.bold}{FormatText.blue}\n{compose}\n"
+        f"   {plan}\n{FormatText.end}"
+        f"      Test info: {tf_url}/{task_id}\n{output_divider}"
     )
+
     print_test_pipeline_log = (
-        output_divider
-        + "\033[1m\033[92m\n{compose}\n   {plan}\033[0m\n      Test pipeline log: {url}/{id}/pipeline.log\n".format(
-            url=ARTIFACT_BASE_URL,
-            id=response.json()["id"],
-            compose=response.json()["environments"][0]["os"]["compose"],
-            plan=response.json()["test"]["fmf"]["name"],
-        )
-        + output_divider
+        f"{output_divider}{FormatText.bold}{FormatText.blue}\n{compose}\n"
+        f"   {plan}\n{FormatText.end}"
+        f"      Test pipeline log: {artifact_url}/{task_id}/pipeline.log\n{output_divider}"
     )
+
     print_test_results = (
-        output_divider
-        + "\033[1m\033[92m\n{compose}\n   {plan}\033[0m\n      Test results: {url}/{id}\n".format(
-            url=ARTIFACT_BASE_URL,
-            id=response.json()["id"],
-            compose=response.json()["environments"][0]["os"]["compose"],
-            plan=response.json()["test"]["fmf"]["name"],
-        )
-        + output_divider
+        f"{output_divider}{FormatText.bold}{FormatText.blue}\n{compose}\n"
+        f"   {plan}\n{FormatText.end}"
+        f"      Test results: {tf_url}/{task_id}\n{output_divider}"
     )
+
     print_key_error = (
-        output_divider
-        + "\033[1m\033[92m\n{compose}\n   {plan}\033[0m\n      Status: {status}, Message: {message}\n".format(
-            status=response.status_code,
-            message=json.dumps(response.json(), indent=2, sort_keys=True),
-            compose=response.json()["environments"][0]["os"]["compose"],
-            plan=response.json()["test"]["fmf"]["name"],
-        )
-        + output_divider
+        f"{output_divider}{FormatText.bold}{FormatText.blue}\n{compose}\n"
+        f"   {plan}\n{FormatText.end}"
+        f"      Status: {status}, Message: {err_message}\n{output_divider}"
     )
+
     print_payload = (
-        output_divider
-        + "\033[1m\033[92m\n{compose}\n   {plan}\033[0m\n      Status: {status}, Payload: {payload}\n".format(
-            status=response.status_code,
-            payload=json.dumps(response.json()),
-            compose=response.json()["environments"][0]["os"]["compose"],
-            plan=response.json()["test"]["fmf"]["name"],
-        )
-        + output_divider
+        f"{output_divider}{FormatText.bold}{FormatText.blue}\n{compose}\n"
+        f"   {plan}\n{FormatText.end}"
+        f"      Status: {status}, Payload: {payload}\{output_divider}"
     )
+
     print_payload_prettify = (
-        output_divider
-        + "\033[1m\033[92m\n{compose}\n   {plan}\033[0m\n      Status: {status}, Payload: {payload}\n".format(
-            status=response.status_code,
-            payload=json.dumps(response.json(), indent=2, sort_keys=True),
-            compose=response.json()["environments"][0]["os"]["compose"],
-            plan=response.json()["test"]["fmf"]["name"],
-        )
-        + output_divider
+        f"{output_divider}{FormatText.bold}{FormatText.blue}\n{compose}\n"
+        f"   {plan}\n{FormatText.end}"
+        f"      Status: {status}, Payload: {payload_pretty}\n{output_divider}"
     )
 
     try:

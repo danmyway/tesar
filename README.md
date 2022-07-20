@@ -115,16 +115,16 @@ Otherwise run with `python tesar.py`.
 
 ```shell 
 # Test copr build for PR#123 with plan basic_sanity_check on CentOS 8.4 
-$ tesar copr --package c2r -ref pr123 -git https://github.com/oamg/convert2rhel -b main -p /plans/tier0/basic_sanity_checks -c cos84
+$ tesar copr c2r -ref pr123 -git https://github.com/oamg/convert2rhel -b main -p /plans/tier0/basic_sanity_checks -c cos84
 
 # Specify which composes you want to run test plan (in this case tier0)
-$ tesar copr --package c2r -ref pr123 -git https://gitlab.cee.redhat.com/xyz/tmt-plans -b testing -p /plans/tier0/ -c ol7 cos8
+$ tesar copr c2r -ref pr123 -git https://gitlab.cee.redhat.com/xyz/tmt-plans -b testing -p /plans/tier0/ -c ol7 cos8
  
 # Run every test plan for brew build 0.12-3 on all composes
-$ tesar brew --package c2r -ref 0.12-3 -git https://github.com/oamg/convert2rhel -b main -p /plans/ 
+$ tesar brew c2r -ref 0.12-3 -git https://github.com/oamg/convert2rhel -b main -p /plans/ 
 
 # Specify more individual test plans
-$ tesar brew --package c2r -ref 0.12-3 -git https://github.com/oamg/convert2rhel -b main -p /plans/tier0/basic_sanity_checks /plans/tier1/rhsm 
+$ tesar brew c2r -ref 0.12-3 -git https://github.com/oamg/convert2rhel -b main -p /plans/tier0/basic_sanity_checks /plans/tier1/rhsm 
 
 ```
 
@@ -173,7 +173,7 @@ For convert2RHEL testing we are currently using this form of payload:
 ## Mapped composes
 ```
 CentOS-8-latest
-Oracle-Linux-8.5
+Oracle-Linux-8.6
 CentOS-7-latest
 Oracle-Linux-7.9
 CentOS-8.4
