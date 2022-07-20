@@ -65,6 +65,16 @@ To be able to get information for brew-builds and copr-builds this script uses t
 If needed, install `python-copr-doc` for code documentation for the python-copr package.<br>
 Documentation then will be available at `/usr/share/doc/python-copr/html/ClientV3.html`
 It is also recommended to install `python-kerberos`, `python-requests`, `python-requests-kerberos`, `make`, `krb5-devel`, `gcc`, `python3-devel`, `redhat-rpm-config` to be able to run the script.
+
+Before installing the packages, it is advised to download the `rcm-tools-fedora.repo` to be able to install `brewkoji`
+
+```shell
+sudo su 
+curl -L https://download.devel.redhat.com/rel-eng/RCMTOOLS/rcm-tools-fedora.repo -o /etc/yum.repos.d/rcm-tools-fedora.repo
+```
+
+Installing the packages
+
 ```shell
 dnf install brewkoji python-copr python-copr-doc python-kerberos python-requests python-requests-kerberos make krb5-devel gcc python3-devel redhat-rpm-config
 ```
