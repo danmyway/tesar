@@ -90,7 +90,7 @@ def submit_test(
     print_test_results = (
         f"{output_divider}{FormatText.bold}{FormatText.blue}\n{compose}\n"
         f"   {plan}\n{FormatText.end}"
-        f"      Test results: {tf_url}/{task_id}\n{output_divider}"
+        f"      Test results: {artifact_url}/{task_id}\n{output_divider}"
     )
 
     print_key_error = (
@@ -102,7 +102,7 @@ def submit_test(
     print_payload = (
         f"{output_divider}{FormatText.bold}{FormatText.blue}\n{compose}\n"
         f"   {plan}\n{FormatText.end}"
-        f"      Status: {status}, Payload: {payload}\{output_divider}"
+        f"      Status: {status}, Payload: {payload}\n{output_divider}"
     )
 
     print_payload_prettify = (
