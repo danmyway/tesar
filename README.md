@@ -37,7 +37,7 @@ That is IMHO **exactly six times more**, than it should be.
 With this script, you will be able to do all of the above with just one command!
 
 ```shell
-$ python tesar.py copr --package c2r -ref pr123 -git https://github.com/oamg/convert2rhel -b main -p /plans/tier0/basic_sanity_checks /plans/tier1/rhsm -c cos84 cos7 ol8
+python tesar.py copr --package c2r -ref pr123 -git https://github.com/oamg/convert2rhel -b main -p /plans/tier0/basic_sanity_checks /plans/tier1/rhsm -c cos84 cos7 ol8
 ```
 
 # Prerequisites
@@ -66,7 +66,7 @@ If needed, install `python-copr-doc` for code documentation for the python-copr 
 Documentation then will be available at `/usr/share/doc/python-copr/html/ClientV3.html`
 It is also recommended to install `python-kerberos`, `python-requests`, `python-requests-kerberos`, `make`, `krb5-devel`, `gcc`, `python3-devel`, `redhat-rpm-config` to be able to run the script.
 ```shell
-$ dnf install brewkoji python-copr python-copr-doc python-kerberos python-requests python-requests-kerberos make krb5-devel gcc python3-devel redhat-rpm-config
+dnf install brewkoji python-copr python-copr-doc python-kerberos python-requests python-requests-kerberos make krb5-devel gcc python3-devel redhat-rpm-config
 ```
 
 # Setup
@@ -77,16 +77,16 @@ $ dnf install brewkoji python-copr python-copr-doc python-kerberos python-reques
 Clone repository to your local machine.
 ```shell
 # ssh
-$ git clone git@gitlab.cee.redhat.com:ddiblik/tesar.git
+git clone git@gitlab.cee.redhat.com:ddiblik/tesar.git
 # https
-$ git clone https://gitlab.cee.redhat.com/ddiblik/tesar.git
+git clone https://gitlab.cee.redhat.com/ddiblik/tesar.git
 ```
 #### Install
 Change directory to the cloned folder, run virtual environment and install the package.
 ```shell
-$ cd ~/tesar
-$ pipenv --site-packages shell
-$ pip install .
+cd ~/tesar
+pipenv --site-packages shell
+pip install .
 ```
 #### Set up configuration file
 Set up config file with obtained testing farm API key and copr API credentials replacing {values} with correct credentials
