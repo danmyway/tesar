@@ -37,7 +37,7 @@ That is IMHO **exactly six times more**, than it should be.
 With this script, you will be able to do all of the above with just one command!
 
 ```shell
-python tesar.py copr --package c2r -ref pr123 -git https://github.com/oamg/convert2rhel -b main -p /plans/tier0/basic_sanity_checks /plans/tier1/rhsm -c cos84 cos7 ol8
+python tesar.py copr c2r -ref pr123 -git https://github.com/oamg/convert2rhel -b main -p /plans/tier0/basic_sanity_checks /plans/tier1/rhsm -c cos84 cos7 ol8
 ```
 
 # Prerequisites
