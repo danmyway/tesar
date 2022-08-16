@@ -8,8 +8,16 @@ session = koji.ClientSession("https://brewhub.engineering.redhat.com/brewhub")
 session.gssapi_login()
 
 epel_composes = {
-    "rhel-8": ["CentOS-8-latest", "Oracle-Linux-8.5", "CentOS-8.4", "Oracle-Linux-8.4"],
-    "rhel-7": ["CentOS-7-latest", "Oracle-Linux-7.9"],
+    "rhel-8": [
+        COMPOSE_MAPPING.get(i).get("compose")
+        for i in COMPOSE_MAPPING
+        if "epel-8" in COMPOSE_MAPPING.get(i).get("chroot")
+    ],
+    "rhel-7": [
+        COMPOSE_MAPPING.get(i).get("compose")
+        for i in COMPOSE_MAPPING
+        if "epel-7" in COMPOSE_MAPPING.get(i).get("chroot")
+    ],
 }
 
 brewbuild_baseurl = "https://brewweb.engineering.redhat.com/brew/taskinfo?taskID="
