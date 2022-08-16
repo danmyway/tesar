@@ -107,45 +107,56 @@ def get_arguments():
         help="Choose package to test e.g. %(choices)s.",
     )
 
-    parser.add_argument(
+    reference = parser.add_mutually_exclusive_group(required=True)
+
+    reference.add_argument(
         "-ref",
         "--reference",
-        required=True,
+        nargs="+",
         help="""For brew: Specify the reference version to find the correct artifact (e.g. 0.1-2, 0.1.2).
-    For copr: Specify the pull request reference to find the correct artifact (e.g. pr123, main, master, ...).""",
+For copr: Specify the pull request reference to find the correct artifact (e.g. pr123, main, master, ...).""",
+    )
+
+    reference.add_argument(
+        "-id",
+        "--task_id",
+        nargs="+",
+        help="""For brew: Specify the TASK ID for required brew build.
+NOTE: Double check, that you are passing TASK ID for copr builds, not BUILD ID otherwise testing farm will not install the package.
+For copr: Specify the BUILD ID for required copr build.""",
     )
 
     parser.add_argument(
         "-git",
         "--git_url",
         required=True,
-        help="""Provide url to git repository containing the plans metadata tree. 
-    Use any format acceptable by the git clone command.""",
+        help="""Provide url to git repository containing the plans metadata tree.
+Use any format acceptable by the git clone command.""",
     )
 
     parser.add_argument(
         "-b",
         "--branch",
         default="master",
-        help="""Branch, tag or commit specifying the desired git revision. 
-    This is used to perform a git checkout in the repository. 
-    Default: '%(default)s'""",
+        help="""Branch, tag or commit specifying the desired git revision.
+This is used to perform a git checkout in the repository.
+Default: '%(default)s'""",
     )
     parser.add_argument(
         "-gp",
         "--git_path",
         default=".",
-        help="""Path to the metadata tree root. 
-    Should be relative to the git repository root provided in the url parameter. 
-    Default: '%(default)s'""",
+        help="""Path to the metadata tree root.
+Should be relative to the git repository root provided in the url parameter.
+Default: '%(default)s'""",
     )
 
     parser.add_argument(
         "-a",
         "--architecture",
         default="x86_64",
-        help="""Choose suitable architecture. 
-    Default: '%(default)s'.""",
+        help="""Choose suitable architecture.
+Default: '%(default)s'.""",
     )
 
     parser.add_argument(
@@ -153,8 +164,8 @@ def get_arguments():
         "--plans",
         required=True,
         nargs="+",
-        help="""Specify a test plan or multiple plans to request at testing farm. 
-    To run whole set of plans use /plans/ or /plans/tier*/""",
+        help="""Specify a test plan or multiple plans to request at testing farm.
+To run whole set of plans use /plans/ or /plans/tier*/""",
     )
 
     parser.add_argument(
@@ -163,8 +174,8 @@ def get_arguments():
         nargs="+",
         default=COMPOSE_MAPPING.keys(),
         choices=COMPOSE_MAPPING.keys(),
-        help="""Choose composes to run tests on. 
-        Default: '%(default)s'.""",
+        help="""Choose composes to run tests on.
+Default: '%(default)s'.""",
     )
 
     # TODO tesar file path

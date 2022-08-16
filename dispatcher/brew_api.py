@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 import koji
-from dispatcher.__init__ import COMPOSE_MAPPING, get_logging
+from dispatcher.__init__ import COMPOSE_MAPPING, get_logging, get_arguments
 
 logger = get_logging()
+args = get_arguments()
 
 session = koji.ClientSession("https://brewhub.engineering.redhat.com/brewhub")
 session.gssapi_login()
@@ -24,19 +25,34 @@ brewbuild_baseurl = "https://brewweb.engineering.redhat.com/brew/taskinfo?taskID
 
 
 def get_brew_task_and_compose(package, reference):
-    logger.info(f"Getting brew build info for {package} v{reference}.")
     query = session.listBuilds(prefix=package)
-    # Append the list of TaskID's collected from the listBuilds query
-    tasks = [
-        build_info.get("task_id")
-        for build_info in query
-        if reference in build_info.get("nvr") and "el6" not in build_info.get("nvr")
-    ]
-    volume_names = [
-        build_info.get("volume_name")
-        for build_info in query
-        if reference in build_info.get("nvr") and "el6" not in build_info.get("nvr")
-    ]
+    if args.reference:
+        logger.info(f"Getting brew build info for {package} v{reference}.")
+        # Append the list of TaskID's collected from the listBuilds query
+        ref = reference
+        tasks = [
+            build_info.get("task_id")
+            for build_info in query
+            for ref in reference
+            if ref in build_info.get("nvr") and "el6" not in build_info.get("nvr")
+        ]
+        volume_names = [
+            build_info.get("volume_name")
+            for build_info in query
+            for ref in reference
+            if ref in build_info.get("nvr") and "el6" not in build_info.get("nvr")
+        ]
+
+    elif args.task_id:
+        logger.info(f"Getting brew build info for {package} task ID {reference}.")
+        tasks = reference
+        volume_names = [
+            build_info.get("volume_name")
+            for task in tasks
+            for build_info in query
+            if int(task) == build_info.get("task_id")
+        ]
+        print(volume_names)
 
     logger.info("Checking for available builds.")
     for i in range(len(tasks)):
@@ -82,7 +98,6 @@ def get_info(package, reference, composes):
                     brew_info_dict["distro"] = COMPOSE_MAPPING.get(compose_choice).get(
                         "distro"
                     )
-
             info.append(brew_info_dict.copy())
 
     return info

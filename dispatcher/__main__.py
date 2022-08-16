@@ -26,16 +26,25 @@ def main():
         logger.error("Artifact_module could not be loaded!")
         return 99
 
+    if args.reference:
+        reference = args.reference
+    elif args.task_id:
+        reference = args.task_id
+    else:
+        reference = None
+        logger.critical("There is something wrong with reference/build_id!")
+        sys.exit(99)
+
     for plan in args.plans:
 
         if args.compose:
             info = artifact_module.get_info(
-                PACKAGE_MAPPING[args.package], str.lower(args.reference), args.compose
+                PACKAGE_MAPPING[args.package], reference, args.compose
             )
         else:
             info = artifact_module.get_info(
                 PACKAGE_MAPPING[args.package],
-                str.lower(args.reference),
+                reference,
                 COMPOSE_MAPPING.keys(),
             )
 
