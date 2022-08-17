@@ -38,11 +38,11 @@ def main():
     for plan in args.plans:
 
         if args.compose:
-            info = artifact_module.get_info(
+            info, build_reference = artifact_module.get_info(
                 PACKAGE_MAPPING[args.package], reference, args.compose
             )
         else:
-            info = artifact_module.get_info(
+            info, build_reference = artifact_module.get_info(
                 PACKAGE_MAPPING[args.package],
                 reference,
                 COMPOSE_MAPPING.keys(),
@@ -54,7 +54,7 @@ def main():
                 + "\033[1;3m"
                 + plan.split("/")[-1]
                 + "\033[0m"
-                + f" for {args.artifact_type} build for {build['compose']} to the testing farm."
+                + f" for {args.artifact_type} build {build_reference} for {build['compose']} to the testing farm."
             )
             submit_test(
                 args.git_url,

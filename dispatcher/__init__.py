@@ -179,12 +179,11 @@ Default: '%(default)s'.""",
     # parser.add_argument(
     #     "-cfg",
     #     "--config_file",
-    #     default=os.path.expanduser('~/.tesar/tesar'),
+    #     default=os.path.expanduser('~/.config/tesar'),
     #     help="""Change path to tesar file.
     #     Default: '%(default)s'.""",
     # )
 
-    # TODO log - log the links
     parser.add_argument(
         "-l", "--log", action="store_true", help="Log the artifact links into a file."
     )
