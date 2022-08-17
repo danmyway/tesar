@@ -70,9 +70,6 @@ def get_config():
     testing_farm_api_key = getconfig.get("testing-farm", "API_KEY")
     copr_config = {
         "copr_url": getconfig.get("copr-cli", "COPR_URL"),
-        "login": getconfig.get("copr-cli", "COPR_LOGIN"),
-        "token": getconfig.get("copr-cli", "COPR_TOKEN"),
-        "username": getconfig.get("copr-cli", "COPR_USERNAME"),
     }
 
     return testing_farm_api_key, copr_config

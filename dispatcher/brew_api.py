@@ -29,7 +29,6 @@ def get_brew_task_and_compose(package, reference):
     if args.reference:
         logger.info(f"Getting brew build info for {package} v{reference}.")
         # Append the list of TaskID's collected from the listBuilds query
-        ref = reference
         tasks = [
             build_info.get("task_id")
             for build_info in query
