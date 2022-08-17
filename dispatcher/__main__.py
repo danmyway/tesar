@@ -26,16 +26,25 @@ def main():
         logger.error("Artifact_module could not be loaded!")
         return 99
 
+    if args.reference:
+        reference = args.reference
+    elif args.task_id:
+        reference = args.task_id
+    else:
+        reference = None
+        logger.critical("There is something wrong with reference/build_id!")
+        sys.exit(99)
+
     for plan in args.plans:
 
         if args.compose:
-            info = artifact_module.get_info(
-                PACKAGE_MAPPING[args.package], str.lower(args.reference), args.compose
+            info, build_reference = artifact_module.get_info(
+                PACKAGE_MAPPING[args.package], reference, args.compose
             )
         else:
-            info = artifact_module.get_info(
+            info, build_reference = artifact_module.get_info(
                 PACKAGE_MAPPING[args.package],
-                str.lower(args.reference),
+                reference,
                 COMPOSE_MAPPING.keys(),
             )
 
@@ -45,7 +54,7 @@ def main():
                 + "\033[1;3m"
                 + plan.split("/")[-1]
                 + "\033[0m"
-                + f" for {args.artifact_type} build for {build['compose']} to the testing farm."
+                + f" for {args.artifact_type} build {build_reference} for {build['compose']} to the testing farm."
             )
             submit_test(
                 args.git_url,

@@ -51,12 +51,9 @@ Please, kindly refer to [testing farm onboarding](https://docs.testing-farm.io/g
 to request the API key.<br>
 Add the obtained api_key to the config file as instructed below.
 
-#### Copr API token
+#### Copr API
 
-To be able to obtain build information for copr builds, you need to obtain the [API token here](https://copr.fedorainfracloud.org/api/).<br>
-Please note, that you will need to log in with your Fedora Account to be able to see the API config information.<br>
-Add the obtained API credentials to the config file `~/.config/tesar`<br>
-**The copr API token is valid for 180 days.**
+To be able to obtain build information for copr builds, all you need to provide to the [config file](#set-up-configuration-file) is copr url https://copr.fedorainfracloud.org/ .<br>
 
 ### Package dependencies
 
@@ -99,9 +96,9 @@ pipenv --site-packages shell
 pip install .
 ```
 #### Set up configuration file
-Set up config file with obtained testing farm API key and copr API credentials replacing {values} with correct credentials
+Set up config file with obtained testing farm API key and copr url (https://copr.fedorainfracloud.org) 
 ```shell
-touch ~/.config/tesar && printf "[copr-cli]\nCOPR_LOGIN={your copr login}\nCOPR_USERNAME={your copr username}\nCOPR_TOKEN={your copr api token}\nCOPR_URL=https://copr.fedorainfracloud.org\n[testing-farm]\nAPI_KEY={your testing farm api key}" > ~/.config/tesar
+touch ~/.config/tesar && printf "[copr-cli]\nCOPR_URL=https://copr.fedorainfracloud.org\n[testing-farm]\nAPI_KEY={your testing farm api key}" > ~/.config/tesar
 ```
 or copy provided file and edit with your favourite editor, e.g.
 ```shell
@@ -111,9 +108,6 @@ vim ~/.config/tesar
 Config file template <a name="config-file-template"></a>
 ```
 [copr-cli]
-COPR_LOGIN=
-COPR_USERNAME=
-COPR_TOKEN=
 COPR_URL=https://copr.fedorainfracloud.org
 [testing-farm]
 API_KEY=
