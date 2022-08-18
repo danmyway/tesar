@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import sys
 from datetime import datetime
 import logging
 import configparser
@@ -66,13 +67,29 @@ def get_datetime():
 
 def get_config():
     getconfig = configparser.ConfigParser()
-    getconfig.read(os.path.expanduser("~/.config/tesar"))
-    testing_farm_api_key = getconfig.get("testing-farm", "API_KEY")
-    copr_config = {
-        "copr_url": getconfig.get("copr-cli", "COPR_URL"),
-    }
+    try:
+        if get_arguments().dry_run or get_arguments().dry_run_cli:
+            testing_farm_api_key = "{testing_farm_api_key}"
+            copr_config = {"copr_url": "https://copr.fedorainfracloud.org"}
+            return testing_farm_api_key, copr_config
+        else:
+            getconfig.read(os.path.expanduser("~/.config/tesar"))
+            testing_farm_api_key = getconfig.get("testing-farm", "API_KEY")
+            copr_config = {
+                "copr_url": getconfig.get("copr-cli", "COPR_URL"),
+            }
 
-    return testing_farm_api_key, copr_config
+            return testing_farm_api_key, copr_config
+    except configparser.NoSectionError as no_config_err:
+        get_logging().critical(
+            "There is probably no config file in the default path ~/.config/tesar."
+        )
+        print(no_config_err)
+        sys.exit(99)
+    except configparser.NoOptionError as no_opt_err:
+        get_logging().critical("Config file might be tainted.")
+        print(no_opt_err)
+        sys.exit(99)
 
 
 def get_logging():
@@ -152,8 +169,7 @@ Default: '%(default)s'""",
         "-a",
         "--architecture",
         default="x86_64",
-        help="""Choose suitable architecture.
-Default: '%(default)s'.""",
+        help="""Choose suitable architecture.\nDefault: '%(default)s'.""",
     )
 
     parser.add_argument(
@@ -171,8 +187,7 @@ To run whole set of plans use /plans/ or /plans/tier*/""",
         nargs="+",
         default=COMPOSE_MAPPING.keys(),
         choices=COMPOSE_MAPPING.keys(),
-        help="""Choose composes to run tests on.
-Default: '%(default)s'.""",
+        help="""Choose composes to run tests on.\nDefault: '%(default)s'.""",
     )
 
     # TODO tesar file path
@@ -185,7 +200,26 @@ Default: '%(default)s'.""",
     # )
 
     parser.add_argument(
-        "-l", "--log", action="store_true", help="Log the artifact links into a file."
+        "-l",
+        "--log",
+        action="store_true",
+        help="Log test links or dry run output to a file.",
+    )
+
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Print out just the payload that would be sent to the testing farm.\nDo not actually send any request.",
+    )
+
+    parser.add_argument(
+        "--dry-run-cli",
+        action="store_true",
+        help="Print out https shell command with requested payload.\nDo not actually send any request.",
+    )
+
+    parser.add_argument(
+        "--debug", action="store_true", help="Print out additional information."
     )
 
     args = parser.parse_args()
