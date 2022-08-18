@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import json
+from pprint import pprint
 import requests
 from dispatcher.__init__ import (
     TESTING_FARM_ENDPOINT,
@@ -33,7 +34,7 @@ def submit_test(
     Payload documentation > https://testing-farm.gitlab.io/api/#operation/requestsPost
     """
 
-    payload = {
+    payload_raw = {
         "api_key": api_key,
         "test": {
             "fmf": {
@@ -64,56 +65,62 @@ def submit_test(
         ],
     }
 
-    response = requests.post(TESTING_FARM_ENDPOINT, json=payload)
-    tf_url = TESTING_FARM_ENDPOINT
-    artifact_url = ARTIFACT_BASE_URL
-    task_id = response.json()["id"]
-    compose = response.json()["environments"][0]["os"]["compose"]
-    plan = response.json()["test"]["fmf"]["name"]
-    err_message = json.dumps(response.json(), indent=2, sort_keys=True)
-    payload = json.dumps(response.json())
-    payload_pretty = json.dumps(response.json(), indent=2, sort_keys=True)
-    status = response.status_code
+    if not (args.dry_run or args.dry_run_cli):
+        response = requests.post(TESTING_FARM_ENDPOINT, json=payload_raw)
+        tf_url = TESTING_FARM_ENDPOINT
+        artifact_url = ARTIFACT_BASE_URL
+        task_id = response.json()["id"]
+        compose = compose
+        plan = plan
+        err_message = json.dumps(response.json(), indent=2, sort_keys=True)
+        status = response.status_code
 
-    print_test_info = (
-        f"{output_divider}{FormatText.bold}{FormatText.blue}\n{compose}\n"
-        f"   {plan}\n{FormatText.end}"
-        f"      Test info: {tf_url}/{task_id}\n{output_divider}"
+        print_test_info = (
+            f"{output_divider}{FormatText.bold}{FormatText.blue}\n{compose}\n"
+            f"   {plan}\n{FormatText.end}"
+            f"      Test info: {tf_url}/{task_id}\n{output_divider}"
+        )
+
+        print_test_results = (
+            f"{output_divider}{FormatText.bold}{FormatText.blue}\n{compose}\n"
+            f"   {plan}\n{FormatText.end}"
+            f"      Test results: {artifact_url}/{task_id}\n{output_divider}"
+        )
+
+        print_key_error = (
+            f"{output_divider}{FormatText.bold}{FormatText.blue}\n{compose}\n"
+            f"   {plan}\n{FormatText.end}"
+            f"      Status: {status}, Message: {err_message}\n{output_divider}"
+        )
+
+    print_payload_cli = (
+        "DRY RUN | Printing out https command for required {} {} on {}:\nhttps POST {} api_key={} "
+        "test:='{}' environments: '{}'\n".format(
+            artifact_type,
+            artifact_id.split(":")[0],
+            compose,
+            TESTING_FARM_ENDPOINT,
+            api_key,
+            str(payload_raw.get("test")).replace("'", '"'),
+            str(payload_raw.get("environments")).replace("'", '"'),
+        )
     )
 
-    print_test_pipeline_log = (
-        f"{output_divider}{FormatText.bold}{FormatText.blue}\n{compose}\n"
-        f"   {plan}\n{FormatText.end}"
-        f"      Test pipeline log: {artifact_url}/{task_id}/pipeline.log\n{output_divider}"
-    )
-
-    print_test_results = (
-        f"{output_divider}{FormatText.bold}{FormatText.blue}\n{compose}\n"
-        f"   {plan}\n{FormatText.end}"
-        f"      Test results: {artifact_url}/{task_id}\n{output_divider}"
-    )
-
-    print_key_error = (
-        f"{output_divider}{FormatText.bold}{FormatText.blue}\n{compose}\n"
-        f"   {plan}\n{FormatText.end}"
-        f"      Status: {status}, Message: {err_message}\n{output_divider}"
-    )
-
-    print_payload = (
-        f"{output_divider}{FormatText.bold}{FormatText.blue}\n{compose}\n"
-        f"   {plan}\n{FormatText.end}"
-        f"      Status: {status}, Payload: {payload}\n{output_divider}"
-    )
-
-    print_payload_prettify = (
-        f"{output_divider}{FormatText.bold}{FormatText.blue}\n{compose}\n"
-        f"   {plan}\n{FormatText.end}"
-        f"      Status: {status}, Payload: {payload_pretty}\n{output_divider}"
-    )
+    print_payload_dryrun_msg = f"\nDRY RUN | Printing out requested payload:"
 
     try:
-        print(print_test_info)
-        print(print_test_pipeline_log)
-        print(print_test_results)
+        if args.dry_run:
+            print(print_payload_dryrun_msg)
+            pprint(payload_raw)
+        elif args.dry_run_cli:
+            print(print_payload_cli)
+        elif args.debug:
+            print(print_test_info)
+            print("Printing payload information:")
+            pprint(payload_raw)
+            print(print_test_results)
+        else:
+            print(print_test_results)
+
     except KeyError:
         print(print_key_error)

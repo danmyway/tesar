@@ -49,13 +49,14 @@ def main():
             )
 
         for build in info:
-            logger.info(
-                f"Sending test plan "
-                + "\033[1;3m"
-                + plan.split("/")[-1]
-                + "\033[0m"
-                + f" for {args.artifact_type} build {build_reference} for {build['compose']} to the testing farm."
-            )
+            if not (args.dry_run or args.dry_run_cli):
+                logger.info(
+                    f"Sending test plan "
+                    + "\033[1;3m"
+                    + plan.split("/")[-1]
+                    + "\033[0m"
+                    + f" for {args.artifact_type} build {build_reference} for {build['compose']} to the testing farm."
+                )
             submit_test(
                 args.git_url,
                 args.branch,
