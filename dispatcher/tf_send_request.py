@@ -11,7 +11,7 @@ from dispatcher.__init__ import (
     FormatText,
 )
 
-testing_farm_api_key, copr_config = get_config()
+testing_farm_api_key = get_config()
 args = get_arguments()
 output_divider = 20 * "="
 

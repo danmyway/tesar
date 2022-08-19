@@ -1,10 +1,16 @@
 #!/usr/bin/env python3
 
 from copr.v3 import BuildProxy
-from dispatcher.__init__ import COMPOSE_MAPPING, get_logging, get_config, get_arguments
+from dispatcher.__init__ import (
+    COMPOSE_MAPPING,
+    COPR_CONFIG,
+    get_logging,
+    get_config,
+    get_arguments,
+)
 
-testing_farm_api_key, copr_config = get_config()
-session = BuildProxy(copr_config)
+testing_farm_api_key = get_config()
+session = BuildProxy(COPR_CONFIG)
 logger = get_logging()
 args = get_arguments()
 
