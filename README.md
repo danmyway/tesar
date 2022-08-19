@@ -37,7 +37,7 @@ That is IMHO **exactly six times more**, than it should be.
 With this script, you will be able to do all of the above with just one command!
 
 ```shell
-python tesar.py copr c2r -ref pr123 -git https://github.com/oamg/convert2rhel -b main -p /plans/tier0/basic_sanity_checks /plans/tier1/rhsm -c cos84 cos7 ol8
+python tesar.py copr c2r -ref pr123 -g github oamg main -p /plans/tier0/basic_sanity_checks /plans/tier1/rhsm -c cos84 cos7 ol8
 ```
 
 # Prerequisites
@@ -53,7 +53,8 @@ Add the obtained api_key to the config file as instructed below.
 
 #### Copr API
 
-To be able to obtain build information for copr builds, all you need to provide to the [config file](#set-up-configuration-file) is copr url https://copr.fedorainfracloud.org/ .<br>
+To be able to obtain build information for copr builds, all you need for public queries is to provide the copr url https://copr.fedorainfracloud.org/ .<br>
+The url is now hardcoded, no need to passing that into a config file.
 
 ### Package dependencies
 
@@ -98,7 +99,7 @@ pip install .
 #### Set up configuration file
 Set up config file with obtained testing farm API key and copr url (https://copr.fedorainfracloud.org) 
 ```shell
-touch ~/.config/tesar && printf "[copr-cli]\nCOPR_URL=https://copr.fedorainfracloud.org\n[testing-farm]\nAPI_KEY={your testing farm api key}" > ~/.config/tesar
+touch ~/.config/tesar && printf "[testing-farm]\nAPI_KEY={your testing farm api key}" > ~/.config/tesar
 ```
 or copy provided file and edit with your favourite editor, e.g.
 ```shell
@@ -107,8 +108,6 @@ vim ~/.config/tesar
 ```
 Config file template <a name="config-file-template"></a>
 ```
-[copr-cli]
-COPR_URL=https://copr.fedorainfracloud.org
 [testing-farm]
 API_KEY=
 ```
@@ -119,16 +118,16 @@ Otherwise run with `python tesar.py`.
 
 ```shell 
 # Test copr build for PR#123 with plan basic_sanity_check on CentOS 8.4 
-$ tesar copr c2r -ref pr123 -git https://github.com/oamg/convert2rhel -b main -p /plans/tier0/basic_sanity_checks -c cos84
+$ tesar copr c2r -ref pr123 -g github oamg main -p /plans/tier0/basic_sanity_checks -c cos84
 
 # Specify which composes you want to run test plan (in this case tier0)
-$ tesar copr c2r -ref pr123 -git https://gitlab.cee.redhat.com/xyz/tmt-plans -b testing -p /plans/tier0/ -c ol7 cos8
+$ tesar copr c2r -ref pr123 -g gitlab.cee.redhat xyz testing -p /plans/tier0/ -c ol7 cos8
  
 # Run every test plan for brew build 0.12-3 on all composes
-$ tesar brew c2r -ref 0.12-3 -git https://github.com/oamg/convert2rhel -b main -p /plans/ 
+$ tesar brew c2r -ref 0.12-3 -g github oamg main -p /plans/ 
 
 # Specify more individual test plans
-$ tesar brew c2r -ref 0.12-3 -git https://github.com/oamg/convert2rhel -b main -p /plans/tier0/basic_sanity_checks /plans/tier1/rhsm 
+$ tesar brew c2r -ref 0.12-3 -git github oamg main -p /plans/tier0/basic_sanity_checks /plans/tier1/rhsm 
 
 ```
 

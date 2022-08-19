@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-import contextlib
+
+import requests
 import sys
 import importlib
 from dispatcher.tf_send_request import submit_test
@@ -9,7 +10,6 @@ from dispatcher.__init__ import (
     PACKAGE_MAPPING,
     ARTIFACT_MAPPING,
     COMPOSE_MAPPING,
-    get_datetime,
 )
 
 
@@ -18,6 +18,51 @@ args = get_arguments()
 
 
 def main():
+
+    try:
+        repo_base_url = "https://{}.com/{}/{}".format(
+            args.git[0], args.git[1], PACKAGE_MAPPING.get(args.package)
+        )
+        git_response = requests.get(repo_base_url)
+        if (
+            args.git[0] != "gitlab"
+            and args.git[0] != "github"
+            and args.git[0] != "gitlab.cee.redhat"
+        ):
+            logger.critical(
+                "Bad git base reference, please provide correct values.\ngithub / gitlab"
+            )
+            sys.exit(99)
+        elif git_response.status_code == 404:
+            logger.critical(
+                "There is an issue with reaching the url. Please check correct order of values."
+            )
+            logger.critical(
+                f"Reaching {repo_base_url} returned status code of {git_response.status_code}."
+            )
+            logger.critical(
+                "Values for git option should be passed in order {repo_base owner branch}"
+            )
+            sys.exit(99)
+        elif args.git[0] == "gitlab.cee.redhat":
+            logger.warning(f"Is the repository url/name correct?\n{repo_base_url}")
+            repo_name = input(
+                "If that is your required repository pres ENTER, otherwise pass the correct name: "
+            )
+            if repo_name == "":
+                logger.info(f"Continuing with selected repository: {repo_base_url}")
+            else:
+                repo_base_url = "https://{}.com/{}/{}".format(
+                    args.git[0], args.git[1], repo_name
+                )
+                logger.info(f"Continuing with selected repository: {repo_base_url}")
+
+    except IndexError as index_err:
+        logger.critical(
+            "Bad git reference, please provide both repository base and repository owner."
+        )
+        logger.critical(index_err)
+        sys.exit(99)
     try:
         artifact_module = importlib.import_module(
             "dispatcher." + args.artifact_type + "_api"
@@ -31,7 +76,6 @@ def main():
     elif args.task_id:
         reference = args.task_id
     else:
-        reference = None
         logger.critical("There is something wrong with reference/build_id!")
         sys.exit(99)
 
@@ -58,8 +102,8 @@ def main():
                     + f" for {args.artifact_type} build {build_reference} for {build['compose']} to the testing farm."
                 )
             submit_test(
-                args.git_url,
-                args.branch,
+                repo_base_url,
+                args.git[2],
                 args.git_path,
                 plan,
                 args.architecture,

@@ -14,6 +14,8 @@ ARTIFACT_BASE_URL = "http://artifacts.osci.redhat.com/testing-farm"
 ARTIFACT_MAPPING = {"brew": "redhat-brew-build", "copr": "fedora-copr-build"}
 PACKAGE_MAPPING = {"c2r": "convert2rhel", "leapp": "leapp"}
 
+COPR_CONFIG = {"copr_url": "https://copr.fedorainfracloud.org"}
+
 COMPOSE_MAPPING = {
     "cos8": {
         "compose": "CentOS-8-latest",
@@ -70,25 +72,21 @@ def get_config():
     try:
         if get_arguments().dry_run or get_arguments().dry_run_cli:
             testing_farm_api_key = "{testing_farm_api_key}"
-            copr_config = {"copr_url": "https://copr.fedorainfracloud.org"}
-            return testing_farm_api_key, copr_config
+            return testing_farm_api_key
         else:
             getconfig.read(os.path.expanduser("~/.config/tesar"))
             testing_farm_api_key = getconfig.get("testing-farm", "API_KEY")
-            copr_config = {
-                "copr_url": getconfig.get("copr-cli", "COPR_URL"),
-            }
 
-            return testing_farm_api_key, copr_config
+            return testing_farm_api_key
     except configparser.NoSectionError as no_config_err:
         get_logging().critical(
             "There is probably no config file in the default path ~/.config/tesar."
         )
-        print(no_config_err)
+        get_logging().critical(no_config_err)
         sys.exit(99)
     except configparser.NoOptionError as no_opt_err:
         get_logging().critical("Config file might be tainted.")
-        print(no_opt_err)
+        get_logging().critical(no_opt_err)
         sys.exit(99)
 
 
@@ -111,13 +109,14 @@ def get_arguments():
     parser.add_argument(
         "artifact_type",
         metavar="artifact_type",
-        choices=ARTIFACT_MAPPING.keys(),
+        choices=list(ARTIFACT_MAPPING.keys()),
         help="Choose which type of artefact to test e.g. %(choices)s.",
     )
 
     parser.add_argument(
         "package",
-        choices=PACKAGE_MAPPING.keys(),
+        metavar="package",
+        choices=list(PACKAGE_MAPPING.keys()),
         help="Choose package to test e.g. %(choices)s.",
     )
 
@@ -127,38 +126,33 @@ def get_arguments():
         "-ref",
         "--reference",
         nargs="+",
-        help="""For brew: Specify the reference version to find the correct artifact (e.g. 0.1-2, 0.1.2).
+        help=f"""{FormatText.bold}Mutually exclusive with respect to --task-id.{FormatText.end}
+For brew: Specify the reference version to find the correct artifact (e.g. 0.1-2, 0.1.2).
 For copr: Specify the pull request reference to find the correct artifact (e.g. pr123, main, master, ...).""",
     )
 
     reference.add_argument(
         "-id",
-        "--task_id",
+        "--task-id",
         nargs="+",
-        help="""For brew: Specify the TASK ID for required brew build.
-NOTE: Double check, that you are passing TASK ID for copr builds, not BUILD ID otherwise testing farm will not install the package.
+        help=f"""{FormatText.bold}Mutually exclusive with respect to --reference.{FormatText.end}
+For brew: Specify the TASK ID for required brew build.
+{FormatText.bold}NOTE: Double check, that you are passing TASK ID for copr builds, not BUILD ID otherwise testing farm will not install the package.{FormatText.end}
 For copr: Specify the BUILD ID for required copr build.""",
     )
 
     parser.add_argument(
-        "-git",
-        "--git_url",
-        required=True,
-        help="""Provide url to git repository containing the plans metadata tree.
-Use any format acceptable by the git clone command.""",
+        "-g",
+        "--git",
+        nargs="+",
+        default=["github", "oamg", "main"],
+        help="""Provide repository base (github, gitlab, gitlab.cee.redhat)\nowner of the repository\nand a branch containing the tests you want to run.
+Default: '%(default)s'""",
     )
 
     parser.add_argument(
-        "-b",
-        "--branch",
-        default="master",
-        help="""Branch, tag or commit specifying the desired git revision.
-This is used to perform a git checkout in the repository.
-Default: '%(default)s'""",
-    )
-    parser.add_argument(
         "-gp",
-        "--git_path",
+        "--git-path",
         default=".",
         help="""Path to the metadata tree root.
 Should be relative to the git repository root provided in the url parameter.
@@ -177,16 +171,18 @@ Default: '%(default)s'""",
         "--plans",
         required=True,
         nargs="+",
+        default="/plans/",
         help="""Specify a test plan or multiple plans to request at testing farm.
-To run whole set of plans use /plans/ or /plans/tier*/""",
+To run whole set of tiers use /plans/tier*/
+Default: '%(default)s'""",
     )
 
     parser.add_argument(
         "-c",
         "--compose",
         nargs="+",
-        default=COMPOSE_MAPPING.keys(),
-        choices=COMPOSE_MAPPING.keys(),
+        default=list(COMPOSE_MAPPING.keys()),
+        choices=list(COMPOSE_MAPPING.keys()),
         help="""Choose composes to run tests on.\nDefault: '%(default)s'.""",
     )
 
@@ -195,7 +191,7 @@ To run whole set of plans use /plans/ or /plans/tier*/""",
     #     "-cfg",
     #     "--config_file",
     #     default=os.path.expanduser('~/.config/tesar'),
-    #     help="""Change path to tesar file.
+    #     help="""Change path to the tesar config file.
     #     Default: '%(default)s'.""",
     # )
 
@@ -219,7 +215,9 @@ To run whole set of plans use /plans/ or /plans/tier*/""",
     )
 
     parser.add_argument(
-        "--debug", action="store_true", help="Print out additional information."
+        "--debug",
+        action="store_true",
+        help="Print out additional information for each request.",
     )
 
     args = parser.parse_args()
