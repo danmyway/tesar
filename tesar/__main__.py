@@ -1,9 +1,11 @@
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 
 import sys
 import contextlib
 from dispatcher.__main__ import main
 from dispatcher.__init__ import get_arguments, get_datetime
+
+
 
 args = get_arguments()
 
