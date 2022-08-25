@@ -24,7 +24,7 @@
 
 TESAR
 =
-### Testing farm API requests dispatcher
+### (TES)ting farm (A)PI (R)equests dispatcher
 #### Send requests to the Testing farm API through command line interface
 Posting requests to the Testing farm requires some json payload manipulation, which is inconvenient and might be time-consuming.<br><br>
 For example, to be able to send a request to test on three different composes you would need to edit 'compose', 'id' and 'distro' in the example payload below twice!<br>
