@@ -9,7 +9,7 @@ with open(os.path.join(_CUR_DIR, "README.md"), "r", encoding="utf-8") as f:
 
 setup(
     name="tesar",
-    version="0.1",
+    version="2022.08.19",
     packages=["dispatcher"],
     install_requires=["envparse", "requests", "copr", "koji"],
     url="https://gitlab.cee.redhat.com/ddiblik/tesar",
