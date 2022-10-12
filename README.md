@@ -194,4 +194,6 @@ https://api.dev.testing-farm.io/v0.1/composes
 
 #### Private ranch
 
+http://storage.tft.osci.redhat.com/composes-generate-compose-list-as-a-nice-html-page.html
+
 `curl -s https://gitlab.cee.redhat.com/baseos-qe/citool-config/-/raw/production/variables-composes.yaml | grep 'compose:' | tr -s ' '`
