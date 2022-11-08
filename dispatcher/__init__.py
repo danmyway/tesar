@@ -19,12 +19,12 @@ COPR_CONFIG = {"copr_url": "https://copr.fedorainfracloud.org"}
 COMPOSE_MAPPING = {
     "cos8": {
         "compose": "CentOS-8-latest",
-        "distro": "centos-8",
+        "distro": "centos-8-latest",
         "chroot": "epel-8-x86_64",
     },
     "ol8": {
         "compose": "Oracle-Linux-8.6",
-        "distro": "oraclelinux-8",
+        "distro": "oraclelinux-8.6",
         "chroot": "epel-8-x86_64",
     },
     "cos7": {
