@@ -6,7 +6,13 @@ and this project adheres to [Calendar Versioning](https://calver.org).<br>
 ![](https://img.shields.io/badge/calver-YYYY.0M.0D-informational)
 
 ## [Unreleased]
-
+### Added
+  - request response watcher
+    - check if the artifact url is sending a 200 response code, if not, notify the user after 30 seconds
+### Changed
+  - `centos-8` and `oraclelinux-8` distro context changed to `centos-8-latest` and `oraclelinux-8.6` respectively 
+    - differentiate better the provisioned machine 
+### Removed
 ## [2022.08.19]
 ### Added
 - check if the repo url is correct in case of gitlab.cee.redhat
