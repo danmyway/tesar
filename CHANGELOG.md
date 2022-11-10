@@ -7,6 +7,11 @@ and this project adheres to [Calendar Versioning](https://calver.org).<br>
 
 ## [Unreleased]
 ### Added
+### Changed
+### Removed
+
+## [2022.11.11]
+### Added
   - request response watcher
     - check if the artifact url is sending a 200 response code, if not, notify the user after 30 seconds
 ### Changed

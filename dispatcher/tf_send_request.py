@@ -82,7 +82,7 @@ def submit_test(
             Wait for default 30 seconds for an OK response from the artifact URL.
             If the response is not successful notify user.
             """
-            response_timeout = 1
+            response_timeout = 30
             clear_line = '\x1b[2K'
             while True:
                 artifact_url_response = requests.get(artifact_url)
