@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import json
+import time
 from pprint import pprint
 import requests
 from dispatcher.__init__ import (
@@ -66,14 +67,46 @@ def submit_test(
     }
 
     if not (args.dry_run or args.dry_run_cli):
+
         response = requests.post(TESTING_FARM_ENDPOINT, json=payload_raw)
         tf_url = TESTING_FARM_ENDPOINT
-        artifact_url = ARTIFACT_BASE_URL
         task_id = response.json()["id"]
+        artifact_url = f"{ARTIFACT_BASE_URL}/{task_id}"
         compose = compose
         plan = plan
         err_message = json.dumps(response.json(), indent=2, sort_keys=True)
-        status = response.status_code
+        request_status = response.status_code
+
+        def _response_watcher(printout):
+            """
+            Wait for default 30 seconds for an OK response from the artifact URL.
+            If the response is not successful notify user.
+            """
+            response_timeout = 30
+            clear_line = '\x1b[2K'
+            while True:
+                artifact_url_response = requests.get(artifact_url)
+                artifact_url_status = artifact_url_response.status_code
+                artifact_url_message = artifact_url_response.reason
+                print(end=clear_line)
+                print(f"{FormatText.bold}Waiting for a successfull response for {response_timeout} seconds. "
+                      f"Current response is: {artifact_url_status} {artifact_url_message}", end='\r', flush=True)
+                time.sleep(1)
+                response_timeout -= 1
+                if artifact_url_status > 200 and response_timeout == 0:
+                    print(end=clear_line)
+                    print(
+                        f"{FormatText.bold}Processing the request takes longer this time.\n"
+                        f"The request response is still {artifact_url_status} {artifact_url_message}\n"
+                        f"Here is the link for the requested job, try refreshing the website after a couple of minutes.\n",
+                        flush=True,
+                    )
+                    print(printout)
+                    break
+                elif artifact_url_status == 200:
+                    print(f"\nResponse successfull!\n")
+                    print(printout)
+                    break
 
         print_test_info = (
             f"{output_divider}{FormatText.bold}{FormatText.blue}\n{compose}\n"
@@ -84,13 +117,13 @@ def submit_test(
         print_test_results = (
             f"{output_divider}{FormatText.bold}{FormatText.blue}\n{compose}\n"
             f"   {plan}\n{FormatText.end}"
-            f"      Test results: {artifact_url}/{task_id}\n{output_divider}"
+            f"      Test results: {artifact_url}\n{output_divider}"
         )
 
         print_key_error = (
             f"{output_divider}{FormatText.bold}{FormatText.blue}\n{compose}\n"
             f"   {plan}\n{FormatText.end}"
-            f"      Status: {status}, Message: {err_message}\n{output_divider}"
+            f"      Status: {request_status}, Message: {err_message}\n{output_divider}"
         )
 
     print_payload_cli = (
@@ -115,12 +148,12 @@ def submit_test(
         elif args.dry_run_cli:
             print(print_payload_cli)
         elif args.debug:
-            print(print_test_info)
+            _response_watcher(print_test_info)
             print("Printing payload information:")
             pprint(payload_raw)
             print(print_test_results)
         else:
-            print(print_test_results)
+            _response_watcher(print_test_results)
 
     except KeyError:
         print(print_key_error)

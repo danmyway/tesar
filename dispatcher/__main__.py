@@ -99,7 +99,7 @@ def main():
                     + "\033[1;3m"
                     + plan.split("/")[-1]
                     + "\033[0m"
-                    + f" for {args.artifact_type} build {build_reference} for {build['compose']} to the testing farm."
+                    + f" for {args.artifact_type} build {build_reference} for {build['compose']} to the testing farm.\n"
                 )
             submit_test(
                 repo_base_url,
