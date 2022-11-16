@@ -86,6 +86,9 @@ def main():
                 PACKAGE_MAPPING[args.package], reference, args.compose
             )
         else:
+            # Disable Oracle Linux 8.4 as default.
+            # Keep it in the mapping in case needed.
+            COMPOSE_MAPPING.pop('ol84')
             info, build_reference = artifact_module.get_info(
                 PACKAGE_MAPPING[args.package],
                 reference,
