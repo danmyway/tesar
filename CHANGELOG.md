@@ -18,6 +18,7 @@ and this project adheres to [Calendar Versioning](https://calver.org).<br>
   - `centos-8` and `oraclelinux-8` distro context changed to `centos-8-latest` and `oraclelinux-8.6` respectively 
     - differentiate better the provisioned machine 
 ### Removed
+  - Oracle Linux 8.4 disabled as a part of default composes to be tested on
 ## [2022.08.19]
 ### Added
 - check if the repo url is correct in case of gitlab.cee.redhat
