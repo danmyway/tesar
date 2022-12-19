@@ -12,7 +12,7 @@ TESTING_FARM_ENDPOINT = "https://api.dev.testing-farm.io/v0.1/requests"
 ARTIFACT_BASE_URL = "http://artifacts.osci.redhat.com/testing-farm"
 
 ARTIFACT_MAPPING = {"brew": "redhat-brew-build", "copr": "fedora-copr-build"}
-PACKAGE_MAPPING = {"c2r": "convert2rhel", "leapp": "leapp"}
+PACKAGE_MAPPING = {"c2r": "convert2rhel", "lp": "leapp", "lpr": "leapp-repository"}
 
 COPR_CONFIG = {"copr_url": "https://copr.fedorainfracloud.org"}
 
@@ -49,6 +49,21 @@ COMPOSE_MAPPING = {
     },
 }
 
+LEAPP_TARGET_MAPPING = {
+    "lpr": {
+        "el7": {"name": "epel7", "arch": ["x86_64"]},
+        "el8": {"name": "epel8", "arch": ["x86_64"]},
+    },
+    "lp": {
+        "el7": {"name": "epel7", "arch": ["ppc64le", "x86_64"]},
+        "el8": {"name": "epel8", "arch": ["x86_64"]},
+        "f35": {"name": "fedora-35", "arch": ["aarch64", "x86_64"]},
+        "f36": {"name": "fedora-36", "arch": ["aarch64", "x86_64"]},
+        "f37": {"name": "fedora-37", "arch": ["aarch64", "x86_64"]},
+        "fraw": {"name": "fedora-rawhide", "arch": ["aarch64", "x86_64"]},
+    },
+}
+
 
 class FormatText:
     purple = "\033[95m"
@@ -71,7 +86,7 @@ def get_config():
     getconfig = configparser.ConfigParser()
     try:
         if get_arguments().dry_run or get_arguments().dry_run_cli:
-            testing_farm_api_key = "{testing_farm_api_key}"
+            testing_farm_api_key = "{TESTING_FARM_API_KEY}"
             return testing_farm_api_key
         else:
             getconfig.read(os.path.expanduser("~/.config/tesar"))
@@ -106,6 +121,7 @@ def get_arguments():
         description="Send requests to testing farm conveniently.",
         formatter_class=argparse.RawTextHelpFormatter,
     )
+
     parser.add_argument(
         "artifact_type",
         metavar="artifact_type",
@@ -119,81 +135,6 @@ def get_arguments():
         choices=list(PACKAGE_MAPPING.keys()),
         help="Choose package to test e.g. %(choices)s.",
     )
-
-    reference = parser.add_mutually_exclusive_group(required=True)
-
-    reference.add_argument(
-        "-ref",
-        "--reference",
-        nargs="+",
-        help=f"""{FormatText.bold}Mutually exclusive with respect to --task-id.{FormatText.end}
-For brew: Specify the reference version to find the correct artifact (e.g. 0.1-2, 0.1.2).
-For copr: Specify the pull request reference to find the correct artifact (e.g. pr123, main, master, ...).""",
-    )
-
-    reference.add_argument(
-        "-id",
-        "--task-id",
-        nargs="+",
-        help=f"""{FormatText.bold}Mutually exclusive with respect to --reference.{FormatText.end}
-For brew: Specify the TASK ID for required brew build.
-{FormatText.bold}NOTE: Double check, that you are passing TASK ID for copr builds, not BUILD ID otherwise testing farm will not install the package.{FormatText.end}
-For copr: Specify the BUILD ID for required copr build.""",
-    )
-
-    parser.add_argument(
-        "-g",
-        "--git",
-        nargs="+",
-        default=["github", "oamg", "main"],
-        help="""Provide repository base (github, gitlab, gitlab.cee.redhat)\nowner of the repository\nand a branch containing the tests you want to run.
-Default: '%(default)s'""",
-    )
-
-    parser.add_argument(
-        "-gp",
-        "--git-path",
-        default=".",
-        help="""Path to the metadata tree root.
-Should be relative to the git repository root provided in the url parameter.
-Default: '%(default)s'""",
-    )
-
-    parser.add_argument(
-        "-a",
-        "--architecture",
-        default="x86_64",
-        help="""Choose suitable architecture.\nDefault: '%(default)s'.""",
-    )
-
-    parser.add_argument(
-        "-p",
-        "--plans",
-        required=True,
-        nargs="+",
-        default="/plans/",
-        help="""Specify a test plan or multiple plans to request at testing farm.
-To run whole set of tiers use /plans/tier*/
-Default: '%(default)s'""",
-    )
-
-    parser.add_argument(
-        "-c",
-        "--compose",
-        nargs="+",
-        default=list(COMPOSE_MAPPING.keys()),
-        choices=list(COMPOSE_MAPPING.keys()),
-        help="""Choose composes to run tests on.\nDefault: '%(default)s'.""",
-    )
-
-    # TODO tesar file path
-    # parser.add_argument(
-    #     "-cfg",
-    #     "--config_file",
-    #     default=os.path.expanduser('~/.config/tesar'),
-    #     help="""Change path to the tesar config file.
-    #     Default: '%(default)s'.""",
-    # )
 
     parser.add_argument(
         "-l",
@@ -220,5 +161,118 @@ Default: '%(default)s'""",
         help="Print out additional information for each request.",
     )
 
+    subparsers = parser.add_subparsers(
+        title="Select an action to perform.", required=True, dest="command"
+    )
+
+    parser_get_id = subparsers.add_parser("get-id", help="prints out build ID")
+
+    parser_get_id.add_argument(
+        "-t",
+        "--target",
+        nargs="+",
+        required=True,
+        choices=["el7", "el8", "f35", "f36", "f37", "fraw"],
+        help="Select a target for the build.",
+    )
+    parser_get_id.add_argument(
+        "-ref",
+        "--reference",
+        required=True,
+        nargs=1,
+        help=f"""For copr: Specify the pull request reference to find the correct artifact (e.g. pr123, main, master, ...).\n
+    {FormatText.bold}For leapp/leapp-repository, the reference is case sensitive.\n
+    Packages built by packit are referenced in lower-case, built by oamgbot are referenced in upper-case letters.\n{FormatText.end}    
+    For brew: {FormatText.bold} FEATURE IS NOT YET IMPLEMENTED {FormatText.end}
+    """,
+    )
+
+    parser_get_id.add_argument(
+        "-a",
+        "--architecture",
+        required=True,
+        nargs="+",
+        choices=["aarch64", "ppc64le", "x86_64"],
+        help="""Choose suitable architecture.\n""",
+    )
+
+    parser_dispatch = subparsers.add_parser("dispatch", help="dispatch jobs")
+
+    reference = parser_dispatch.add_mutually_exclusive_group(required=True)
+
+    parser_dispatch.add_argument(
+        "-a",
+        "--architecture",
+        default="x86_64",
+        help="""Choose suitable architecture.\nDefault: '%(default)s'.""",
+    )
+
+    reference.add_argument(
+        "-ref",
+        "--reference",
+        nargs="+",
+        help=f"""{FormatText.bold}Mutually exclusive with respect to --task-id.{FormatText.end}
+For brew: Specify the reference version to find the correct artifact (e.g. 0.1-2, 0.1.2).
+For copr: Specify the pull request reference to find the correct artifact (e.g. pr123, main, master, ...).""",
+    )
+
+    reference.add_argument(
+        "-id",
+        "--task-id",
+        nargs="+",
+        help=f"""{FormatText.bold}Mutually exclusive with respect to --reference.{FormatText.end}
+For brew: Specify the TASK ID for required brew build.
+{FormatText.bold}NOTE: Double check, that you are passing TASK ID for copr builds, not BUILD ID otherwise testing farm will not install the package.{FormatText.end}
+For copr: Specify the BUILD ID for required copr build.""",
+    )
+
+    parser_dispatch.add_argument(
+        "-g",
+        "--git",
+        nargs="+",
+        default=["github", "oamg", "main"],
+        help="""Provide repository base (github, gitlab, gitlab.cee.redhat)\nowner of the repository\nand a branch containing the tests you want to run.
+Default: '%(default)s'""",
+    )
+
+    parser_dispatch.add_argument(
+        "-gp",
+        "--git-path",
+        default=".",
+        help="""Path to the metadata tree root.
+Should be relative to the git repository root provided in the url parameter.
+Default: '%(default)s'""",
+    )
+
+    parser_dispatch.add_argument(
+        "-p",
+        "--plans",
+        required=True,
+        nargs="+",
+        default="/plans/",
+        help="""Specify a test plan or multiple plans to request at testing farm.
+To run whole set of tiers use /plans/tier*/
+Default: '%(default)s'""",
+    )
+
+    parser_dispatch.add_argument(
+        "-c",
+        "--compose",
+        nargs="+",
+        default=list(COMPOSE_MAPPING.keys()),
+        choices=list(COMPOSE_MAPPING.keys()),
+        help="""Choose composes to run tests on.\nDefault: '%(default)s'.""",
+    )
+
+    # TODO tesar file path
+    # parser.add_argument(
+    #     "-cfg",
+    #     "--config_file",
+    #     default=os.path.expanduser('~/.config/tesar'),
+    #     help="""Change path to the tesar config file.
+    #     Default: '%(default)s'.""",
+    # )
+
     args = parser.parse_args()
+
     return args

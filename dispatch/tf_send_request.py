@@ -4,7 +4,7 @@ import json
 import time
 from pprint import pprint
 import requests
-from dispatcher.__init__ import (
+from dispatch.__init__ import (
     TESTING_FARM_ENDPOINT,
     ARTIFACT_BASE_URL,
     get_config,
@@ -12,9 +12,9 @@ from dispatcher.__init__ import (
     FormatText,
 )
 
-testing_farm_api_key = get_config()
-args = get_arguments()
-output_divider = 20 * "="
+TESTING_FARM_API_KEY = get_config()
+ARGS = get_arguments()
+OUTPUT_DIVIDER = 20 * "="
 
 
 def submit_test(
@@ -29,7 +29,7 @@ def submit_test(
     package,
     tmt_distro,
     tmt_architecture,
-    api_key=testing_farm_api_key,
+    api_key=TESTING_FARM_API_KEY,
 ):
     """
     Payload documentation > https://testing-farm.gitlab.io/api/#operation/requestsPost
@@ -66,7 +66,7 @@ def submit_test(
         ],
     }
 
-    if not (args.dry_run or args.dry_run_cli):
+    if not (ARGS.dry_run or ARGS.dry_run_cli):
 
         response = requests.post(TESTING_FARM_ENDPOINT, json=payload_raw)
         tf_url = TESTING_FARM_ENDPOINT
@@ -83,14 +83,18 @@ def submit_test(
             If the response is not successful notify user.
             """
             response_timeout = 30
-            clear_line = '\x1b[2K'
+            clear_line = "\x1b[2K"
             while True:
                 artifact_url_response = requests.get(artifact_url)
                 artifact_url_status = artifact_url_response.status_code
                 artifact_url_message = artifact_url_response.reason
                 print(end=clear_line)
-                print(f"{FormatText.bold}Waiting for a successfull response for {response_timeout} seconds. "
-                      f"Current response is: {artifact_url_status} {artifact_url_message}", end='\r', flush=True)
+                print(
+                    f"{FormatText.bold}Waiting for a successfull response for {response_timeout} seconds. "
+                    f"Current response is: {artifact_url_status} {artifact_url_message}",
+                    end="\r",
+                    flush=True,
+                )
                 time.sleep(1)
                 response_timeout -= 1
                 if artifact_url_status > 200 and response_timeout == 0:
@@ -109,21 +113,21 @@ def submit_test(
                     break
 
         print_test_info = (
-            f"{output_divider}{FormatText.bold}{FormatText.blue}\n{compose}\n"
+            f"{OUTPUT_DIVIDER}{FormatText.bold}{FormatText.blue}\n{compose}\n"
             f"   {plan}\n{FormatText.end}"
-            f"      Test info: {tf_url}/{task_id}\n{output_divider}"
+            f"      Test info: {tf_url}/{task_id}\n{OUTPUT_DIVIDER}"
         )
 
         print_test_results = (
-            f"{output_divider}{FormatText.bold}{FormatText.blue}\n{compose}\n"
+            f"{OUTPUT_DIVIDER}{FormatText.bold}{FormatText.blue}\n{compose}\n"
             f"   {plan}\n{FormatText.end}"
-            f"      Test results: {artifact_url}\n{output_divider}"
+            f"      Test results: {artifact_url}\n{OUTPUT_DIVIDER}"
         )
 
         print_key_error = (
-            f"{output_divider}{FormatText.bold}{FormatText.blue}\n{compose}\n"
+            f"{OUTPUT_DIVIDER}{FormatText.bold}{FormatText.blue}\n{compose}\n"
             f"   {plan}\n{FormatText.end}"
-            f"      Status: {request_status}, Message: {err_message}\n{output_divider}"
+            f"      Status: {request_status}, Message: {err_message}\n{OUTPUT_DIVIDER}"
         )
 
     print_payload_cli = (
@@ -142,12 +146,12 @@ def submit_test(
     print_payload_dryrun_msg = f"\nDRY RUN | Printing out requested payload:"
 
     try:
-        if args.dry_run:
+        if ARGS.dry_run:
             print(print_payload_dryrun_msg)
             pprint(payload_raw)
-        elif args.dry_run_cli:
+        elif ARGS.dry_run_cli:
             print(print_payload_cli)
-        elif args.debug:
+        elif ARGS.debug:
             _response_watcher(print_test_info)
             print("Printing payload information:")
             pprint(payload_raw)

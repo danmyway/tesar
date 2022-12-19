@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import koji
-from dispatcher.__init__ import COMPOSE_MAPPING, get_logging, get_arguments
+from dispatch.__init__ import COMPOSE_MAPPING, get_logging, get_arguments
 
 logger = get_logging()
 args = get_arguments()

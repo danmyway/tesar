@@ -13,6 +13,8 @@
             1. [Config file template](#config-file-template)
     2. [Run](#run)
         1. [Examples](#examples)
+           1. [Dispatch](#dispatch)
+           2. [Get ID](#get-id-poc-currently-for-leapp-only)
 4. [Currently used variables](#currently-used-variables)
     1. [Payload](#payload)
     2. [Mapped composes](#mapped-composes)
@@ -103,7 +105,7 @@ touch ~/.config/tesar && printf "[testing-farm]\nAPI_KEY={your testing farm api 
 ```
 or copy provided file and edit with your favourite editor, e.g.
 ```shell
-cp ./dispatcher/tesar ~/.config/tesar 
+cp ./dispatch/tesar ~/.config/tesar 
 vim ~/.config/tesar
 ```
 Config file template <a name="config-file-template"></a>
@@ -114,23 +116,39 @@ API_KEY=
 ### Run
 If you installed the script via `pip install .` you should be able to run the script by running `tesar` command.<br>
 Otherwise run with `python tesar.py`.
+Another option is to `export PYTHONPATH=/path/to/tesar/` and run with `python tesar`
 #### Examples
-
+##### Dispatch
 ```shell 
 # Test copr build for PR#123 with plan basic_sanity_check on CentOS 8.4 
-$ tesar copr c2r -ref pr123 -g github oamg main -p /plans/tier0/basic_sanity_checks -c cos84
+$ tesar copr c2r dispatch -ref pr123 -g github oamg main -p /plans/tier0/basic_sanity_checks -c cos84
 
 # Specify which composes you want to run test plan (in this case tier0)
-$ tesar copr c2r -ref pr123 -g gitlab.cee.redhat xyz testing -p /plans/tier0/ -c ol7 cos8
+$ tesar copr c2r dispatch -ref pr123 -g gitlab.cee.redhat xyz testing -p /plans/tier0/ -c ol7 cos8
  
 # Run every test plan for brew build 0.12-3 on all composes
-$ tesar brew c2r -ref 0.12-3 -g github oamg main -p /plans/ 
+$ tesar brew c2r dispatch -ref 0.12-3 -g github oamg main -p /plans/ 
 
 # Specify more individual test plans
-$ tesar brew c2r -ref 0.12-3 -git github oamg main -p /plans/tier0/basic_sanity_checks /plans/tier1/rhsm 
+$ tesar brew c2r dispatch -ref 0.12-3 -git github oamg main -p /plans/tier0/basic_sanity_checks /plans/tier1/rhsm 
 
 ```
+#### Get ID [PoC] currently for LEAPP only
+***Please NOTE, that the reference for requested PR build is case-sensitive depending on which service made the build.***
+- ***Packit builds are referenced in lowercase***
+- ***oamgbot builds are referenced in uppercase***
 
+```shell
+# Get copr build ID for referenced leapp PR #123, target fedora-35, architecture x86_64
+$ tesar copr lp get-id -ref pr123 -t f35 -a x86_64
+
+# Get copr build ID for referenced leapp-repository PR #123, target epel-7, architecture ppc64le
+$ tesar copr lpr get-id -ref PR123 -t el7 -a ppc64le
+
+# Get latest copr build ID for referenced leapp, target fedora-rawhide, architecture aarch64
+$ tesar copr lpr get-id -ref latest -t fraw -a aarch64
+
+```
 
 # Currently used variables
 
