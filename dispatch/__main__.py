@@ -3,8 +3,8 @@
 import requests
 import sys
 import importlib
-from dispatcher.tf_send_request import submit_test
-from dispatcher.__init__ import (
+from dispatch.tf_send_request import submit_test
+from dispatch.__init__ import (
     get_logging,
     get_arguments,
     PACKAGE_MAPPING,
@@ -13,109 +13,111 @@ from dispatcher.__init__ import (
 )
 
 
-logger = get_logging()
-args = get_arguments()
+LOGGER = get_logging()
+ARGS = get_arguments()
 
 
 def main():
-
+    if ARGS.package in ["lp", "lpr"]:
+        LOGGER.critical("The dispatch feature not yet properly implemented for leapp.")
+        sys.exit(1)
     try:
         repo_base_url = "https://{}.com/{}/{}".format(
-            args.git[0], args.git[1], PACKAGE_MAPPING.get(args.package)
+            ARGS.git[0], ARGS.git[1], PACKAGE_MAPPING.get(ARGS.package)
         )
         git_response = requests.get(repo_base_url)
         if (
-            args.git[0] != "gitlab"
-            and args.git[0] != "github"
-            and args.git[0] != "gitlab.cee.redhat"
+            ARGS.git[0] != "gitlab"
+            and ARGS.git[0] != "github"
+            and ARGS.git[0] != "gitlab.cee.redhat"
         ):
-            logger.critical(
+            LOGGER.critical(
                 "Bad git base reference, please provide correct values.\ngithub / gitlab"
             )
             sys.exit(99)
         elif git_response.status_code == 404:
-            logger.critical(
+            LOGGER.critical(
                 "There is an issue with reaching the url. Please check correct order of values."
             )
-            logger.critical(
+            LOGGER.critical(
                 f"Reaching {repo_base_url} returned status code of {git_response.status_code}."
             )
-            logger.critical(
+            LOGGER.critical(
                 "Values for git option should be passed in order {repo_base owner branch}"
             )
             sys.exit(99)
-        elif args.git[0] == "gitlab.cee.redhat":
-            logger.warning(f"Is the repository url/name correct?\n{repo_base_url}")
+        elif ARGS.git[0] == "gitlab.cee.redhat":
+            LOGGER.warning(f"Is the repository url/name correct?\n{repo_base_url}")
             repo_name = input(
                 "If that is your required repository pres ENTER, otherwise pass the correct name: "
             )
             if repo_name == "":
-                logger.info(f"Continuing with selected repository: {repo_base_url}")
+                LOGGER.info(f"Continuing with selected repository: {repo_base_url}")
             else:
                 repo_base_url = "https://{}.com/{}/{}".format(
-                    args.git[0], args.git[1], repo_name
+                    ARGS.git[0], ARGS.git[1], repo_name
                 )
-                logger.info(f"Continuing with selected repository: {repo_base_url}")
+                LOGGER.info(f"Continuing with selected repository: {repo_base_url}")
 
     except IndexError as index_err:
-        logger.critical(
+        LOGGER.critical(
             "Bad git reference, please provide both repository base and repository owner."
         )
-        logger.critical(index_err)
+        LOGGER.critical(index_err)
         sys.exit(99)
     try:
         artifact_module = importlib.import_module(
-            "dispatcher." + args.artifact_type + "_api"
+            "dispatch." + ARGS.artifact_type + "_api"
         )
     except ImportError:
-        logger.error("Artifact_module could not be loaded!")
+        LOGGER.error("Artifact_module could not be loaded!")
         return 99
 
-    if args.reference:
-        reference = args.reference
-    elif args.task_id:
-        reference = args.task_id
+    if ARGS.reference:
+        reference = ARGS.reference
+    elif ARGS.task_id:
+        reference = ARGS.task_id
     else:
-        logger.critical("There is something wrong with reference/build_id!")
+        LOGGER.critical("There is something wrong with reference/build_id!")
         sys.exit(99)
 
-    for plan in args.plans:
+    for plan in ARGS.plans:
 
-        if args.compose:
+        if ARGS.compose:
             info, build_reference = artifact_module.get_info(
-                PACKAGE_MAPPING[args.package], reference, args.compose
+                PACKAGE_MAPPING[ARGS.package], reference, ARGS.compose
             )
         else:
             # Disable Oracle Linux 8.4 as default.
             # Keep it in the mapping in case needed.
-            COMPOSE_MAPPING.pop('ol84')
+            COMPOSE_MAPPING.pop("ol84")
             info, build_reference = artifact_module.get_info(
-                PACKAGE_MAPPING[args.package],
+                PACKAGE_MAPPING[ARGS.package],
                 reference,
                 COMPOSE_MAPPING.keys(),
             )
 
         for build in info:
-            if not (args.dry_run or args.dry_run_cli):
-                logger.info(
-                    f"Sending test plan "
+            if not (ARGS.dry_run or ARGS.dry_run_cli):
+                LOGGER.info(
+                    f"Scheduling test for "
                     + "\033[1;3m"
                     + plan.split("/")[-1]
                     + "\033[0m"
-                    + f" for {args.artifact_type} build {build_reference} for {build['compose']} to the testing farm.\n"
+                    + f" on {ARGS.artifact_type} build {build_reference} for target {build['compose']} on the Testing Farm.\n"
                 )
             submit_test(
                 repo_base_url,
-                args.git[2],
-                args.git_path,
+                ARGS.git[2],
+                ARGS.git_path,
                 plan,
-                args.architecture,
+                ARGS.architecture,
                 build["compose"],
                 str(build["build_id"]),
-                ARTIFACT_MAPPING[args.artifact_type],
-                PACKAGE_MAPPING[args.package],
+                ARTIFACT_MAPPING[ARGS.artifact_type],
+                PACKAGE_MAPPING[ARGS.package],
                 build["distro"],
-                args.architecture,
+                ARGS.architecture,
             )
 
 

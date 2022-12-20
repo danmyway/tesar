@@ -7,7 +7,10 @@ and this project adheres to [Calendar Versioning](https://calver.org).<br>
 
 ## [Unreleased]
 ### Added
+- new required argument `dispatch/get-id` to differentiate between dispatching jobs or simply getting ID of required build
+- `get-id` module to easily get build ID with targeted chroot (Implemented as PoC for LEAPP, currently no use for Convert2RHEL)
 ### Changed
+- dispatcher module changed to `dispatch`
 ### Removed
 
 ## [2022.11.11]
