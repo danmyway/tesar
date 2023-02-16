@@ -62,6 +62,26 @@ COMPOSE_MAPPING = {
         "distro": "rocky-linux-8.7",
         "chroot": "epel-8-x86_64",
     },
+    "al8": {
+        "compose": "AlmaLinux-OS-8.7",
+        "distro": "AlmaLinux-OS-8.7",
+        "chroot": "epel-8-x86_64",
+    },
+    "al86": {
+        "compose": "AlmaLinux-OS-8.6",
+        "distro": "AlmaLinux-OS-8.6",
+        "chroot": "epel-8-x86_64",
+    },
+    "roc86": {
+        "compose": "Rocky-Linux-8.6",
+        "distro": "rocky-linux-8.6",
+        "chroot": "epel-8-x86_64",
+    },
+    "roc8": {
+        "compose": "Rocky-Linux-8.7",
+        "distro": "rocky-linux-8.7",
+        "chroot": "epel-8-x86_64",
+    },
 }
 
 
