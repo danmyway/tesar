@@ -16,6 +16,11 @@ testing_farm_api_key = get_config()
 args = get_arguments()
 output_divider = 20 * "="
 
+# For some images (Alma, Rocky) we need to use post-install-script to enable root login.
+post_install_script = (
+    "#!/bin/bash\nsudo sed -i 's/^.*ssh-rsa/ssh-rsa/' /root/.ssh/authorized_keys"
+)
+
 
 def submit_test(
     git_url,
@@ -58,6 +63,11 @@ def submit_test(
                         "packages": [package],
                     }
                 ],
+                "settings": {
+                    "provisioning": {
+                        "post_install_script": post_install_script
+                    }
+                },
                 "tmt": {
                     "context": {
                         "distro": tmt_distro,
