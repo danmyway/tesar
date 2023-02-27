@@ -186,6 +186,13 @@ Default: '%(default)s'""",
         help="""Choose composes to run tests on.\nDefault: '%(default)s'.""",
     )
 
+    parser.add_argument(
+        "-pw",
+        "--pool-workaround",
+        action="store_true",
+        help="""Workarounds the AWS spot instances release.""",
+    )
+
     # TODO tesar file path
     # parser.add_argument(
     #     "-cfg",

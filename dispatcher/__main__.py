@@ -80,15 +80,19 @@ def main():
         sys.exit(99)
 
     for plan in args.plans:
+        # Usually the best approach is to let Testing Farm to choose the most suitable pool.
+        # Recently the AWS pools are releasing the guests during test execution.
+        # If the pool-workaround option is passed, use the baseosci-openstack pool
+        pool = ""
+        if args.pool_workaround:
+            pool = "baseosci-openstack"
+            logger.warning("Pool workaround option detected, requesting 'baseosci-openstack' pool for this run.")
 
         if args.compose:
             info, build_reference = artifact_module.get_info(
                 PACKAGE_MAPPING[args.package], reference, args.compose
             )
         else:
-            # Disable Oracle Linux 8.4 as default.
-            # Keep it in the mapping in case needed.
-            COMPOSE_MAPPING.pop('ol84')
             info, build_reference = artifact_module.get_info(
                 PACKAGE_MAPPING[args.package],
                 reference,
@@ -111,6 +115,7 @@ def main():
                 plan,
                 args.architecture,
                 build["compose"],
+                pool,
                 str(build["build_id"]),
                 ARTIFACT_MAPPING[args.artifact_type],
                 PACKAGE_MAPPING[args.package],

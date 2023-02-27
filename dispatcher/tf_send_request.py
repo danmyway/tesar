@@ -24,6 +24,7 @@ def submit_test(
     plan,
     architecture,
     compose,
+    pool,
     artifact_id,
     artifact_type,
     package,
@@ -49,6 +50,7 @@ def submit_test(
             {
                 "arch": architecture,
                 "os": {"compose": compose},
+                "pool": pool,
                 "artifacts": [
                     {
                         "id": artifact_id,
