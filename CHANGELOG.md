@@ -7,6 +7,11 @@ and this project adheres to [Calendar Versioning](https://calver.org).<br>
 
 ## [Unreleased]
 ### Added
+ [2023.02.28]
+ - option `-w/--wait` to specify number of seconds to wait for a successful response with default 20 seconds
+ - option `-nw/--no-wait` to bypass waiting for response and get the link ASAP
+ [2023.02.27]
+ - option `-pw/--pool-workaround` to request `baseosci-openstack` pool for the provisioning
 ### Changed
 ### Removed
 
@@ -22,9 +27,9 @@ and this project adheres to [Calendar Versioning](https://calver.org).<br>
 ## [2022.08.19]
 ### Added
 - check if the repo url is correct in case of gitlab.cee.redhat
-- --debug argument and move redundant links to debug
-- --dry-run argument to get just the payload printed
-- --dry-run-cli argument to get https command with required payload printed
+- `--debug` argument and move redundant links to debug
+- `--dry-run` argument to get just the payload printed
+- `--dry-run-cli` argument to get https command with required payload printed
 - pass task ID as a reference to a brew build directly 
   - fixes heavy dependency on NVR working correctly
 - pass copr build ID directly 
@@ -38,8 +43,8 @@ and this project adheres to [Calendar Versioning](https://calver.org).<br>
 ### Changed
 - hardcode copr API configuration - discard from config file
 - pass git references `[git_base_url repository_owner branch]` under one argument
-- change -git/--git_url argument to -g/--git
-  - -g/--git is required with default option `[github oamg main]`
+- change `-git/--git_url` argument to `-g/--git`
+  - `-g/--git` is required with default option `[github oamg main]`
 - simplify the outputted test links to just test results
 - make epel_composes in brew_api load dynamically from COMPOSE_MAPPING
   - previously hardcoded approach was naive as it required changes to epel_composes mapping, whenever COMPOSES_MAPPING keys were changed
