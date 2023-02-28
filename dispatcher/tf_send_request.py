@@ -81,17 +81,20 @@ def submit_test(
 
         def _response_watcher(printout):
             """
-            Wait for default 30 seconds for an OK response from the artifact URL.
+            Wait for default 20 seconds for an OK response from the artifact URL.
             If the response is not successful notify user.
             """
-            response_timeout = 30
+            if args.no_wait:
+                print(printout)
+                return
+            response_timeout = args.wait
             clear_line = '\x1b[2K'
             while True:
                 artifact_url_response = requests.get(artifact_url)
                 artifact_url_status = artifact_url_response.status_code
                 artifact_url_message = artifact_url_response.reason
                 print(end=clear_line)
-                print(f"{FormatText.bold}Waiting for a successfull response for {response_timeout} seconds. "
+                print(f"{FormatText.bold}Waiting for a successful response for {response_timeout} seconds. "
                       f"Current response is: {artifact_url_status} {artifact_url_message}", end='\r', flush=True)
                 time.sleep(1)
                 response_timeout -= 1
@@ -106,7 +109,7 @@ def submit_test(
                     print(printout)
                     break
                 elif artifact_url_status == 200:
-                    print(f"\nResponse successfull!\n")
+                    print(f"\nResponse successful!\n")
                     print(printout)
                     break
 

@@ -42,11 +42,6 @@ COMPOSE_MAPPING = {
         "distro": "centos-8.4",
         "chroot": "epel-8-x86_64",
     },
-    "ol84": {
-        "compose": "Oracle-Linux-8.4",
-        "distro": "oraclelinux-8.4",
-        "chroot": "epel-8-x86_64",
-    },
 }
 
 
@@ -191,6 +186,21 @@ Default: '%(default)s'""",
         "--pool-workaround",
         action="store_true",
         help="""Workarounds the AWS spot instances release.""",
+    )
+
+    parser.add_argument(
+        "-w",
+        "--wait",
+        type=int,
+        default=20,
+        help="""Provide number of seconds to wait for successful response.\nDefault: %(default)s seconds.""",
+    )
+
+    parser.add_argument(
+        "-nw",
+        "--no-wait",
+        action="store_true",
+        help="""Don't wait for successful response and get the artifact link ASAP.""",
     )
 
     # TODO tesar file path

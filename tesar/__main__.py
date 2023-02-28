@@ -6,7 +6,6 @@ from dispatcher.__main__ import main
 from dispatcher.__init__ import get_arguments, get_datetime
 
 
-
 args = get_arguments()
 
 if args.log:
