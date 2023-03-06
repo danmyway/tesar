@@ -19,6 +19,7 @@
         1. [List globally available composes](#list-globally-available-composes)
             1. [Public ranch](#public-ranch)
             2. [Private ranch](#private-ranch)
+5. [Mitigating infrastructure issues](#mitigating-infrastructure-issues)
     
 
 
@@ -85,9 +86,9 @@ dnf install brewkoji python-copr python-copr-doc python-kerberos python-requests
 Clone repository to your local machine.
 ```shell
 # ssh
-git clone git@gitlab.cee.redhat.com:ddiblik/tesar.git
+git clone git@github.com:danmyway/tesar.git
 # https
-git clone https://gitlab.cee.redhat.com/ddiblik/tesar.git
+git clone https://github.com/danmyway/tesar.git
 ```
 #### Install
 Change directory to the cloned folder, run virtual environment and install the package.
@@ -154,6 +155,7 @@ For convert2RHEL testing we are currently using this form of payload:
             {
                 "arch": architecture,
                 "os": {"compose": compose},
+                "pool": pool,
                 "artifacts": [
                     {
                         "id": artifact_id,
@@ -180,7 +182,6 @@ Oracle-Linux-8.6
 CentOS-7-latest
 Oracle-Linux-7.9
 CentOS-8.4
-Oracle-Linux-8.4
 ```
 
 ### List globally available composes
@@ -197,3 +198,6 @@ https://api.dev.testing-farm.io/v0.1/composes
 http://storage.tft.osci.redhat.com/composes-generate-compose-list-as-a-nice-html-page.html
 
 `curl -s https://gitlab.cee.redhat.com/baseos-qe/citool-config/-/raw/production/variables-composes.yaml | grep 'compose:' | tr -s ' '`
+
+# Mitigating infrastructure issues
+In case of the tests failing prematurely in the middle of the execution with ssh connection unreachable use `-pw / --pool-workaround` to directly request `baseosci-openstack` pool for provisionining guests.
