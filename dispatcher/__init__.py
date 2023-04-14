@@ -62,26 +62,6 @@ COMPOSE_MAPPING = {
         "distro": "rocky-linux-8.7",
         "chroot": "epel-8-x86_64",
     },
-    "al8": {
-        "compose": "AlmaLinux-OS-8.7",
-        "distro": "AlmaLinux-OS-8.7",
-        "chroot": "epel-8-x86_64",
-    },
-    "al86": {
-        "compose": "AlmaLinux-OS-8.6",
-        "distro": "AlmaLinux-OS-8.6",
-        "chroot": "epel-8-x86_64",
-    },
-    "roc86": {
-        "compose": "Rocky-Linux-8.6",
-        "distro": "rocky-linux-8.6",
-        "chroot": "epel-8-x86_64",
-    },
-    "roc8": {
-        "compose": "Rocky-Linux-8.7",
-        "distro": "rocky-linux-8.7",
-        "chroot": "epel-8-x86_64",
-    },
 }
 
 
@@ -107,12 +87,14 @@ def get_config():
     try:
         if get_arguments().dry_run or get_arguments().dry_run_cli:
             testing_farm_api_key = "{testing_farm_api_key}"
-            return testing_farm_api_key
+            cloud_resources_tag = "{cloud_resources_tag}"
+            return testing_farm_api_key, cloud_resources_tag
         else:
             getconfig.read(os.path.expanduser("~/.config/tesar"))
             testing_farm_api_key = getconfig.get("testing-farm", "API_KEY")
+            cloud_resources_tag = getconfig.get("cloud-resources-tag", "CLOUD_RESOURCES_TAG")
 
-            return testing_farm_api_key
+            return testing_farm_api_key, cloud_resources_tag
     except configparser.NoSectionError as no_config_err:
         get_logging().critical(
             "There is probably no config file in the default path ~/.config/tesar."

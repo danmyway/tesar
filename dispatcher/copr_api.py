@@ -5,11 +5,9 @@ from dispatcher.__init__ import (
     COMPOSE_MAPPING,
     COPR_CONFIG,
     get_logging,
-    get_config,
     get_arguments,
 )
 
-testing_farm_api_key = get_config()
 session = BuildProxy(COPR_CONFIG)
 logger = get_logging()
 args = get_arguments()
