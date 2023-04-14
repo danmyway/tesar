@@ -12,7 +12,7 @@ from dispatcher.__init__ import (
     FormatText,
 )
 
-testing_farm_api_key = get_config()
+testing_farm_api_key, cloud_resources_tag = get_config()
 args = get_arguments()
 output_divider = 20 * "="
 
@@ -20,7 +20,6 @@ output_divider = 20 * "="
 post_install_script = (
     "#!/bin/bash\nsudo sed -i 's/^.*ssh-rsa/ssh-rsa/' /root/.ssh/authorized_keys"
 )
-
 
 def submit_test(
     git_url,
@@ -65,7 +64,10 @@ def submit_test(
                 ],
                 "settings": {
                     "provisioning": {
-                        "post_install_script": post_install_script
+                        "post_install_script": post_install_script,
+                        "tags": {
+                            "BusinessUnit": cloud_resources_tag
+                        }
                     }
                 },
                 "tmt": {

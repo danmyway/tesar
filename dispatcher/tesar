@@ -5,3 +5,5 @@ COPR_TOKEN=
 COPR_URL=https://copr.fedorainfracloud.org
 [testing-farm]
 API_KEY=
+[cloud-resources-tag]
+CLOUD_RESOURCES_TAG=
