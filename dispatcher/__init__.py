@@ -17,16 +17,6 @@ PACKAGE_MAPPING = {"c2r": "convert2rhel", "leapp": "leapp"}
 COPR_CONFIG = {"copr_url": "https://copr.fedorainfracloud.org"}
 
 COMPOSE_MAPPING = {
-    "cos8": {
-        "compose": "CentOS-8-latest",
-        "distro": "centos-8-latest",
-        "chroot": "epel-8-x86_64",
-    },
-    "ol8": {
-        "compose": "Oracle-Linux-8.6",
-        "distro": "oraclelinux-8.6",
-        "chroot": "epel-8-x86_64",
-    },
     "cos7": {
         "compose": "CentOS-7-latest",
         "distro": "centos-7",
@@ -40,6 +30,36 @@ COMPOSE_MAPPING = {
     "cos84": {
         "compose": "CentOS-8.4",
         "distro": "centos-8.4",
+        "chroot": "epel-8-x86_64",
+    },
+    "cos8": {
+        "compose": "CentOS-8-latest",
+        "distro": "centos-8-latest",
+        "chroot": "epel-8-x86_64",
+    },
+    "ol8": {
+        "compose": "Oracle-Linux-8.6",
+        "distro": "oraclelinux-8.7",
+        "chroot": "epel-8-x86_64",
+    },
+    "al86": {
+        "compose": "AlmaLinux-OS-8.6",
+        "distro": "AlmaLinux-OS-8.6",
+        "chroot": "epel-8-x86_64",
+    },
+    "al8": {
+        "compose": "AlmaLinux-OS-8.7",
+        "distro": "AlmaLinux-OS-8.7",
+        "chroot": "epel-8-x86_64",
+    },
+    "roc86": {
+        "compose": "Rocky-Linux-8.6",
+        "distro": "rocky-linux-8.6",
+        "chroot": "epel-8-x86_64",
+    },
+    "roc8": {
+        "compose": "Rocky-Linux-8.7",
+        "distro": "rocky-linux-8.7",
         "chroot": "epel-8-x86_64",
     },
 }
