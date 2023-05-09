@@ -39,7 +39,7 @@ COMPOSE_MAPPING = {
     },
     "ol8": {
         "compose": "Oracle-Linux-8.6",
-        "distro": "oraclelinux-8.7",
+        "distro": "oraclelinux-8.6",
         "chroot": "epel-8-x86_64",
     },
     "al86": {
