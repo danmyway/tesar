@@ -98,9 +98,9 @@ pipenv --site-packages shell
 pip install .
 ```
 #### Set up configuration file
-Set up config file with obtained testing farm API key and copr url (https://copr.fedorainfracloud.org) 
+Set up config file with obtained Testing Farm API key and an optional tag that helps with tracking cloud spend.
 ```shell
-touch ~/.config/tesar && printf "[testing-farm]\nAPI_KEY={your testing farm api key}" > ~/.config/tesar
+touch ~/.config/tesar && printf "[testing-farm]\nAPI_KEY={your testing farm api key}\n[cloud-resources-tag]\nCLOUD_RESOURCES_TAG={tag}" > ~/.config/tesar
 ```
 or copy provided file and edit with your favourite editor, e.g.
 ```shell
@@ -111,6 +111,8 @@ Config file template <a name="config-file-template"></a>
 ```
 [testing-farm]
 API_KEY=
+[cloud-resources-tag]
+CLOUD_RESOURCES_TAG=
 ```
 ### Run
 If you installed the script via `pip install .` you should be able to run the script by running `tesar` command.<br>
