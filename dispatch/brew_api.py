@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 import koji
-from dispatcher.__init__ import COMPOSE_MAPPING, get_logging, get_arguments
 
-logger = get_logging()
-args = get_arguments()
+from dispatch.__init__ import COMPOSE_MAPPING, get_arguments, get_logging
 
-session = koji.ClientSession("https://brewhub.engineering.redhat.com/brewhub")
-session.gssapi_login()
+LOGGER = get_logging()
+ARGS = get_arguments()
 
-epel_composes = {
+SESSION = koji.ClientSession("https://brewhub.engineering.redhat.com/brewhub")
+SESSION.gssapi_login()
+
+EPEL_COMPOSES = {
     "rhel-8": [
         COMPOSE_MAPPING.get(i).get("compose")
         for i in COMPOSE_MAPPING
@@ -21,13 +22,13 @@ epel_composes = {
     ],
 }
 
-brewbuild_baseurl = "https://brewweb.engineering.redhat.com/brew/taskinfo?taskID="
+BREWBUILD_BASEURL = "https://brewweb.engineering.redhat.com/brew/taskinfo?taskID="
 
 
 def get_brew_task_and_compose(package, reference):
-    query = session.listBuilds(prefix=package)
-    if args.reference:
-        logger.info(f"Getting brew build info for {package} version/s {reference}.")
+    query = SESSION.listBuilds(prefix=package)
+    if ARGS.reference:
+        LOGGER.info(f"Getting brew build info for {package} version/s {reference}.")
         # Append the list of TaskID's collected from the listBuilds query
         tasks = [
             build_info.get("task_id")
@@ -42,8 +43,8 @@ def get_brew_task_and_compose(package, reference):
             if ref in build_info.get("nvr") and "el6" not in build_info.get("nvr")
         ]
 
-    elif args.task_id:
-        logger.info(f"Getting brew build info for {package} task ID {reference}.")
+    elif ARGS.task_id:
+        LOGGER.info(f"Getting brew build info for {package} task ID {reference}.")
         tasks = reference
         volume_names = [
             build_info.get("volume_name")
@@ -52,12 +53,12 @@ def get_brew_task_and_compose(package, reference):
             if int(task) == build_info.get("task_id")
         ]
 
-    logger.info("Checking for available builds.")
+    LOGGER.info("Checking for available builds.")
     for i in range(len(tasks)):
-        logger.info(
+        LOGGER.info(
             f"Available build task ID {tasks[i]} for {volume_names[i]} assigned."
         )
-        logger.info(f"LINK: {brewbuild_baseurl}{tasks[i]}")
+        LOGGER.info(f"LINK: {BREWBUILD_BASEURL}{tasks[i]}")
 
     return {tasks[i]: volume_names[i] for i in range(len(tasks))}
 
@@ -75,7 +76,7 @@ def get_info(package, reference, composes):
         package, reference
     ).items():
         brew_dict[build_reference] = list(
-            set(compose_selection).intersection(epel_composes.get(volume_name))
+            set(compose_selection).intersection(EPEL_COMPOSES.get(volume_name))
         )
 
     for build_reference in brew_dict:
@@ -86,7 +87,7 @@ def get_info(package, reference, composes):
                 "chroot": None,
                 "distro": None,
             }
-            logger.info(
+            LOGGER.info(
                 f"Assigning build id {build_reference} for testing on {compose} to test batch."
             )
             brew_info_dict["build_id"] = build_reference

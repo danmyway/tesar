@@ -7,21 +7,41 @@ and this project adheres to [Calendar Versioning](https://calver.org).<br>
 
 ## [Unreleased]
 ### Added
+ [2023.06.29]
+- subcommand `test` and `report`
+- `test` keeps the current behavior of dispatching jobs to the Testing Farm Endpoint
+- `report` parses the requests xunit for results at two levels l1: plans, l2: tests
+  - `-l/--level` provides detail for either plans (l1) or tests (l2)
+  - `-w/--wait` waits for the task to finish and reports afterward
+  - tasks can be parsed from multiple sources
+    - default is the `./latest_jobs` file
+    - `-lt/--latest` parses tasks from latest `test` session created at `/tmp/tesar_latest_jobs`
+    - `-f/--file` parses a specified file location, other than the default
+    - `-c/--cmd` parses tasks from passed to the commandline
+    - `-d/--download-logs` downloads log files locally
+
  [2023.02.28]
  - option `-w/--wait` to specify number of seconds to wait for a successful response with default 20 seconds
  - option `-nw/--no-wait` to bypass waiting for response and get the link ASAP
  [2023.02.27]
  - option `-pw/--pool-workaround` to request `baseosci-openstack` pool for the provisioning
 ### Changed
+[2023.06.21]
+- request official non-custom AWS AMIs as targets (applies to Alma, Rocky and Oracle-latest)
+- fixed broken top level plan invocation, when plan ends with `/`
 ### Removed
+[2023.06.21]
+- mapping for CentOS 8.4
+- default `/plans` from the `-p/--plans` argument
+- copr-cli section from config file
 
 ## [2022.11.11]
 ### Added
   - request response watcher
     - check if the artifact url is sending a 200 response code, if not, notify the user after 30 seconds
 ### Changed
-  - `centos-8` and `oraclelinux-8` distro context changed to `centos-8-latest` and `oraclelinux-8.6` respectively 
-    - differentiate better the provisioned machine 
+  - `centos-8` and `oraclelinux-8` distro context changed to `centos-8-latest` and `oraclelinux-8.6` respectively
+    - differentiate better the provisioned machine
 ### Removed
   - Oracle Linux 8.4 disabled as a part of default composes to be tested on
 ## [2022.08.19]
@@ -30,9 +50,9 @@ and this project adheres to [Calendar Versioning](https://calver.org).<br>
 - `--debug` argument and move redundant links to debug
 - `--dry-run` argument to get just the payload printed
 - `--dry-run-cli` argument to get https command with required payload printed
-- pass task ID as a reference to a brew build directly 
+- pass task ID as a reference to a brew build directly
   - fixes heavy dependency on NVR working correctly
-- pass copr build ID directly 
+- pass copr build ID directly
   - fixes heavy dependency on NEVRA working correctly
 - pass multiple build references
   - PR reference (e.g. PR123, pr123)
@@ -124,6 +144,6 @@ Proper versioning and changelog starts with `v2022.08.19`
 #### [2022-04-11]
 `commit 22d39f39c93c95494e1b5984fac9964604fdfea4`
 - Initial commit
-- Basic functionality through changing values in `.env` file 
+- Basic functionality through changing values in `.env` file
   - Pseudo semi-automated solution
   - Test requests were sent automatically through the script though :))

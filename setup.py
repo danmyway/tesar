@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+
 from setuptools import setup
 
 _CUR_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -12,8 +13,8 @@ with open(os.path.join(_CUR_DIR, "README.md"), "r", encoding="utf-8") as f:
 setup(
     name="tesar",
     version="2022.11.11",
-    packages=["dispatcher"],
-    install_requires=["envparse", "requests", "copr", "koji"],
+    packages=["dispatch", "report"],
+    install_requires=["envparse", "requests", "copr", "koji", "prettytable", "lxml"],
     url="https://gitlab.cee.redhat.com/ddiblik/tesar",
     license="",
     author="Daniel Diblik",
@@ -21,6 +22,6 @@ setup(
     description="Testing farm API requests dispatcher.",
     long_description=readme,
     entry_points={
-        "console_scripts": "tesar = dispatcher.__main__:main",
+        "console_scripts": "tesar = tesar.__main__:main",
     },
 )

@@ -1,17 +1,24 @@
 #!/usr/bin/env python3
 
-import sys
 import contextlib
-from dispatcher.__main__ import main
-from dispatcher.__init__ import get_arguments, get_datetime
+import sys
+
+from dispatch.__init__ import get_arguments, get_datetime
+
+ARGS = get_arguments()
 
 
-args = get_arguments()
+if ARGS.action == "test":
+    from dispatch.__main__ import main as dispatch
 
-if args.log:
-    datetime_str = get_datetime()
-    with open(f"./artifactlog_{datetime_str}", "a") as log:
-        with contextlib.redirect_stdout(log):
-            sys.exit(main())
-else:
-    sys.exit(main())
+    if ARGS.log:
+        datetime_str = get_datetime()
+        with open(f"./artifactlog_{datetime_str}", "a") as log:
+            with contextlib.redirect_stdout(log):
+                sys.exit(dispatch())
+    else:
+        sys.exit(dispatch())
+elif ARGS.action == "report":
+    from report.__main__ import main as report
+
+    sys.exit(report())

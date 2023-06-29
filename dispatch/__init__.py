@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
 
 import argparse
+import configparser
+import logging
+import os
 import sys
 from datetime import datetime
-import logging
-import configparser
-import os
 
+LATEST_TASKS_FILE = "/tmp/tesar_latest_jobs"
+DEFAULT_TASKS_FILE = "./report_jobs"
 TESTING_FARM_ENDPOINT = "https://api.dev.testing-farm.io/v0.1/requests"
-
 ARTIFACT_BASE_URL = "http://artifacts.osci.redhat.com/testing-farm"
+
 
 ARTIFACT_MAPPING = {"brew": "redhat-brew-build", "copr": "fedora-copr-build"}
 PACKAGE_MAPPING = {"c2r": "convert2rhel", "leapp": "leapp"}
@@ -23,14 +25,9 @@ COMPOSE_MAPPING = {
         "chroot": "epel-7-x86_64",
     },
     "ol7": {
-        "compose": "Oracle-Linux-7.9",
+        "compose": "OL7.9-x86_64-HVM-2023-01-05",
         "distro": "oraclelinux-7",
         "chroot": "epel-7-x86_64",
-    },
-    "cos84": {
-        "compose": "CentOS-8.4",
-        "distro": "centos-8.4",
-        "chroot": "epel-8-x86_64",
     },
     "cos8": {
         "compose": "CentOS-8-latest",
@@ -38,28 +35,28 @@ COMPOSE_MAPPING = {
         "chroot": "epel-8-x86_64",
     },
     "ol8": {
-        "compose": "Oracle-Linux-8.6",
+        "compose": "OL8.7-x86_64-HVM-2023-03-07",
         "distro": "oraclelinux-8.6",
         "chroot": "epel-8-x86_64",
     },
     "al86": {
-        "compose": "AlmaLinux-OS-8.6",
+        "compose": "AlmaLinux OS 8.6.20220901 x86_64",
         "distro": "AlmaLinux-OS-8.6",
         "chroot": "epel-8-x86_64",
     },
     "al8": {
-        "compose": "AlmaLinux-OS-8.7",
-        "distro": "AlmaLinux-OS-8.7",
+        "compose": "AlmaLinux OS 8.8.20230524 x86_64",
+        "distro": "AlmaLinux-OS-8-latest",
         "chroot": "epel-8-x86_64",
     },
     "roc86": {
-        "compose": "Rocky-Linux-8.6",
+        "compose": "Rocky-8-ec2-8.6-20220515.0.x86_64",
         "distro": "rocky-linux-8.6",
         "chroot": "epel-8-x86_64",
     },
     "roc8": {
-        "compose": "Rocky-Linux-8.7",
-        "distro": "rocky-linux-8.7",
+        "compose": "Rocky-8-EC2-Base-8.8-20230518.0.x86_64",
+        "distro": "rocky-linux-8-latest",
         "chroot": "epel-8-x86_64",
     },
 }
@@ -75,26 +72,42 @@ class FormatText:
     red = "\033[91m"
     bold = "\033[1m"
     end = "\033[0m"
+    bg_red = "\033[41m"
+    bg_green = "\033[42m"
+    bg_yellow = "\033[43m"
+    bg_blue = "\033[44m"
+    bg_magenta = "\033[45m"
+    bg_cyan = "\033[46m"
+    bg_white = "\033[47m"
+    bg_default = "\033[49m"
+    bg_black = "\033[40m"
+    bg_purple = "\033[45m"
 
 
 def get_datetime():
-    datetime_str = datetime.now().strftime("%Y%m%d_%H%M%S")
+    datetime_str = datetime.now().strftime("%Y%m%d%H%M%S")
     return datetime_str
 
 
 def get_config():
     getconfig = configparser.ConfigParser()
     try:
-        if get_arguments().dry_run or get_arguments().dry_run_cli:
+        getconfig.read(os.path.expanduser("~/.config/tesar"))
+        testing_farm_api_key = getconfig.get("testing-farm", "API_KEY")
+        cloud_resources_tag = getconfig.get(
+            "cloud-resources-tag", "CLOUD_RESOURCES_TAG"
+        )
+
+        if get_arguments().action == "test" and (
+            get_arguments().dry_run or get_arguments().dry_run_cli
+        ):
             testing_farm_api_key = "{testing_farm_api_key}"
             cloud_resources_tag = "{cloud_resources_tag}"
-            return testing_farm_api_key, cloud_resources_tag
-        else:
-            getconfig.read(os.path.expanduser("~/.config/tesar"))
-            testing_farm_api_key = getconfig.get("testing-farm", "API_KEY")
-            cloud_resources_tag = getconfig.get("cloud-resources-tag", "CLOUD_RESOURCES_TAG")
 
-            return testing_farm_api_key, cloud_resources_tag
+        return (
+            cloud_resources_tag,
+            testing_farm_api_key,
+        )
     except configparser.NoSectionError as no_config_err:
         get_logging().critical(
             "There is probably no config file in the default path ~/.config/tesar."
@@ -120,24 +133,33 @@ def get_logging():
 
 def get_arguments():
     parser = argparse.ArgumentParser(
-        description="Send requests to testing farm conveniently.",
+        description="Send requests to and get the results back from the Testing Farm conveniently.",
         formatter_class=argparse.RawTextHelpFormatter,
     )
-    parser.add_argument(
+
+    subparsers = parser.add_subparsers(dest="action")
+
+    test = subparsers.add_parser(
+        "test",
+        help="Dispatch a job to the Testing Farm API endpoint.",
+        description="Send requests to the Testing Farm conveniently.",
+    )
+
+    test.add_argument(
         "artifact_type",
         metavar="artifact_type",
         choices=list(ARTIFACT_MAPPING.keys()),
-        help="Choose which type of artefact to test e.g. %(choices)s.",
+        help="Choose which type of artifact to test. Choices: %(choices)s",
     )
 
-    parser.add_argument(
+    test.add_argument(
         "package",
         metavar="package",
         choices=list(PACKAGE_MAPPING.keys()),
-        help="Choose package to test e.g. %(choices)s.",
+        help="Choose package to test. Choices: %(choices)s",
     )
 
-    reference = parser.add_mutually_exclusive_group(required=True)
+    reference = test.add_mutually_exclusive_group(required=True)
 
     reference.add_argument(
         "-ref",
@@ -158,7 +180,7 @@ For brew: Specify the TASK ID for required brew build.
 For copr: Specify the BUILD ID for required copr build.""",
     )
 
-    parser.add_argument(
+    test.add_argument(
         "-g",
         "--git",
         nargs="+",
@@ -167,7 +189,7 @@ For copr: Specify the BUILD ID for required copr build.""",
 Default: '%(default)s'""",
     )
 
-    parser.add_argument(
+    test.add_argument(
         "-gp",
         "--git-path",
         default=".",
@@ -176,25 +198,45 @@ Should be relative to the git repository root provided in the url parameter.
 Default: '%(default)s'""",
     )
 
-    parser.add_argument(
+    test.add_argument(
         "-a",
         "--architecture",
         default="x86_64",
         help="""Choose suitable architecture.\nDefault: '%(default)s'.""",
     )
 
-    parser.add_argument(
+    fmf_reference = test.add_mutually_exclusive_group(required=True)
+
+    fmf_reference.add_argument(
         "-p",
         "--plans",
-        required=True,
         nargs="+",
-        default="/plans/",
         help="""Specify a test plan or multiple plans to request at testing farm.
 To run whole set of tiers use /plans/tier*/
-Default: '%(default)s'""",
+Accepts multiple space separated values, sends as a separate request.""",
     )
 
-    parser.add_argument(
+    fmf_reference.add_argument(
+        "-pf",
+        "--planfilter",
+        nargs="+",
+        help="""Filter plans.
+The specified plan filter will be used in tmt plan ls --filter <YOUR-FILTER> command.
+By default enabled: true filter is applied.
+Accepts multiple space separated values, sends as a separate request.
+""",
+    )
+
+    fmf_reference.add_argument(
+        "-tf",
+        "--testfilter",
+        nargs="+",
+        help="""Filter tests.
+The specified plan filter will be used in tmt run discover plan test --filter <YOUR-FILTER> command.
+Accepts multiple space separated values, sends as a separate request.""",
+    )
+
+    test.add_argument(
         "-c",
         "--compose",
         nargs="+",
@@ -203,14 +245,14 @@ Default: '%(default)s'""",
         help="""Choose composes to run tests on.\nDefault: '%(default)s'.""",
     )
 
-    parser.add_argument(
+    test.add_argument(
         "-pw",
         "--pool-workaround",
         action="store_true",
         help="""Workarounds the AWS spot instances release.""",
     )
 
-    parser.add_argument(
+    test.add_argument(
         "-w",
         "--wait",
         type=int,
@@ -218,7 +260,7 @@ Default: '%(default)s'""",
         help="""Provide number of seconds to wait for successful response.\nDefault: %(default)s seconds.""",
     )
 
-    parser.add_argument(
+    test.add_argument(
         "-nw",
         "--no-wait",
         action="store_true",
@@ -226,7 +268,7 @@ Default: '%(default)s'""",
     )
 
     # TODO tesar file path
-    # parser.add_argument(
+    # test.add_argument(
     #     "-cfg",
     #     "--config_file",
     #     default=os.path.expanduser('~/.config/tesar'),
@@ -234,29 +276,76 @@ Default: '%(default)s'""",
     #     Default: '%(default)s'.""",
     # )
 
-    parser.add_argument(
+    test.add_argument(
         "-l",
         "--log",
         action="store_true",
         help="Log test links or dry run output to a file.",
     )
 
-    parser.add_argument(
+    test.add_argument(
         "--dry-run",
         action="store_true",
         help="Print out just the payload that would be sent to the testing farm.\nDo not actually send any request.",
     )
 
-    parser.add_argument(
+    test.add_argument(
         "--dry-run-cli",
         action="store_true",
         help="Print out https shell command with requested payload.\nDo not actually send any request.",
     )
 
-    parser.add_argument(
+    test.add_argument(
         "--debug",
         action="store_true",
         help="Print out additional information for each request.",
+    )
+
+    report = subparsers.add_parser(
+        "report",
+        help="Report results for requested tasks.",
+        description="Parses task IDs, Testing Farm artifact URLs or Testing Farm API request URLs from multiple sources.",
+    )
+
+    report.add_argument(
+        "-l",
+        "--level",
+        choices=["l1", "l2"],
+        default="l1",
+        help="""Specify the level of detail. Choose 'l1' for plans view or 'l2' for tests view""",
+    )
+    report.add_argument(
+        "-w",
+        "--wait",
+        action="store_true",
+        help="Wait for the job to complete. Print the table afterwards",
+    )
+    report.add_argument(
+        "-d",
+        "--download-logs",
+        action="store_true",
+        help="""Download logs for requested run(s).""",
+    )
+    tasks_source = report.add_mutually_exclusive_group()
+    tasks_source.add_argument(
+        "-lt",
+        "--latest",
+        action="store_true",
+        help=f"""{FormatText.bold}Mutually exclusive with respect to --file and --cmd.{FormatText.end}
+        Report latest jobs from {LATEST_TASKS_FILE}.""",
+    )
+    tasks_source.add_argument(
+        "-f",
+        "--file",
+        help=f"""{FormatText.bold}Mutually exclusive with respect to --latest and --cmd.{FormatText.end}
+        Specify a different location than the default {DEFAULT_TASKS_FILE} of the file containing request_id's, artifact URLs or request URLs.""",
+    )
+    tasks_source.add_argument(
+        "-c",
+        "--cmd",
+        nargs="+",
+        help=f"""{FormatText.bold}Mutually exclusive with respect to --file and --latest.{FormatText.end}
+        Parse request_ids, artifact URLs or request URLs from the command line.""",
     )
 
     args = parser.parse_args()

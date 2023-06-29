@@ -1,16 +1,14 @@
 #!/usr/bin/env python3
+import sys
+from datetime import datetime
 
 from copr.v3 import BuildProxy
-from dispatcher.__init__ import (
-    COMPOSE_MAPPING,
-    COPR_CONFIG,
-    get_logging,
-    get_arguments,
-)
 
-session = BuildProxy(COPR_CONFIG)
-logger = get_logging()
-args = get_arguments()
+from dispatch.__init__ import COMPOSE_MAPPING, COPR_CONFIG, get_arguments, get_logging
+
+SESSION = BuildProxy(COPR_CONFIG)
+LOGGER = get_logging()
+ARGS = get_arguments()
 
 
 def get_info(package, reference, composes):
@@ -19,18 +17,18 @@ def get_info(package, reference, composes):
     build_reference = None
     pr_baseurl = f"https://github.com/oamg/{package}/pull/"
 
-    if args.reference:
-        query = session.get_list(owner, package)
+    if ARGS.reference:
+        query = SESSION.get_list(owner, package)
         for build_reference in reference:
             if build_reference == "master" or build_reference == "main":
-                logger.info(
+                LOGGER.info(
                     f"Getting copr build info for referenced {build_reference}."
                 )
             else:
-                logger.info(
+                LOGGER.info(
                     f"Getting copr build info for referenced {str.upper(build_reference)}."
                 )
-                logger.info(f"LINK: {pr_baseurl}{build_reference[2:]}")
+                LOGGER.info(f"LINK: {pr_baseurl}{build_reference[2:]}")
 
             for build in query:
                 # Get build with pull request number
@@ -44,10 +42,10 @@ def get_info(package, reference, composes):
                     info.append(build_info)
                 break
 
-    elif args.task_id:
+    elif ARGS.task_id:
         for build_reference in reference:
-            logger.info(f"Getting copr build info for referenced ID {build_reference}.")
-            build = session.get(build_reference)
+            LOGGER.info(f"Getting copr build info for referenced ID {build_reference}.")
+            build = SESSION.get(build_reference)
             for build_info in get_build_dictionary(build, package, composes):
                 info.append(build_info)
 
@@ -60,20 +58,21 @@ def get_build_dictionary(build, package, composes):
     # In case of a race condition occurs and referenced build is in a running state,
     # thus uninstallable, raise a warning
     if build.state == "running":
-        logger.warning(
+        LOGGER.warning(
             f"There is currently {build.state} build task, consider waiting for completion."
         )
-        logger.info(f"{build_baseurl[:-1]}" + "s/")
-    logger.info(
+        LOGGER.info(f"{build_baseurl[:-1]}" + "s/")
+    LOGGER.info(
         "Getting build ID for %s version %s.",
         build.projectname,
         build.source_package["version"],
     )
-    build_time = build.source_package["version"].split(".")[2]
-    logger.info(
-        f"Built at {build_time[0:4]}-{build_time[4:6]}-{build_time[6:8]} {build_time[8:10]}:{build_time[10:12]}"
-    )
-    logger.info(f"LINK: {build_baseurl}{build.id}")
+    timestamp_str = build.source_package["version"].split(".")[3]
+    timestamp_format = "%Y%m%d%H%M%S"
+    build_time = datetime.strptime(timestamp_str[0:13], timestamp_format)
+
+    LOGGER.info(f"Built at {build_time}")
+    LOGGER.info(f"LINK: {build_baseurl}{build.id}")
 
     for distro in composes:
         copr_info_dict = {
@@ -88,7 +87,7 @@ def get_build_dictionary(build, package, composes):
             if COMPOSE_MAPPING.get(distro).get("chroot") == chroot:
                 copr_info_dict["chroot"] = COMPOSE_MAPPING.get(distro).get("chroot")
                 copr_info_dict["build_id"] = f"{build.id}:{chroot}"
-                logger.info(
+                LOGGER.info(
                     f"Assigning copr build id {build.id} for testing on {copr_info_dict['compose']} to test batch."
                 )
 
