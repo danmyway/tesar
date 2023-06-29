@@ -14,11 +14,44 @@ ARTIFACT_BASE_URL = "http://artifacts.osci.redhat.com/testing-farm"
 
 
 ARTIFACT_MAPPING = {"brew": "redhat-brew-build", "copr": "fedora-copr-build"}
-PACKAGE_MAPPING = {"c2r": "convert2rhel", "leapp": "leapp"}
+PACKAGE_MAPPING = {"c2r": "convert2rhel", "lp": "leapp", "lpr": "leapp-repository"}
 
 COPR_CONFIG = {"copr_url": "https://copr.fedorainfracloud.org"}
 
-COMPOSE_MAPPING = {
+LP_COMPOSE_MAPPING = {
+    "79to84": {
+        "compose": "RHEL-7.9-ZStream",
+        "distro": "rhel-7.9",
+        "chroot": "epel-7-x86_64",
+    },
+    "79to86": {
+        "compose": "RHEL-7.9-ZStream",
+        "distro": "rhel-7.9",
+        "chroot": "epel-7-x86_64",
+    },
+    "79to88": {
+        "compose": "RHEL-7.9-ZStream",
+        "distro": "rhel-7.9",
+        "chroot": "epel-7-x86_64",
+    },
+    "86to90": {
+        "compose": "RHEL-8.6.0-Nightly",
+        "distro": "rhel-8.6",
+        "chroot": "epel-8-x86_64",
+    },
+    "87to90": {
+        "compose": "RHEL-8.7.0-Nightly",
+        "distro": "rhel-8.7",
+        "chroot": "epel-8-x86_64",
+    },
+    "88to92": {
+        "compose": "RHEL-8.8.0-Nightly",
+        "distro": "rhel-8.8",
+        "chroot": "epel-8-x86_64",
+    },
+}
+
+C2R_COMPOSE_MAPPING = {
     "cos7": {
         "compose": "CentOS-7-latest",
         "distro": "centos-7",
@@ -237,12 +270,10 @@ Accepts multiple space separated values, sends as a separate request.""",
     )
 
     test.add_argument(
-        "-c",
-        "--compose",
+        "-t",
+        "--target",
         nargs="+",
-        default=list(COMPOSE_MAPPING.keys()),
-        choices=list(COMPOSE_MAPPING.keys()),
-        help="""Choose composes to run tests on.\nDefault: '%(default)s'.""",
+        help="""Choose targeted test run. For c2r targeted OS, for leapp targeted upgrade path.""",
     )
 
     test.add_argument(
@@ -367,3 +398,11 @@ Accepts multiple space separated values, sends as a separate request.""",
 
     args = parser.parse_args()
     return args
+
+
+ARGS = get_arguments()
+
+if ARGS.package == "c2r":
+    COMPOSE_MAPPING = C2R_COMPOSE_MAPPING
+else:
+    COMPOSE_MAPPING = LP_COMPOSE_MAPPING
