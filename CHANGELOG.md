@@ -7,7 +7,14 @@ and this project adheres to [Calendar Versioning](https://calver.org).<br>
 
 ## [Unreleased]
 ### Added
- [2023.06.29]
+
+### Changed
+
+### Removed
+
+
+## [2023.06.29]
+### Added
 - subcommand `test` and `report`
 - `test` keeps the current behavior of dispatching jobs to the Testing Farm Endpoint
 - `report` parses the requests xunit for results at two levels l1: plans, l2: tests
@@ -19,18 +26,13 @@ and this project adheres to [Calendar Versioning](https://calver.org).<br>
     - `-f/--file` parses a specified file location, other than the default
     - `-c/--cmd` parses tasks from passed to the commandline
     - `-d/--download-logs` downloads log files locally
-
- [2023.02.28]
  - option `-w/--wait` to specify number of seconds to wait for a successful response with default 20 seconds
  - option `-nw/--no-wait` to bypass waiting for response and get the link ASAP
- [2023.02.27]
  - option `-pw/--pool-workaround` to request `baseosci-openstack` pool for the provisioning
 ### Changed
-[2023.06.21]
 - request official non-custom AWS AMIs as targets (applies to Alma, Rocky and Oracle-latest)
 - fixed broken top level plan invocation, when plan ends with `/`
 ### Removed
-[2023.06.21]
 - mapping for CentOS 8.4
 - default `/plans` from the `-p/--plans` argument
 - copr-cli section from config file
