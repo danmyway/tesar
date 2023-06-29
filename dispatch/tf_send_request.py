@@ -43,6 +43,8 @@ def submit_test(
     architecture,
     compose,
     pool,
+    source_release,
+    target_release,
     artifact_id,
     artifact_type,
     package,
@@ -71,6 +73,10 @@ def submit_test(
                 "arch": architecture,
                 "os": {"compose": compose},
                 "pool": pool,
+                "variables": {
+                    "SOURCE_RELEASE": source_release,
+                    "TARGET_RELEASE": target_release,
+                },
                 "artifacts": [
                     {
                         "id": artifact_id,

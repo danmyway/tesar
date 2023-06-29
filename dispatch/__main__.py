@@ -19,10 +19,22 @@ ARGS = get_arguments()
 
 
 def main():
-
+    copr_package = PACKAGE_MAPPING[ARGS.package]
+    if ARGS.package == "c2r":
+        repository = PACKAGE_MAPPING.get(ARGS.package)
+        source_release = ""
+        target_release = ""
+    else:
+        release_vars = ARGS.target
+        repository = "leapp-tests"
+        copr_package = "leapp"
+        # source_release_raw = str(release_vars.split("to")[0])
+        # target_release_raw = str(release_vars.split("to")[1])
+        # source_release = f"{source_release_raw[0]}.{source_release_raw[1]}"
+        # target_release = f"{target_release_raw[0]}.{target_release_raw[1]}"
     try:
         repo_base_url = "https://{}.com/{}/{}".format(
-            ARGS.git[0], ARGS.git[1], PACKAGE_MAPPING.get(ARGS.package)
+            ARGS.git[0], ARGS.git[1], repository
         )
         git_response = requests.get(repo_base_url)
         if (
@@ -117,13 +129,13 @@ def main():
             planfilter = ""
             testfilter = item
 
-        if ARGS.compose:
+        if ARGS.target:
             info, build_reference = artifact_module.get_info(
-                PACKAGE_MAPPING[ARGS.package], reference, ARGS.compose
+                copr_package, reference, ARGS.target
             )
         else:
             info, build_reference = artifact_module.get_info(
-                PACKAGE_MAPPING[ARGS.package],
+                copr_package,
                 reference,
                 COMPOSE_MAPPING.keys(),
             )
@@ -147,6 +159,8 @@ def main():
                 ARGS.architecture,
                 build["compose"],
                 pool,
+                source_release,
+                target_release,
                 str(build["build_id"]),
                 ARTIFACT_MAPPING[ARGS.artifact_type],
                 PACKAGE_MAPPING[ARGS.package],

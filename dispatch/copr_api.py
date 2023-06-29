@@ -93,4 +93,7 @@ def get_build_dictionary(build, package, composes):
 
                 build_info.append(copr_info_dict)
 
+    print(build_info)
+    sys.exit()
+
     return build_info
