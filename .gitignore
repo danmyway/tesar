@@ -2,3 +2,4 @@
 .idea/
 Pipfile*
 */__pycache__/
+/*.egg-info/
