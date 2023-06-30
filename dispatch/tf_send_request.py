@@ -181,10 +181,17 @@ def submit_test(
 
     print_payload_dryrun_msg = f"\nDRY RUN | Printing out requested payload:"
 
+    payload_formatted = json.dumps(payload_raw, indent=4)
+    from pygments import highlight, lexers, formatters
+
+    colorful_json = highlight(
+        payload_formatted, lexers.JsonLexer(), formatters.TerminalFormatter()
+    )
+
     try:
         if ARGS.dry_run:
             print(print_payload_dryrun_msg)
-            pprint(payload_raw)
+            print(colorful_json)
         elif ARGS.dry_run_cli:
             print(print_payload_cli)
         elif ARGS.debug:
@@ -195,8 +202,9 @@ def submit_test(
         else:
             _response_watcher(print_test_results)
 
-        latest_jobs_file.write(f"{task_id}\n")
-        latest_jobs_archive.write(f"{task_id}\n")
+        if not (ARGS.dry_run or ARGS.dry_run_cli):
+            latest_jobs_file.write(f"{task_id}\n")
+            latest_jobs_archive.write(f"{task_id}\n")
 
     except KeyError:
         print(print_key_error)

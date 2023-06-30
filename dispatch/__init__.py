@@ -14,7 +14,7 @@ ARTIFACT_BASE_URL = "http://artifacts.osci.redhat.com/testing-farm"
 
 
 ARTIFACT_MAPPING = {"brew": "redhat-brew-build", "copr": "fedora-copr-build"}
-PACKAGE_MAPPING = {"c2r": "convert2rhel", "lp": "leapp", "lpr": "leapp-repository"}
+PACKAGE_MAPPING = {"c2r": "convert2rhel", "leapp-repository": "leapp-repository"}
 
 COPR_CONFIG = {"copr_url": "https://copr.fedorainfracloud.org"}
 
@@ -385,7 +385,7 @@ Accepts multiple space separated values, sends as a separate request.""",
 
 ARGS = get_arguments()
 
-if ARGS.package == "c2r":
+if ARGS.action == "test" and ARGS.package == "c2r":
     COMPOSE_MAPPING = C2R_COMPOSE_MAPPING
-else:
+elif ARGS.action == "test" and ARGS.package == "leapp-repository":
     COMPOSE_MAPPING = LP_COMPOSE_MAPPING
