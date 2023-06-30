@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+import sys
+
 import koji
 
 from dispatch.__init__ import COMPOSE_MAPPING, get_arguments, get_logging
@@ -63,7 +65,7 @@ def get_brew_task_and_compose(package, reference):
     return {tasks[i]: volume_names[i] for i in range(len(tasks))}
 
 
-def get_info(package, reference, composes):
+def get_info(package, repository, reference, composes):
     brew_dict = {}
     info = []
     compose_selection = []
@@ -79,6 +81,7 @@ def get_info(package, reference, composes):
             set(compose_selection).intersection(EPEL_COMPOSES.get(volume_name))
         )
 
+    release_var_iter = 0
     for build_reference in brew_dict:
         for compose in brew_dict[build_reference]:
             brew_info_dict = {
@@ -86,12 +89,22 @@ def get_info(package, reference, composes):
                 "compose": None,
                 "chroot": None,
                 "distro": None,
+                "source_release": None,
+                "target_release": None,
             }
             LOGGER.info(
                 f"Assigning build id {build_reference} for testing on {compose} to test batch."
             )
+            if ARGS.package == "leapp-repository":
+                release_vars = ARGS.target[release_var_iter]
+                source_release_raw = str(release_vars.split("to")[0])
+                target_release_raw = str(release_vars.split("to")[1])
+                source_release = f"{source_release_raw[0]}.{source_release_raw[1]}"
+                target_release = f"{target_release_raw[0]}.{target_release_raw[1]}"
             brew_info_dict["build_id"] = build_reference
             brew_info_dict["compose"] = compose
+            brew_info_dict["source_release"] = source_release
+            brew_info_dict["target_release"] = target_release
             for compose_choice in composes:
                 if COMPOSE_MAPPING.get(compose_choice).get("compose") == compose:
                     brew_info_dict["chroot"] = COMPOSE_MAPPING.get(compose_choice).get(

@@ -19,22 +19,18 @@ ARGS = get_arguments()
 
 
 def main():
+    copr_repo = PACKAGE_MAPPING[ARGS.package]
     copr_package = PACKAGE_MAPPING[ARGS.package]
-    if ARGS.package == "c2r":
-        repository = PACKAGE_MAPPING.get(ARGS.package)
-        source_release = ""
-        target_release = ""
-    else:
-        release_vars = ARGS.target
-        repository = "leapp-tests"
-        copr_package = "leapp"
-        # source_release_raw = str(release_vars.split("to")[0])
-        # target_release_raw = str(release_vars.split("to")[1])
-        # source_release = f"{source_release_raw[0]}.{source_release_raw[1]}"
-        # target_release = f"{target_release_raw[0]}.{target_release_raw[1]}"
+    git_repo = PACKAGE_MAPPING.get(ARGS.package)
+    source_release = ""
+    target_release = ""
+    if ARGS.package == "leapp-repository":
+        git_repo = "leapp-tests"
+        copr_repo = "leapp"
+
     try:
         repo_base_url = "https://{}.com/{}/{}".format(
-            ARGS.git[0], ARGS.git[1], repository
+            ARGS.git[0], ARGS.git[1], git_repo
         )
         git_response = requests.get(repo_base_url)
         if (
@@ -57,18 +53,6 @@ def main():
                 "Values for git option should be passed in order {repo_base owner branch}"
             )
             sys.exit(99)
-        elif ARGS.git[0] == "gitlab.cee.redhat":
-            LOGGER.warning(f"Is the repository url/name correct?\n{repo_base_url}")
-            repo_name = input(
-                "If that is your required repository pres ENTER, otherwise pass the correct name: "
-            )
-            if repo_name == "":
-                LOGGER.info(f"Continuing with selected repository: {repo_base_url}")
-            else:
-                repo_base_url = "https://{}.com/{}/{}".format(
-                    ARGS.git[0], ARGS.git[1], repo_name
-                )
-                LOGGER.info(f"Continuing with selected repository: {repo_base_url}")
 
     except IndexError as index_err:
         LOGGER.critical(
@@ -131,16 +115,18 @@ def main():
 
         if ARGS.target:
             info, build_reference = artifact_module.get_info(
-                copr_package, reference, ARGS.target
+                copr_package, copr_repo, reference, ARGS.target
             )
         else:
             info, build_reference = artifact_module.get_info(
                 copr_package,
+                copr_repo,
                 reference,
                 COMPOSE_MAPPING.keys(),
             )
 
         for build in info:
+
             if not (ARGS.dry_run or ARGS.dry_run_cli):
                 LOGGER.info(
                     f"Sending test plan "
@@ -159,8 +145,8 @@ def main():
                 ARGS.architecture,
                 build["compose"],
                 pool,
-                source_release,
-                target_release,
+                build["source_release"],
+                build["target_release"],
                 str(build["build_id"]),
                 ARTIFACT_MAPPING[ARGS.artifact_type],
                 PACKAGE_MAPPING[ARGS.package],
