@@ -11,7 +11,17 @@ and this project adheres to [Calendar Versioning](https://calver.org).<br>
 ### Changed
 
 ### Removed
+### [2023.07.12]
+### Added
+- `-s/--short` display short test and plan names
+- `-stn/--split-testname` specify index from which the test name will be shortened
+- `-spn/--split-planname` specify index from which the plan name will be shortened
 
+### Changed
+- `-l/--level` changed to `-l2/--level2` switch since the level1 (plan) view is default
+
+### Removed
+- `-l/--level` argument to choose between level1 (plan) view and level2 (test) view
 
 ## [2023.06.29]
 ### Added

@@ -203,19 +203,22 @@ In case you want to get the log files stored locally, use `-d/--download-logs`. 
 
 ```shell
 ❯ tesar report --help
-usage: tesar report [-h] [-l {l1,l2}] [-w] [-d] [-lt | -f FILE | -c CMD [CMD ...]]
+usage: tesar report [-h] [-l2] [--short] [-stn SPLIT_TESTNAME] [-spn SPLIT_PLANNAME] [-w] [-d] [-lt | -f FILE | -c CMD [CMD ...]]
 
 Parses task IDs, Testing Farm artifact URLs or Testing Farm API request URLs from multiple sources.
 
 options:
   -h, --help            show this help message and exit
-  -l {l1,l2}, --level {l1,l2}
-                        Specify the level of detail. Choose 'l1' for plans view or 'l2' for tests view
+  -l2, --level2         Display test view detail. By default the report shows only plan view.
+  --short               Display short test and plan names.
+  -stn SPLIT_TESTNAME, --split-testname SPLIT_TESTNAME
+                        Specify an index from which will the test name be shown. Passed to testname.split('/')[index:]
+  -spn SPLIT_PLANNAME, --split-planname SPLIT_PLANNAME
+                        Specify an index from which will the plan name be shown. Passed to planname.split('/')[index:]
   -w, --wait            Wait for the job to complete. Print the table afterwards
   -d, --download-logs   Download logs for requested run(s).
   -lt, --latest         Mutually exclusive with respect to --file and --cmd. Report latest jobs from /tmp/tesar_latest_jobs.
-  -f FILE, --file FILE  Mutually exclusive with respect to --latest and --cmd. Specify a different location than the default ./report_jobs of the file containing
-                        request_ids, artifact URLs or request URLs.
+  -f FILE, --file FILE  Mutually exclusive with respect to --latest and --cmd. Specify a different location than the default ./report_jobs of the file containing request_id's, artifact URLs or request URLs.
   -c CMD [CMD ...], --cmd CMD [CMD ...]
                         Mutually exclusive with respect to --file and --latest. Parse request_ids, artifact URLs or request URLs from the command line.
 ```
@@ -245,10 +248,13 @@ $ tesar report
 $ tesar report --latest
 
 # Report from custom file on the test level
-$ tesar report --level l2 --file /home/username/my_jobs_file
+$ tesar report --level2 --file /home/username/my_jobs_file
 
 # Pass requests' references to the commandline
 $ tesar report --cmd d60ee5ab-194f-442d-9e37-933be1daf2ce https://api.endpoint/requests/9f42645f-bcaa-4c73-87e2-6e1efef16635
+
+# Shorten the displayed test and plan names
+$ tesar report --level2 --cmd 9f42645f-bcaa-4c73-87e2-6e1efef16635 /home/username/my_jobs_file --short
 
 ```
 

@@ -308,11 +308,28 @@ Accepts multiple space separated values, sends as a separate request.""",
     )
 
     report.add_argument(
-        "-l",
-        "--level",
-        choices=["l1", "l2"],
-        default="l1",
-        help="""Specify the level of detail. Choose 'l1' for plans view or 'l2' for tests view""",
+        "-l2",
+        "--level2",
+        action="store_true",
+        help="""Display test view detail. By default the report shows only plan view.""",
+    )
+    report.add_argument(
+        "-s",
+        "--short",
+        action="store_true",
+        help="Display short test and plan names.",
+    )
+    report.add_argument(
+        "-stn",
+        "--split-testname",
+        type=int,
+        help="""Specify an index from which will the test name be shown. Passed to testname.split('/')[index:]""",
+    )
+    report.add_argument(
+        "-spn",
+        "--split-planname",
+        type=int,
+        help="""Specify an index from which will the plan name be shown. Passed to planname.split('/')[index:]""",
     )
     report.add_argument(
         "-w",

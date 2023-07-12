@@ -182,15 +182,6 @@ Skipping to next request."""
             testsuite_result = elem.xpath("./@result")[0].upper()
             testsuite_test_count = elem.xpath("./@tests")
             testsuite_log_dir = testsuite_name.split("/")[-1]
-            if testsuite_result == "PASSED":
-                testsuite_result = FormatText.green + testsuite_result + FormatText.end
-                testsuite_name = FormatText.green + testsuite_name + FormatText.end
-            elif testsuite_result == "FAILED":
-                testsuite_result = FormatText.red + testsuite_result + FormatText.end
-                testsuite_name = FormatText.red + testsuite_name + FormatText.end
-            elif testsuite_result == "ERROR":
-                testsuite_result = FormatText.yellow + testsuite_result + FormatText.end
-                testsuite_name = FormatText.yellow + testsuite_name + FormatText.end
 
             testsuite_data = {
                 "testsuite_name": testsuite_name,
@@ -211,23 +202,6 @@ Skipping to next request."""
                     0
                 ]
                 log_name = f"{request_target}_{testcase_name.split('/')[-1]}.log"
-
-                # print(testcase_log_url_fail)
-                # sys.exit()
-
-                if testcase_result == "PASSED":
-                    testcase_result = (
-                        FormatText.green + testcase_result + FormatText.end
-                    )
-                    testcase_name = FormatText.green + testcase_name + FormatText.end
-                elif testcase_result == "FAILED":
-                    testcase_result = FormatText.red + testcase_result + FormatText.end
-                    testcase_name = FormatText.red + testcase_name + FormatText.end
-                elif testcase_result == "ERROR":
-                    testcase_result = (
-                        FormatText.yellow + testcase_result + FormatText.end
-                    )
-                    testcase_name = FormatText.yellow + testcase_name + FormatText.end
 
                 # Constructing the parsed dictionary
                 testcase_data = {
@@ -255,24 +229,22 @@ def build_table():
 
     result_table = PrettyTable()
 
-    if ARGS.level.lower() == "l1":
-        result_table.field_names = ["UUID", "Target", "Test Plan", "Result"]
-        for task_uuid, data in parsed_dict.items():
-            target = data["target_name"]
-            result_table.add_row(
-                [
-                    task_uuid,
-                    target,
-                    "",
-                    "",
-                ]
-            )
-            for testsuite_data in data["testsuites"]:
-                testsuite_name = testsuite_data["testsuite_name"]
-                testsuite_result = testsuite_data["testsuite_result"]
-                result_table.add_row(["", "", testsuite_name, testsuite_result])
+    color_format_default = FormatText.end
 
-    elif ARGS.level.lower() == "l2":
+    planname_split_index = 0
+    testname_split_index = 0
+
+    if ARGS.short:
+        planname_split_index = -1
+        testname_split_index = -1
+
+    if ARGS.split_testname:
+        testname_split_index = ARGS.split_testname
+
+    if ARGS.split_planname:
+        planname_split_index = ARGS.split_planname
+
+    if ARGS.level2:
         result_table.field_names = [
             "UUID",
             "Target",
@@ -283,27 +255,82 @@ def build_table():
         for task_uuid, data in parsed_dict.items():
             target = data["target_name"]
             result_table.add_row([task_uuid, target, "", "", ""])
+
             for testsuite_data in data["testsuites"]:
-                testsuite_name = testsuite_data["testsuite_name"]
+                testsuite_name_raw = testsuite_data["testsuite_name"].split("/")
+                testsuite_name_raw.remove("")
+                testsuite_name = "/".join(testsuite_name_raw[planname_split_index:])
                 testsuite_result = testsuite_data["testsuite_result"]
-                result_table.add_row(["", "", testsuite_name, "", testsuite_result])
+                testsuite_color_format = get_color_format(testsuite_result)
+                result_table.add_row(
+                    [
+                        "",
+                        "",
+                        testsuite_color_format + testsuite_name + color_format_default,
+                        "",
+                        testsuite_color_format
+                        + testsuite_result
+                        + color_format_default,
+                    ]
+                )
+
                 testcases = testsuite_data["testcases"]
                 for testcase in testcases:
-                    testcase_name = testcase["testcase_name"]
+                    testcase_name_raw = testcase["testcase_name"].split("/")
+                    testcase_name_raw.remove("")
+                    testcase_name = "/".join(testcase_name_raw[testname_split_index:])
                     testcase_result = testcase["testcase_result"]
+                    testcase_color_format = get_color_format(testcase_result)
                     result_table.add_row(
                         [
                             "",
                             "",
                             "",
-                            testcase_name,
-                            testcase_result,
+                            testcase_color_format
+                            + testcase_name
+                            + color_format_default,
+                            testcase_color_format
+                            + testcase_result
+                            + color_format_default,
                         ]
                     )
+    else:
+        result_table.field_names = ["UUID", "Target", "Test Plan", "Result"]
+        for task_uuid, data in parsed_dict.items():
+            target = data["target_name"]
+            result_table.add_row([task_uuid, target, "", ""])
+
+            for testsuite_data in data["testsuites"]:
+                testsuite_name_raw = testsuite_data["testsuite_name"].split("/")
+                testsuite_name_raw.remove("")
+                testsuite_name = "/".join(testsuite_name_raw[planname_split_index:])
+                testsuite_result = testsuite_data["testsuite_result"]
+                testsuite_color_format = get_color_format(testsuite_result)
+                result_table.add_row(
+                    [
+                        "",
+                        "",
+                        testsuite_color_format + testsuite_name + color_format_default,
+                        testsuite_color_format
+                        + testsuite_result
+                        + color_format_default,
+                    ]
+                )
 
     result_table.align = "l"
 
     return result_table
+
+
+def get_color_format(result):
+    color_format_default = FormatText.end
+    if result == "PASSED":
+        return FormatText.green
+    elif result == "FAILED":
+        return FormatText.red
+    elif result == "ERROR":
+        return FormatText.yellow
+    return color_format_default
 
 
 def main(result_table=None):
