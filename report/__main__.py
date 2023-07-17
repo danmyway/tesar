@@ -134,7 +134,8 @@ def parse_request_xunit(request_url_list=None, tasks_source=None):
                     flush=True,
                 )
                 index = (index + 1) % len(loading_chars)
-                time.sleep(0.2)
+                time.sleep(30)
+                request = requests.get(url)
             else:
                 print("Job finished!")
         else:
