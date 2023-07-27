@@ -164,7 +164,7 @@ def get_logging():
     return logger
 
 
-def get_arguments():
+def get_arguments(args=sys.argv[1:]):
     parser = argparse.ArgumentParser(
         description="Send requests to and get the results back from the Testing Farm conveniently.",
         formatter_class=argparse.RawTextHelpFormatter,
@@ -391,12 +391,12 @@ Accepts multiple space separated values, sends as a separate request.""",
     tasks_source.add_argument(
         "-c",
         "--cmd",
-        nargs="+",
+        action="append",
         help=f"""{FormatText.bold}Mutually exclusive with respect to --file and --latest.{FormatText.end}
         Parse request_ids, artifact URLs or request URLs from the command line.""",
     )
 
-    args = parser.parse_args()
+    args = parser.parse_args(args=args)
     return args
 
 
