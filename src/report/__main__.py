@@ -279,7 +279,9 @@ def build_table():
     result_table = PrettyTable()
     # prepare field names
     fields = []
-    fields += ["UUID", "Target"]
+    if not ARGS.stats:
+        fields += ["UUID"]
+    fields += ["Target"]
     if ARGS.showarch:
         fields += ["Arch"]
     fields += ["Test Plan"]

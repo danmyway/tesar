@@ -284,6 +284,11 @@ Accepts multiple space separated values, sends as a separate request.""",
         help="""Specify an index from which will the plan name be shown. Passed to planname.split('/')[index:]""",
     )
     report.add_argument(
+        '--stats',
+        action='store_true',
+        help='Provide statistics how many times the same test plan and the same tests passed, failed or errored out.',
+    )
+    report.add_argument(
         "-w",
         "--wait",
         action="store_true",
