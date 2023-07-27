@@ -229,6 +229,13 @@ def build_table():
     parsed_dict = parse_request_xunit()
 
     result_table = PrettyTable()
+    # prepare field names
+    fields = []
+    fields += ["UUID", "Target", "Test Plan"]
+    if ARGS.level2:
+        fields += ["Test Case"]
+    fields += ["Result"]
+    result_table.field_names = fields
 
     color_format_default = FormatText.end
 
@@ -245,78 +252,37 @@ def build_table():
     if ARGS.split_planname:
         planname_split_index = ARGS.split_planname
 
-    if ARGS.level2:
-        result_table.field_names = [
-            "UUID",
-            "Target",
-            "Test Plan",
-            "Test Case",
-            "Result",
-        ]
-        for task_uuid, data in parsed_dict.items():
-            target = data["target_name"]
-            result_table.add_row([task_uuid, target, "", "", ""])
 
-            for testsuite_data in data["testsuites"]:
-                testsuite_name_raw = testsuite_data["testsuite_name"].split("/")
-                testsuite_name_raw.remove("")
-                testsuite_name = "/".join(testsuite_name_raw[planname_split_index:])
-                testsuite_result = testsuite_data["testsuite_result"]
-                testsuite_color_format = get_color_format(testsuite_result)
-                result_table.add_row(
-                    [
-                        "",
-                        "",
-                        testsuite_color_format + testsuite_name + color_format_default,
-                        "",
-                        testsuite_color_format
-                        + testsuite_result
-                        + color_format_default,
-                    ]
-                )
+    def _gen_row(uuid="", target="", testplan="", testcase="", result=""):
+        if 'UUID' in fields:
+            yield uuid
+        if 'Target' in fields:
+            yield target
+        if 'Test Plan' in fields:
+            yield testplan
+        if 'Test Case' in fields:
+            yield testcase
+        if 'Result' in fields:
+            yield result
 
-                testcases = testsuite_data["testcases"]
-                for testcase in testcases:
+    def add_row(*args, **kwargs):
+        result_table.add_row(tuple(_gen_row(*args, **kwargs)))
+
+    for task_uuid, data in parsed_dict.items():
+        add_row(task_uuid, data["target_name"])
+        for testsuite_data in data["testsuites"]:
+            testsuite_name_raw = testsuite_data["testsuite_name"].split("/")
+            testsuite_name_raw.remove("")
+            testsuite_name = "/".join(testsuite_name_raw[planname_split_index:])
+            testsuite_result = testsuite_data["testsuite_result"]
+            add_row(testplan=colorize(testsuite_result, testsuite_name), result=colorize(testsuite_result))
+            if 'Test Case' in fields:
+                for testcase in testsuite_data["testcases"]:
                     testcase_name_raw = testcase["testcase_name"].split("/")
                     testcase_name_raw.remove("")
                     testcase_name = "/".join(testcase_name_raw[testname_split_index:])
                     testcase_result = testcase["testcase_result"]
-                    testcase_color_format = get_color_format(testcase_result)
-                    result_table.add_row(
-                        [
-                            "",
-                            "",
-                            "",
-                            testcase_color_format
-                            + testcase_name
-                            + color_format_default,
-                            testcase_color_format
-                            + testcase_result
-                            + color_format_default,
-                        ]
-                    )
-    else:
-        result_table.field_names = ["UUID", "Target", "Test Plan", "Result"]
-        for task_uuid, data in parsed_dict.items():
-            target = data["target_name"]
-            result_table.add_row([task_uuid, target, "", ""])
-
-            for testsuite_data in data["testsuites"]:
-                testsuite_name_raw = testsuite_data["testsuite_name"].split("/")
-                testsuite_name_raw.remove("")
-                testsuite_name = "/".join(testsuite_name_raw[planname_split_index:])
-                testsuite_result = testsuite_data["testsuite_result"]
-                testsuite_color_format = get_color_format(testsuite_result)
-                result_table.add_row(
-                    [
-                        "",
-                        "",
-                        testsuite_color_format + testsuite_name + color_format_default,
-                        testsuite_color_format
-                        + testsuite_result
-                        + color_format_default,
-                    ]
-                )
+                    add_row(testcase=colorize(testcase_result, testcase_name), result=colorize(testcase_result))
 
     result_table.align = "l"
 
@@ -332,6 +298,17 @@ def get_color_format(result):
     elif result == "ERROR":
         return FormatText.yellow
     return color_format_default
+
+
+def colorize(result, label=None, color_format_default=FormatText.end):
+    """
+    Colorize provided label (or result) using color associated to the provided result.
+
+    :return: Colorized label (if provided) or result (if label is not provided)
+    :rtype: str
+    """
+    label = label if label else result
+    return get_color_format(result) + label + color_format_default
 
 
 def main(result_table=None):
