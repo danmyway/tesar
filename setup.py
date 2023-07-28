@@ -12,7 +12,7 @@ with open(os.path.join(_CUR_DIR, "README.md"), "r", encoding="utf-8") as f:
 
 setup(
     name="tesar",
-    version="2022.11.11",
+    version="2023.06.29",
     packages=["dispatch", "report"],
     install_requires=[
         "envparse",
@@ -23,7 +23,7 @@ setup(
         "lxml",
         "pygments",
     ],
-    url="https://gitlab.cee.redhat.com/ddiblik/tesar",
+    url="https://github.com/danmyway/tesar",
     license="",
     author="Daniel Diblik",
     author_email="ddiblik@redhat.com",
