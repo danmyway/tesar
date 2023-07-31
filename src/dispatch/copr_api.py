@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
-import sys
 from datetime import datetime
 
 from copr.v3 import BuildProxy
 
-from dispatch.__init__ import COMPOSE_MAPPING, COPR_CONFIG, get_arguments, get_logging
+from dispatch import dispatch_globals
+from dispatch import get_arguments, get_compose_mapping, get_logging
 
-SESSION = BuildProxy(COPR_CONFIG)
+SESSION = BuildProxy(dispatch_globals.COPR_CONFIG)
 LOGGER = get_logging()
 ARGS = get_arguments()
+COMPOSE_MAPPING = get_compose_mapping()
 
 
 def get_info(package, repository, reference, composes):

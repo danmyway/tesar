@@ -8,13 +8,12 @@ import lxml.etree
 import requests
 from prettytable import PrettyTable
 
-from dispatch.__init__ import (
+from dispatch import FormatText, get_arguments
+from dispatch.dispatch_globals import (
     ARTIFACT_BASE_URL,
     TESTING_FARM_ENDPOINT,
     LATEST_TASKS_FILE,
     DEFAULT_TASKS_FILE,
-    FormatText,
-    get_arguments,
 )
 
 ARGS = get_arguments()
