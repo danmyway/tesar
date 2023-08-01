@@ -14,6 +14,7 @@ and this project adheres to [Calendar Versioning](https://calver.org).<br>
 - `-u/--uefi` test option to request target with UEFI boot mode
 - CentOS Stream 8 target
 - `--parallel-limit` limit of plans to be run in parallel, default 42
+- query for task ID, warn and exit if build doesn't match requested test artifact
 
 ### Changed
 - `-c/--compose` to `-t/--target`

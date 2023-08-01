@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import sys
 from datetime import datetime
 
 from copr.v3 import BuildProxy
@@ -13,6 +14,21 @@ COMPOSE_MAPPING = get_compose_mapping()
 
 
 def get_info(package, repository, reference, composes):
+    """
+    Get information about a COPR build for a specific package and reference.
+
+    Args:
+        package (str): The name of the package for which to get information.
+        repository (str): The name of the Copr repository containing the package build.
+        reference (str, int): The reference for the package build. This can be either a commit reference
+                         (e.g., "master", "main") or a pull request ID (e.g., "pull/123").
+        composes (list): A list of strings representing the target distributions for the COPR build.
+
+    Returns:
+        tuple: A tuple containing two elements:
+            - A list of dictionaries containing build information for each target distribution.
+            - The build reference used for selecting the COPR build.
+    """
     owner = "@oamg"
     info = []
     build_reference = reference[0]
@@ -21,10 +37,16 @@ def get_info(package, repository, reference, composes):
     if ARGS.reference:
 
         def _get_correct_build_list():
+            """
+            Get a clean list of COPR builds that match the specified reference.
+
+            Returns:
+                list: A list of COPR builds that match the specified reference.
+            """
             clean_build_list = []
             query = SESSION.get_list(owner, repository)
 
-            if build_reference == "master" or build_reference == "main":
+            if build_reference in ["master", "main"]:
                 LOGGER.info(
                     f"Getting copr build info for referenced {build_reference}."
                 )
@@ -63,14 +85,12 @@ def get_info(package, repository, reference, composes):
         LOGGER.info(f"Getting copr build info for referenced ID {build_reference}.")
         build_munch = SESSION.get(build_reference)
         if build_munch.source_package["name"] != package:
+            LOGGER.critical(f"There seems to be some mismatch with the build ID!")
             LOGGER.critical(
-                f"{FormatText.red+FormatText.bold}There seems to be some mismatch with the build ID!{FormatText.end}"
+                f"The ID points to owner: {build_munch.ownername}, project: {build_munch.projectname}"
             )
-            LOGGER.critical(
-                f"{FormatText.red+FormatText.bold}The ID points to owner: {build_munch.ownername}, project: {build_munch.projectname}{FormatText.end}"
-            )
-            LOGGER.critical(f"{FormatText.red+FormatText.bold}Exiting.{FormatText.end}")
-            sys.exit(1)
+            LOGGER.critical(f"Exiting.")
+            sys.exit(99)
         elif build_munch.state == "failed":
             LOGGER.critical(
                 f"{FormatText.red+FormatText.bold}The build with the given ID failed!{FormatText.end}"
@@ -90,6 +110,20 @@ def get_info(package, repository, reference, composes):
 def get_build_dictionary(
     build, repository, package, composes, source_release=None, target_release=None
 ):
+    """
+    Get the dictionary containing build information for each target distribution.
+
+    Args:
+        build: The COPR build object.
+        repository (str): The COPR repository name.
+        package (str): The name of the package.
+        composes (list): A list of strings representing the target distributions for the COPR build.
+        source_release (str, optional): The source release version. Defaults to None.
+        target_release (str, optional): The target release version. Defaults to None.
+
+    Returns:
+        list: A list of dictionaries containing build information for each target distribution.
+    """
     build_info = []
     build_baseurl = (
         f"https://copr.fedorainfracloud.org/coprs/g/oamg/{repository}/build/"

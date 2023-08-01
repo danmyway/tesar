@@ -124,7 +124,7 @@ def parse_request_xunit(request_url_list=None, tasks_source=None, skip_pass=Fals
         request_state = request.json()["state"].upper()
         request_uuid = request.json()["id"]
         request_target = request.json()["environments_requested"][0]["os"]["compose"]
-        request_arch = request.json()["environments_requested"][0]['arch']
+        request_arch = request.json()["environments_requested"][0]["arch"]
         request_datetime_created = request.json()["created"]
         request_datetime_parsed = request_datetime_created.split(".")[0]
 
@@ -231,7 +231,9 @@ def parse_request_xunit(request_url_list=None, tasks_source=None, skip_pass=Fals
             # it consist of only the plan name
             testsuite_name = elem.xpath("./@name")[0].split(":")[-1]
             try:
-                testsuite_arch = elem.xpath("./testing-environment/property[@name='arch']/@value")[0]
+                testsuite_arch = elem.xpath(
+                    "./testing-environment/property[@name='arch']/@value"
+                )[0]
             except IndexError:
                 testsuite_arch = elem.xpath("./@name")[0].split(":")[1]
             testsuite_result = elem.xpath("./@result")[0].upper()
