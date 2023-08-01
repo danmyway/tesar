@@ -433,7 +433,6 @@ def build_table():
     if ARGS.split_planname:
         planname_split_index = ARGS.split_planname
 
-
     def _gen_row(uuid="", target="", arch="", testplan="", testcase="", result=""):
         if "UUID" in fields:
             yield uuid

@@ -4,7 +4,7 @@ from datetime import datetime
 from copr.v3 import BuildProxy
 
 from dispatch import dispatch_globals
-from dispatch import get_arguments, get_compose_mapping, get_logging
+from dispatch import get_arguments, get_compose_mapping, get_logging, FormatText
 
 SESSION = BuildProxy(dispatch_globals.COPR_CONFIG)
 LOGGER = get_logging()
@@ -15,13 +15,15 @@ COMPOSE_MAPPING = get_compose_mapping()
 def get_info(package, repository, reference, composes):
     owner = "@oamg"
     info = []
-    build_reference = None
+    build_reference = reference[0]
     pr_baseurl = f"https://github.com/oamg/{package}/pull/"
 
     if ARGS.reference:
-        query = SESSION.get_list(owner, repository)
 
-        for build_reference in reference:
+        def _get_correct_build_list():
+            clean_build_list = []
+            query = SESSION.get_list(owner, repository)
+
             if build_reference == "master" or build_reference == "main":
                 LOGGER.info(
                     f"Getting copr build info for referenced {build_reference}."
@@ -31,35 +33,56 @@ def get_info(package, repository, reference, composes):
                     f"Getting copr build info for referenced {str.upper(build_reference)}."
                 )
                 LOGGER.info(f"LINK: {pr_baseurl}{build_reference[2:]}")
-
-            for build in query:
-                # Parse only correct packages
-                if build.source_package["name"] == package:
-                    build = build
-                else:
-                    continue
-
-                # Get build with pull request number
+            for build_munch in query:
                 if (
-                    build.source_package["version"] is None
-                    or build.state == "failed"
-                    or build_reference not in build.source_package["version"]
+                    build_munch.state != "failed"
+                    and build_munch.source_package["name"] == package
+                    and build_munch.source_package["version"] is not None
+                    and build_reference in build_munch.source_package["version"]
                 ):
-                    continue
-                for build_info in get_build_dictionary(
-                    build, repository, package, composes
-                ):
-                    info.append(build_info)
-                break
+                    clean_build_list.append(build_munch)
 
-    elif ARGS.task_id:
-        for build_reference in reference:
-            LOGGER.info(f"Getting copr build info for referenced ID {build_reference}.")
-            build = SESSION.get(build_reference)
+            if not clean_build_list:
+                LOGGER.warning(
+                    f"{FormatText.yellow+FormatText.bold}No build with given {build_reference} found!{FormatText.end}"
+                )
+
+            return clean_build_list
+
+        for build_munch in _get_correct_build_list():
+            build = build_munch
             for build_info in get_build_dictionary(
                 build, repository, package, composes
             ):
                 info.append(build_info)
+            # Break so just the latest is selected
+            break
+
+    elif ARGS.task_id:
+        build = None
+        LOGGER.info(f"Getting copr build info for referenced ID {build_reference}.")
+        build_munch = SESSION.get(build_reference)
+        if build_munch.source_package["name"] != package:
+            LOGGER.critical(
+                f"{FormatText.red+FormatText.bold}There seems to be some mismatch with the build ID!{FormatText.end}"
+            )
+            LOGGER.critical(
+                f"{FormatText.red+FormatText.bold}The ID points to owner: {build_munch.ownername}, project: {build_munch.projectname}{FormatText.end}"
+            )
+            LOGGER.critical(f"{FormatText.red+FormatText.bold}Exiting.{FormatText.end}")
+            sys.exit(1)
+        elif build_munch.state == "failed":
+            LOGGER.critical(
+                f"{FormatText.red+FormatText.bold}The build with the given ID failed!{FormatText.end}"
+            )
+            LOGGER.critical(
+                f"{FormatText.red+FormatText.bold}Please provide valid build ID.{FormatText.end}"
+            )
+            LOGGER.critical(f"{FormatText.red+FormatText.bold}Exiting.{FormatText.end}")
+        else:
+            build = build_munch
+        for build_info in get_build_dictionary(build, repository, package, composes):
+            info.append(build_info)
 
     return info, build_reference
 
