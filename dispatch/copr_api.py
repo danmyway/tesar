@@ -63,7 +63,9 @@ def get_info(package, repository, reference, composes):
     return info, build_reference
 
 
-def get_build_dictionary(build, repository, package, composes):
+def get_build_dictionary(
+    build, repository, package, composes, source_release=None, target_release=None
+):
     build_info = []
     build_baseurl = (
         f"https://copr.fedorainfracloud.org/coprs/g/oamg/{repository}/build/"
