@@ -65,7 +65,10 @@ def get_brew_task_and_compose(package, reference):
     return {tasks[i]: volume_names[i] for i in range(len(tasks))}
 
 
-def get_info(package, repository, reference, composes):
+def get_info(
+    package, repository, reference, composes, source_release=None, target_release=None
+):
+
     brew_dict = {}
     info = []
     compose_selection = []
