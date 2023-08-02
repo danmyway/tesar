@@ -1,0 +1,28 @@
+name: Python package
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # NOTE(ivasilev) Do we want to support anything else?
+        python: ["3.9"]
+
+    steps:
+      - uses: actions/checkout@v3
+      # NOTE(ivasilev) Fix for Command 'krb5-config --libs gssapi' returned non-zero exit status 127
+      - name: Install libkrb5 for Kerberos on Linux
+        run: |
+          sudo apt install -y libkrb5-dev
+          pip install requests-kerberos
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install tox and any other packages
+        run: pip install tox
+      - name: Run tox
+        # Run tox using the version of Python in `PATH`
+        run: tox -e py

@@ -198,7 +198,7 @@ Results can be reported back in two levels - `l1` for plan overview and `l2` for
 You can chain the report command with test command and use the `-lt/--latest` and `-w/--wait` argument to get the results back whenever the requests state is complete (or error in which case the job results cannot be and won't be reported due to the non-existent xunit field).<br>
 `tesar test` automatically stores the request IDs from the latest dispatched job - the primary location to store and read the data from is `/tmp/latest_tesar_jobs` file. The file is also saved with a timestamp to the working directory just for a good measure.
 You can specify a different path to the file with `-f/--file` or pass the jobs to get report for straight to the commandline with `-c/--cmd`.<br>
-The tool is able to parse and report for multiple variants of values as long as they are separated by a new-line (in the files) or a whitespace (on the commandline). Raw request_ids, artifact URLs (Testing Farm result page URLs) or request URLs are allowed.
+The tool is able to parse and report for multiple variants of values as long as they are separated by a new-line (in the files) or a `-c/--cmd` argument (on the commandline). Raw request_ids, artifact URLs (Testing Farm result page URLs) or request URLs are allowed.
 In case you want to get the log files stored locally, use `-d/--download-logs`. Log files for pytest runs will be stored in `/var/tmp/tesar/logs/{request_id}_log/`. In case there are multiple plans in one pipeline, the logs should get divided in their respective plan directories.
 
 ```shell

@@ -2,97 +2,13 @@
 
 import argparse
 import configparser
+from datetime import datetime
 import logging
 import os
 import sys
-from datetime import datetime
-
-LATEST_TASKS_FILE = "/tmp/tesar_latest_jobs"
-DEFAULT_TASKS_FILE = "./report_jobs"
-TESTING_FARM_ENDPOINT = "https://api.dev.testing-farm.io/v0.1/requests"
-ARTIFACT_BASE_URL = "http://artifacts.osci.redhat.com/testing-farm"
 
 
-ARTIFACT_MAPPING = {"brew": "redhat-brew-build", "copr": "fedora-copr-build"}
-PACKAGE_MAPPING = {"c2r": "convert2rhel", "leapp-repository": "leapp-repository"}
-
-COPR_CONFIG = {"copr_url": "https://copr.fedorainfracloud.org"}
-
-LP_COMPOSE_MAPPING = {
-    "79to84": {
-        "compose": "RHEL-7.9-ZStream",
-        "distro": "rhel-7.9",
-        "chroot": "epel-7-x86_64",
-    },
-    "79to86": {
-        "compose": "RHEL-7.9-ZStream",
-        "distro": "rhel-7.9",
-        "chroot": "epel-7-x86_64",
-    },
-    "79to88": {
-        "compose": "RHEL-7.9-ZStream",
-        "distro": "rhel-7.9",
-        "chroot": "epel-7-x86_64",
-    },
-    "86to90": {
-        "compose": "RHEL-8.6.0-Nightly",
-        "distro": "rhel-8.6",
-        "chroot": "epel-8-x86_64",
-    },
-    "87to90": {
-        "compose": "RHEL-8.7.0-Nightly",
-        "distro": "rhel-8.7",
-        "chroot": "epel-8-x86_64",
-    },
-    "88to92": {
-        "compose": "RHEL-8.8.0-Nightly",
-        "distro": "rhel-8.8",
-        "chroot": "epel-8-x86_64",
-    },
-}
-
-C2R_COMPOSE_MAPPING = {
-    "cos7": {
-        "compose": "CentOS-7-latest",
-        "distro": "centos-7",
-        "chroot": "epel-7-x86_64",
-    },
-    "ol7": {
-        "compose": "OL7.9-x86_64-HVM-2023-01-05",
-        "distro": "oraclelinux-7",
-        "chroot": "epel-7-x86_64",
-    },
-    "cos8": {
-        "compose": "CentOS-8-latest",
-        "distro": "centos-8-latest",
-        "chroot": "epel-8-x86_64",
-    },
-    "ol8": {
-        "compose": "OL8.7-x86_64-HVM-2023-03-07",
-        "distro": "oraclelinux-8.6",
-        "chroot": "epel-8-x86_64",
-    },
-    "al86": {
-        "compose": "AlmaLinux OS 8.6.20220901 x86_64",
-        "distro": "AlmaLinux-OS-8.6",
-        "chroot": "epel-8-x86_64",
-    },
-    "al8": {
-        "compose": "AlmaLinux OS 8.8.20230524 x86_64",
-        "distro": "AlmaLinux-OS-8-latest",
-        "chroot": "epel-8-x86_64",
-    },
-    "roc86": {
-        "compose": "Rocky-8-ec2-8.6-20220515.0.x86_64",
-        "distro": "rocky-linux-8.6",
-        "chroot": "epel-8-x86_64",
-    },
-    "roc8": {
-        "compose": "Rocky-8-EC2-Base-8.8-20230518.0.x86_64",
-        "distro": "rocky-linux-8-latest",
-        "chroot": "epel-8-x86_64",
-    },
-}
+from . import dispatch_globals
 
 
 class FormatText:
@@ -164,7 +80,7 @@ def get_logging():
     return logger
 
 
-def get_arguments():
+def get_arguments(args=None):
     parser = argparse.ArgumentParser(
         description="Send requests to and get the results back from the Testing Farm conveniently.",
         formatter_class=argparse.RawTextHelpFormatter,
@@ -181,14 +97,14 @@ def get_arguments():
     test.add_argument(
         "artifact_type",
         metavar="artifact_type",
-        choices=list(ARTIFACT_MAPPING.keys()),
+        choices=list(dispatch_globals.ARTIFACT_MAPPING.keys()),
         help="Choose which type of artifact to test. Choices: %(choices)s",
     )
 
     test.add_argument(
         "package",
         metavar="package",
-        choices=list(PACKAGE_MAPPING.keys()),
+        choices=list(dispatch_globals.PACKAGE_MAPPING.keys()),
         help="Choose package to test. Choices: %(choices)s",
     )
 
@@ -380,29 +296,30 @@ Accepts multiple space separated values, sends as a separate request.""",
         "--latest",
         action="store_true",
         help=f"""{FormatText.bold}Mutually exclusive with respect to --file and --cmd.{FormatText.end}
-        Report latest jobs from {LATEST_TASKS_FILE}.""",
+        Report latest jobs from {dispatch_globals.LATEST_TASKS_FILE}.""",
     )
     tasks_source.add_argument(
         "-f",
         "--file",
         help=f"""{FormatText.bold}Mutually exclusive with respect to --latest and --cmd.{FormatText.end}
-        Specify a different location than the default {DEFAULT_TASKS_FILE} of the file containing request_id's, artifact URLs or request URLs.""",
+        Specify a different location than the default {dispatch_globals.DEFAULT_TASKS_FILE} of the file containing request_id's, artifact URLs or request URLs.""",
     )
     tasks_source.add_argument(
         "-c",
         "--cmd",
-        nargs="+",
+        action="append",
         help=f"""{FormatText.bold}Mutually exclusive with respect to --file and --latest.{FormatText.end}
         Parse request_ids, artifact URLs or request URLs from the command line.""",
     )
 
-    args = parser.parse_args()
+    args = parser.parse_args(args=args or sys.argv[1:])
     return args
 
 
-ARGS = get_arguments()
+def get_compose_mapping(args=None):
+    """Dynamically provide proper compose mapping depending on cli args"""
+    args = get_arguments(args=args or sys.argv[1:])
 
-if ARGS.action == "test" and ARGS.package == "c2r":
-    COMPOSE_MAPPING = C2R_COMPOSE_MAPPING
-elif ARGS.action == "test" and ARGS.package == "leapp-repository":
-    COMPOSE_MAPPING = LP_COMPOSE_MAPPING
+    compose_mapping = {('test', 'c2r'): dispatch_globals.C2R_COMPOSE_MAPPING,
+                       ('test', 'leapp-repository'): dispatch_globals.LP_COMPOSE_MAPPING}
+    return compose_mapping.get((args.action, args.package), {})

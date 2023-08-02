@@ -3,7 +3,7 @@
 import contextlib
 import sys
 
-from dispatch.__init__ import get_arguments, get_datetime
+from dispatch import get_arguments, get_datetime
 
 ARGS = get_arguments()
 
