@@ -22,8 +22,6 @@ def main():
     copr_repo = PACKAGE_MAPPING[ARGS.package]
     copr_package = PACKAGE_MAPPING[ARGS.package]
     git_repo = PACKAGE_MAPPING.get(ARGS.package)
-    source_release = ""
-    target_release = ""
     if ARGS.package == "leapp-repository":
         git_repo = "leapp-tests"
         copr_repo = "leapp"

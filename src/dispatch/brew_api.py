@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-import sys
-
 import koji
 
 from dispatch import get_compose_mapping, get_arguments, get_logging
@@ -8,6 +6,7 @@ from dispatch import get_compose_mapping, get_arguments, get_logging
 LOGGER = get_logging()
 ARGS = get_arguments()
 
+# Initialize the Koji client session
 SESSION = koji.ClientSession("https://brewhub.engineering.redhat.com/brewhub")
 SESSION.gssapi_login()
 
@@ -30,6 +29,16 @@ BREWBUILD_BASEURL = "https://brewweb.engineering.redhat.com/brew/taskinfo?taskID
 
 
 def get_brew_task_and_compose(package, reference):
+    """
+    Get the Brew build task IDs and associated composes for a given package and reference.
+
+    Args:
+        package (str): The name of the package.
+        reference (str, int): List of references for the package.
+
+    Returns:
+        dict: A dictionary with Brew task IDs as keys and associated composes as values.
+    """
     query = SESSION.listBuilds(prefix=package)
     if ARGS.reference:
         LOGGER.info(f"Getting brew build info for {package} version/s {reference}.")
@@ -46,7 +55,6 @@ def get_brew_task_and_compose(package, reference):
             for ref in reference
             if ref in build_info.get("nvr") and "el6" not in build_info.get("nvr")
         ]
-
     elif ARGS.task_id:
         LOGGER.info(f"Getting brew build info for {package} task ID {reference}.")
         tasks = reference
@@ -70,7 +78,20 @@ def get_brew_task_and_compose(package, reference):
 def get_info(
     package, repository, reference, composes, source_release=None, target_release=None
 ):
+    """
+    Get information about the package and its associated composes for testing.
 
+    Args:
+        package (str): The name of the package.
+        repository (str): The repository name.
+        reference (list): List of references for the package.
+        composes (list): List of composes to check.
+        source_release (str, optional): The source release version. Defaults to None.
+        target_release (str, optional): The target release version. Defaults to None.
+
+    Returns:
+        tuple: A tuple containing a list of dictionaries with build information and the build reference.
+    """
     brew_dict = {}
     info = []
     compose_selection = []
@@ -86,9 +107,8 @@ def get_info(
             set(compose_selection).intersection(EPEL_COMPOSES.get(volume_name))
         )
 
-    release_var_iter = 0
     for build_reference in brew_dict:
-        for compose in brew_dict[build_reference]:
+        for distro in brew_dict[build_reference]:
             brew_info_dict = {
                 "build_id": None,
                 "compose": None,
@@ -98,20 +118,20 @@ def get_info(
                 "target_release": None,
             }
             LOGGER.info(
-                f"Assigning build id {build_reference} for testing on {compose} to test batch."
+                f"Assigning build id {build_reference} for testing on {distro} to test batch."
             )
+            # Assign correct SOURCE_RELEASE and TARGET_RELEASE
             if ARGS.package == "leapp-repository":
-                release_vars = ARGS.target[release_var_iter]
-                source_release_raw = str(release_vars.split("to")[0])
-                target_release_raw = str(release_vars.split("to")[1])
+                source_release_raw = str(distro.split("to")[0])
+                target_release_raw = str(distro.split("to")[1])
                 source_release = f"{source_release_raw[0]}.{source_release_raw[1]}"
                 target_release = f"{target_release_raw[0]}.{target_release_raw[1]}"
             brew_info_dict["build_id"] = build_reference
-            brew_info_dict["compose"] = compose
+            brew_info_dict["compose"] = distro
             brew_info_dict["source_release"] = source_release
             brew_info_dict["target_release"] = target_release
             for compose_choice in composes:
-                if COMPOSE_MAPPING.get(compose_choice).get("compose") == compose:
+                if COMPOSE_MAPPING.get(compose_choice).get("compose") == distro:
                     brew_info_dict["chroot"] = COMPOSE_MAPPING.get(compose_choice).get(
                         "chroot"
                     )

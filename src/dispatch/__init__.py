@@ -320,6 +320,8 @@ def get_compose_mapping(args=None):
     """Dynamically provide proper compose mapping depending on cli args"""
     args = get_arguments(args=args or sys.argv[1:])
 
-    compose_mapping = {('test', 'c2r'): dispatch_globals.C2R_COMPOSE_MAPPING,
-                       ('test', 'leapp-repository'): dispatch_globals.LP_COMPOSE_MAPPING}
+    compose_mapping = {
+        ("test", "c2r"): dispatch_globals.C2R_COMPOSE_MAPPING,
+        ("test", "leapp-repository"): dispatch_globals.LP_COMPOSE_MAPPING,
+    }
     return compose_mapping.get((args.action, args.package), {})
