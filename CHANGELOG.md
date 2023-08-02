@@ -19,6 +19,8 @@ and this project adheres to [Calendar Versioning](https://calver.org).<br>
 
 ### Changed
 - `-l/--level` changed to `-l2/--level2` switch since the level1 (plan) view is default
+- `-c/--cmd` option of the report command supports one argument at a time, but `-c/--cmd` can be passed several
+   times for multiple results aggregation.
 
 ### Removed
 - `-l/--level` argument to choose between level1 (plan) view and level2 (test) view

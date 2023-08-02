@@ -6,14 +6,16 @@ from pprint import pprint
 
 import requests
 
-from dispatch.__init__ import (
-    ARTIFACT_BASE_URL,
-    LATEST_TASKS_FILE,
-    TESTING_FARM_ENDPOINT,
+from dispatch import (
     FormatText,
     get_arguments,
     get_config,
     get_datetime,
+)
+from dispatch.dispatch_globals import (
+    ARTIFACT_BASE_URL,
+    LATEST_TASKS_FILE,
+    TESTING_FARM_ENDPOINT,
 )
 
 CLOUD_RESOURCES_TAG, TESTING_FARM_API_KEY = get_config()
