@@ -12,6 +12,7 @@ and this project adheres to [Calendar Versioning](https://calver.org).<br>
 - `-c/--compose` to `-t/--target`
 - bump mapped convert2rhel composes/targets to Alma Linux and Rocky Linux 8.9, Oracle Linux 8.8
    (8.9 is absent on the AWS marketplace)
+- use all mapped compose targets when `-t/--target` not specified for the leapp-repository package
 ### Removed
 ## [2023.07.12]
 ### Added

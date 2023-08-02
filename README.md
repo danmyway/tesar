@@ -139,7 +139,7 @@ Multiple `--plans` can be specified and will be dispatched in separate jobs. The
 You can look for possible [targeted OS' below](#mapped-composes), multiple can be requested and will be dispatched in separate jobs.
 Use `-w/--wait` to override the default 20 seconds waiting time for successful response from the endpoint, or `-nw/--no-wait` to skip the wait time.
 If for any reason you would need the raw payload, use `--dry-run` to get it printed to the command line or use `--dry-run-cli` to print out the full usable `http POST` command.
-
+When no `-t/--target` option is specified, the request is sent for all mapped target composes for their respective tested packages.
 ```shell
 ❯ tesar test --help
 usage: tesar test [-h] (-ref REFERENCE [REFERENCE ...] | -id TASK_ID [TASK_ID ...]) [-g GIT [GIT ...]] [-gp GIT_PATH] [-a ARCHITECTURE] (-p PLANS [PLANS ...] | -pf PLANFILTER [PLANFILTER ...] | -tf TESTFILTER [TESTFILTER ...])

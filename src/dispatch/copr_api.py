@@ -89,7 +89,6 @@ def get_build_dictionary(
 
     LOGGER.info(f"Built at {build_time}")
     LOGGER.info(f"LINK: {build_baseurl}{build.id}")
-    release_var_iter = 0
     for distro in composes:
         copr_info_dict = {
             "build_id": None,
@@ -101,16 +100,14 @@ def get_build_dictionary(
         }
         # Assign correct SOURCE_RELEASE and TARGET_RELEASE
         if ARGS.package == "leapp-repository":
-            release_vars = ARGS.target[release_var_iter]
-            source_release_raw = str(release_vars.split("to")[0])
-            target_release_raw = str(release_vars.split("to")[1])
+            source_release_raw = str(distro.split("to")[0])
+            target_release_raw = str(distro.split("to")[1])
             source_release = f"{source_release_raw[0]}.{source_release_raw[1]}"
             target_release = f"{target_release_raw[0]}.{target_release_raw[1]}"
         copr_info_dict["compose"] = COMPOSE_MAPPING.get(distro).get("compose")
         copr_info_dict["distro"] = COMPOSE_MAPPING.get(distro).get("distro")
         copr_info_dict["source_release"] = source_release
         copr_info_dict["target_release"] = target_release
-        release_var_iter += 1
         for chroot in build.chroots:
             if COMPOSE_MAPPING.get(distro).get("chroot") == chroot:
                 copr_info_dict["chroot"] = COMPOSE_MAPPING.get(distro).get("chroot")
