@@ -12,6 +12,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+      # NOTE(ivasilev) Fix for Command 'krb5-config --libs gssapi' returned non-zero exit status 127
+      - name: Install libkrb5 for Kerberos on Linux
+        run: |
+          sudo apt install -y libkrb5-dev
+          pip install requests-kerberos
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
