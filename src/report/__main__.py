@@ -273,8 +273,24 @@ Skipping to next request."""
     return parsed_dict
 
 
+def make_stats(parsed_dict):
+    testsuite_stats = {} # [target_name, testsuite_name] = [result, ...]
+    testcase_stats = {} # [target_name, testsuite_name, testcase_name] = [result, ...]
+    for run in parsed_dict.values():
+        target_name = run['target_name']
+        for testsuite in run['testsuites']:
+            testsuite_name = testsuite['testsuite_name']
+            testsuite_stats.setdefault((target_name, testsuite_name), [])
+            testsuite_stats[(target_name, testsuite_name)].append(testsuite['testsuite_result'])
+            for testcase in testsuite['testcases']:
+                testcase_name = testcase['testcase_name']
+                testcase_stats.setdefault((target_name, testsuite_name, testcase_name), [])
+                testcase_stats[(target_name, testsuite_name, testcase_name)].append(testcase['testcase_result'])
+    return {'testsuite' : testsuite_stats, 'testcase' : testcase_stats}
+
 def build_table():
     parsed_dict = parse_request_xunit(skip_pass=ARGS.skip_pass)
+    stats = make_stats(parsed_dict)
 
     result_table = PrettyTable()
     # prepare field names
@@ -323,6 +339,12 @@ def build_table():
     def add_row(*args, **kwargs):
         result_table.add_row(tuple(_gen_row(*args, **kwargs)))
 
+    def stat_result(target_name, testsuite_name, testcase_name=None):
+        if testcase_name:
+            return stats['testcase'][target_name, testsuite_name, testcase_name]
+        return stats['testsuite'][target_name, testsuite_name]
+
+    shown = set()
     for task_uuid, data in parsed_dict.items():
         add_row(task_uuid, data["target_name"], data["arch"])
         for testsuite_data in data["testsuites"]:
@@ -330,20 +352,34 @@ def build_table():
             testsuite_name_raw.remove("")
             testsuite_name = "/".join(testsuite_name_raw[planname_split_index:])
             testsuite_result = testsuite_data["testsuite_result"]
-            add_row(
-                testplan=colorize(testsuite_result, testsuite_name),
-                result=colorize(testsuite_result),
-            )
+            stats_desc = data['target_name'], testsuite_data["testsuite_name"]
+            if stats_desc not in shown:
+                add_row(
+                    testplan=colorize(testsuite_result, testsuite_name),
+                    result=stat_result(*stats_desc)
+                )
+                shown.add(stats_desc)
+            #add_row(
+            #    testplan=colorize(testsuite_result, testsuite_name),
+            #    result=colorize(testsuite_result)
+            #)
             if "Test Case" in fields:
                 for testcase in testsuite_data["testcases"]:
                     testcase_name_raw = testcase["testcase_name"].split("/")
                     testcase_name_raw.remove("")
                     testcase_name = "/".join(testcase_name_raw[testname_split_index:])
                     testcase_result = testcase["testcase_result"]
-                    add_row(
-                        testcase=colorize(testcase_result, testcase_name),
-                        result=colorize(testcase_result),
-                    )
+                    stats_desc = data['target_name'], testsuite_data["testsuite_name"], testcase["testcase_name"]
+                    if stats_desc not in shown:
+                        add_row(
+                            testcase=colorize(testcase_result, testcase_name),
+                            result=stat_result(*stats_desc)
+                        )
+                        shown.add(stats_desc)
+                    #add_row(
+                    #    testcase=colorize(testcase_result, testcase_name),
+                    #    result=colorize(testcase_result)
+                    #)
 
     result_table.align = "l"
 
