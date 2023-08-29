@@ -123,6 +123,7 @@ def parse_request_xunit(request_url_list=None, tasks_source=None, skip_pass=Fals
         request_state = request.json()["state"].upper()
         request_uuid = request.json()["id"]
         request_target = request.json()["environments_requested"][0]["os"]["compose"]
+        request_arch = request.json()["environments_requested"][0]['arch']
         request_datetime_created = request.json()["created"]
         request_datetime_parsed = request_datetime_created.split(".")[0]
 
@@ -209,6 +210,7 @@ Skipping to next request."""
         if request_uuid not in parsed_dict:
             parsed_dict[request_uuid] = {
                 "target_name": request_target,
+                "arch": request_arch,
                 "testsuites": [],
             }
 
@@ -277,7 +279,10 @@ def build_table():
     result_table = PrettyTable()
     # prepare field names
     fields = []
-    fields += ["UUID", "Target", "Test Plan"]
+    fields += ["UUID", "Target"]
+    if ARGS.showarch:
+        fields += ["Arch"]
+    fields += ["Test Plan"]
     if ARGS.level2:
         fields += ["Test Case"]
     fields += ["Result"]
@@ -298,11 +303,14 @@ def build_table():
     if ARGS.split_planname:
         planname_split_index = ARGS.split_planname
 
-    def _gen_row(uuid="", target="", testplan="", testcase="", result=""):
+
+    def _gen_row(uuid="", target="", arch="", testplan="", testcase="", result=""):
         if "UUID" in fields:
             yield uuid
         if "Target" in fields:
             yield target
+        if "Arch" in fields:
+            yield arch
         if "Test Plan" in fields:
             yield testplan
         if "Test Case" in fields:
@@ -314,7 +322,7 @@ def build_table():
         result_table.add_row(tuple(_gen_row(*args, **kwargs)))
 
     for task_uuid, data in parsed_dict.items():
-        add_row(task_uuid, data["target_name"])
+        add_row(task_uuid, data["target_name"], data["arch"])
         for testsuite_data in data["testsuites"]:
             testsuite_name_raw = testsuite_data["testsuite_name"].split("/")
             testsuite_name_raw.remove("")

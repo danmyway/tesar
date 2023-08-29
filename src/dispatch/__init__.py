@@ -255,6 +255,11 @@ Accepts multiple space separated values, sends as a separate request.""",
     )
 
     report.add_argument(
+        "--showarch",
+        action="store_true",
+        help="""Display architecture. By default the architecture is not shown.""",
+    )
+    report.add_argument(
         "-l2",
         "--level2",
         action="store_true",
