@@ -214,12 +214,13 @@ The default way to show results is by showing each run details as a separate tab
 
 ```shell
 ❯ tesar report --help
-usage: tesar report [-h] [-l2] [-s] [-stn SPLIT_TESTNAME] [-spn SPLIT_PLANNAME] [-w] [-d] [--skip-pass] [--compare] [-u UNIFY_RESULTS] [-lt | -f FILE | -c CMD]
+usage: tesar report [-h] [--showarch] [-l2] [-s] [-stn SPLIT_TESTNAME] [-spn SPLIT_PLANNAME] [-w] [-d] [--skip-pass] [--compare] [-u UNIFY_RESULTS] [-lt | -f FILE | -c CMD]
 
 Parses task IDs, Testing Farm artifact URLs or Testing Farm API request URLs from multiple sources.
 
 options:
   -h, --help            show this help message and exit
+  --showarch            Display architecture. By default the architecture is not shown.
   -l2, --level2         Display test view detail. By default the report shows only plan view.
   -s, --short           Display short test and plan names.
   -stn SPLIT_TESTNAME, --split-testname SPLIT_TESTNAME

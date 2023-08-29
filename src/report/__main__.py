@@ -124,6 +124,7 @@ def parse_request_xunit(request_url_list=None, tasks_source=None, skip_pass=Fals
         request_state = request.json()["state"].upper()
         request_uuid = request.json()["id"]
         request_target = request.json()["environments_requested"][0]["os"]["compose"]
+        request_arch = request.json()["environments_requested"][0]['arch']
         request_datetime_created = request.json()["created"]
         request_datetime_parsed = request_datetime_created.split(".")[0]
 
@@ -229,6 +230,10 @@ def parse_request_xunit(request_url_list=None, tasks_source=None, skip_pass=Fals
             # With the latest Testing Farm release, the testsuite name does not include the target name
             # it consist of only the plan name
             testsuite_name = elem.xpath("./@name")[0].split(":")[-1]
+            try:
+                testsuite_arch = elem.xpath("./testing-environment/property[@name='arch']/@value")[0]
+            except IndexError:
+                testsuite_arch = elem.xpath("./@name")[0].split(":")[1]
             testsuite_result = elem.xpath("./@result")[0].upper()
             testsuite_test_count = elem.xpath("./@tests")
             testsuite_log_dir = testsuite_name.split("/")[-1]
@@ -242,6 +247,7 @@ def parse_request_xunit(request_url_list=None, tasks_source=None, skip_pass=Fals
 
             testsuite_data = {
                 "testsuite_name": testsuite_name,
+                "testsuite_arch": testsuite_arch,
                 "testsuite_result": testsuite_result,
                 "testcases": [],
             }
@@ -403,7 +409,10 @@ def build_table():
     result_table = PrettyTable()
     # prepare field names
     fields = []
-    fields += ["UUID", "Target", "Test Plan"]
+    fields += ["UUID", "Target"]
+    if ARGS.showarch:
+        fields += ["Arch"]
+    fields += ["Test Plan"]
     if ARGS.level2:
         fields += ["Test Case"]
     fields += ["Result"]
@@ -424,11 +433,14 @@ def build_table():
     if ARGS.split_planname:
         planname_split_index = ARGS.split_planname
 
-    def _gen_row(uuid="", target="", testplan="", testcase="", result=""):
+
+    def _gen_row(uuid="", target="", arch="", testplan="", testcase="", result=""):
         if "UUID" in fields:
             yield uuid
         if "Target" in fields:
             yield target
+        if "Arch" in fields:
+            yield arch
         if "Test Plan" in fields:
             yield testplan
         if "Test Case" in fields:
@@ -441,7 +453,11 @@ def build_table():
 
     for task_uuid, data in parsed_dict.items():
         add_row(task_uuid, data["target_name"])
+        last_arch = None
         for testsuite_data in data["testsuites"]:
+            if last_arch != testsuite_data["testsuite_arch"] and "Arch" in fields:
+                last_arch = testsuite_data["testsuite_arch"]
+                add_row(arch=last_arch)
             testsuite_result = testsuite_data["testsuite_result"]
             add_row(
                 testplan=colorize(
