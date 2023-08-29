@@ -10,6 +10,7 @@ and this project adheres to [Calendar Versioning](https://calver.org).<br>
 - Return code for report command
 - Report command option for downloading logs only for non-passed tests
 - Test results comparison mode introduced, can be controlled by the `--compare` option of `tesar report`.
+- `--showarch` option in `report` command displaying architecture in the table
 
 ### Changed
 - `-c/--compose` to `-t/--target`
