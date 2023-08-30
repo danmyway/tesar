@@ -362,7 +362,7 @@ def build_table():
             stats_desc = data['target_name'], testsuite_data["testsuite_name"]
             if stats_desc not in shown:
                 add_row(
-                    testplan=colorize(testsuite_result, testsuite_name),
+                    testplan=testsuite_name,
                     result=stat_result(*stats_desc)
                 )
                 shown.add(stats_desc)
@@ -379,7 +379,7 @@ def build_table():
                     stats_desc = data['target_name'], testsuite_data["testsuite_name"], testcase["testcase_name"]
                     if stats_desc not in shown:
                         add_row(
-                            testcase=colorize(testcase_result, testcase_name),
+                            testcase=testcase_name,
                             result=stat_result(*stats_desc)
                         )
                         shown.add(stats_desc)
