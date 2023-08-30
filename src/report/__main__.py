@@ -341,8 +341,15 @@ def build_table():
 
     def stat_result(target_name, testsuite_name, testcase_name=None):
         if testcase_name:
-            return stats['testcase'][target_name, testsuite_name, testcase_name]
-        return stats['testsuite'][target_name, testsuite_name]
+            result = stats['testcase'][target_name, testsuite_name, testcase_name]
+        else:
+            result = stats['testsuite'][target_name, testsuite_name]
+        return (
+            colorize('PASSED', f"{result.count('PASSED')}") + "," +
+            colorize('FAILED', f"{result.count('FAILED')}") + "," +
+            colorize('ERROR', f"{result.count('ERROR')}") +
+            f"/{len(result)}"
+        )
 
     shown = set()
     for task_uuid, data in parsed_dict.items():
