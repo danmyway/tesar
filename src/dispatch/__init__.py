@@ -290,6 +290,11 @@ Accepts multiple space separated values, sends as a separate request.""",
         action="store_true",
         help="""Download logs for requested run(s).""",
     )
+    report.add_argument(
+        '--skip-pass',
+        action="store_true",
+        help="Skip PASSED results while showing table and while downloading logs.",
+    )
     tasks_source = report.add_mutually_exclusive_group()
     tasks_source.add_argument(
         "-lt",

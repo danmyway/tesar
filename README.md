@@ -206,24 +206,25 @@ Corresponding return code is set based on the results with following logic:
 
 ```shell
 ❯ tesar report --help
-usage: tesar report [-h] [-l2] [--short] [-stn SPLIT_TESTNAME] [-spn SPLIT_PLANNAME] [-w] [-d] [-lt | -f FILE | -c CMD [CMD ...]]
+usage: tesar report [-h] [-l2] [-s] [-stn SPLIT_TESTNAME] [-spn SPLIT_PLANNAME] [-w] [-d] [--skip-pass] [-lt | -f FILE | -c CMD]
 
 Parses task IDs, Testing Farm artifact URLs or Testing Farm API request URLs from multiple sources.
 
 options:
   -h, --help            show this help message and exit
   -l2, --level2         Display test view detail. By default the report shows only plan view.
-  --short               Display short test and plan names.
+  -s, --short           Display short test and plan names.
   -stn SPLIT_TESTNAME, --split-testname SPLIT_TESTNAME
                         Specify an index from which will the test name be shown. Passed to testname.split('/')[index:]
   -spn SPLIT_PLANNAME, --split-planname SPLIT_PLANNAME
                         Specify an index from which will the plan name be shown. Passed to planname.split('/')[index:]
   -w, --wait            Wait for the job to complete. Print the table afterwards
   -d, --download-logs   Download logs for requested run(s).
+  --skip-pass           Skip PASSED results while showing table and while downloading logs.
   -lt, --latest         Mutually exclusive with respect to --file and --cmd. Report latest jobs from /tmp/tesar_latest_jobs.
-  -f FILE, --file FILE  Mutually exclusive with respect to --latest and --cmd. Specify a different location than the default ./report_jobs of the file containing request_id's, artifact URLs or request URLs.
-  -c CMD [CMD ...], --cmd CMD [CMD ...]
-                        Mutually exclusive with respect to --file and --latest. Parse request_ids, artifact URLs or request URLs from the command line.
+  -f FILE, --file FILE  Mutually exclusive with respect to --latest and --cmd. Specify a different location than the default ./report_jobs of the file containing request_id's, artifact URLs or request
+                        URLs.
+  -c CMD, --cmd CMD     Mutually exclusive with respect to --file and --latest. Parse request_ids, artifact URLs or request URLs from the command line.
 ```
 
 #### Examples
