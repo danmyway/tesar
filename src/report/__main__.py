@@ -97,7 +97,7 @@ def parse_tasks():
     return request_url_list, tasks_source
 
 
-def parse_request_xunit(request_url_list=None, tasks_source=None):
+def parse_request_xunit(request_url_list=None, tasks_source=None, skip_pass=False):
     logs_base_directory = "/var/tmp/tesar/logs"
 
     if request_url_list is None or tasks_source is None:
@@ -199,6 +199,11 @@ Skipping to next request."""
         else:
             update_retval(99)
 
+
+        if skip_pass and job_result_overall.upper() == "PASSED":
+            # TODO add debug log
+            continue
+
         if request_uuid not in parsed_dict:
             parsed_dict[request_uuid] = {
                 "target_name": request_target,
@@ -213,6 +218,10 @@ Skipping to next request."""
             testsuite_result = elem.xpath("./@result")[0].upper()
             testsuite_test_count = elem.xpath("./@tests")
             testsuite_log_dir = testsuite_name.split("/")[-1]
+
+            if skip_pass and testsuite_result == "PASSED":
+                # TODO add debug log
+                continue
 
             testsuite_data = {
                 "testsuite_name": testsuite_name,
@@ -229,6 +238,9 @@ Skipping to next request."""
             for test in testsuite_testcase:
                 testcase_name = test.xpath("./@name")[0]
                 testcase_result = test.xpath("./@result")[0].upper()
+                if skip_pass and testcase_result == "PASSED":
+                    # TODO add debug log
+                    continue
                 testcase_log_url = test.xpath('./logs/log[@name="testout.log"]/@href')[
                     0
                 ]
@@ -256,7 +268,7 @@ Skipping to next request."""
 
 
 def build_table():
-    parsed_dict = parse_request_xunit()
+    parsed_dict = parse_request_xunit(skip_pass=ARGS.skip_pass)
 
     result_table = PrettyTable()
     # prepare field names
