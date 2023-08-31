@@ -179,12 +179,6 @@ Skipping to next request."""
             update_reval(ERROR_HERE)
             continue
 
-        if ARGS.download_logs:
-            print("  > Downloading the log files.")
-            # Create the log directory path for the request
-            log_dir_path = os.path.join(logs_base_directory, log_dir)
-            os.makedirs(log_dir_path, exist_ok=True)
-
         xunit = request.json()["result"]["xunit"]
         xml = lxml.etree.fromstring(xunit.encode())
 
@@ -203,6 +197,12 @@ Skipping to next request."""
         if skip_pass and job_result_overall.upper() == "PASSED":
             # TODO add debug log
             continue
+
+        if ARGS.download_logs:
+            print("  > Downloading the log files.")
+            # Create the log directory path for the request
+            log_dir_path = os.path.join(logs_base_directory, log_dir)
+            os.makedirs(log_dir_path, exist_ok=True)
 
         if request_uuid not in parsed_dict:
             parsed_dict[request_uuid] = {
