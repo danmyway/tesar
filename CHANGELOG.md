@@ -8,6 +8,7 @@ and this project adheres to [Calendar Versioning](https://calver.org).<br>
 ## [Unreleased]
 ### Added
 - Return code for report command
+- Report command option for downloading logs only for non-passed tests
 
 ### Changed
 - `-c/--compose` to `-t/--target`
