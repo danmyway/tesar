@@ -52,7 +52,7 @@ C2R_COMPOSE_MAPPING = {
     },
     "ol7": {
         "compose": "OL7.9-x86_64-HVM-2023-01-05",
-        "distro": "oraclelinux-7",
+        "distro": "oracle-7",
         "chroot": "epel-7-x86_64",
     },
     "cos8": {
@@ -61,28 +61,28 @@ C2R_COMPOSE_MAPPING = {
         "chroot": "epel-8-x86_64",
     },
     "ol8": {
-        "compose": "OL8.7-x86_64-HVM-2023-03-07",
-        "distro": "oraclelinux-8.6",
+        "compose": "OL8.8-x86_64-HVM-2023-06-21",
+        "distro": "oracle-8-latest",
         "chroot": "epel-8-x86_64",
     },
     "al86": {
         "compose": "AlmaLinux OS 8.6.20220901 x86_64",
-        "distro": "AlmaLinux-OS-8.6",
+        "distro": "alma-8.6",
         "chroot": "epel-8-x86_64",
     },
     "al8": {
         "compose": "AlmaLinux OS 8.8.20230524 x86_64",
-        "distro": "AlmaLinux-OS-8-latest",
+        "distro": "alma-8-latest",
         "chroot": "epel-8-x86_64",
     },
     "roc86": {
         "compose": "Rocky-8-ec2-8.6-20220515.0.x86_64",
-        "distro": "rocky-linux-8.6",
+        "distro": "rocky-8.6",
         "chroot": "epel-8-x86_64",
     },
     "roc8": {
         "compose": "Rocky-8-EC2-Base-8.8-20230518.0.x86_64",
-        "distro": "rocky-linux-8-latest",
+        "distro": "rocky-8-latest",
         "chroot": "epel-8-x86_64",
     },
 }
