@@ -24,7 +24,11 @@ and this project adheres to [Calendar Versioning](https://calver.org).<br>
    (8.9 is absent on the AWS marketplace)
 - use all mapped compose targets when `-t/--target` not specified for the leapp-repository package
 - make `--plans`, `--planfilter` and `--testfilter` compatible
+- `-g/--git` accepts 4 arguments - base (github, gitlab, gitlab.cee.redhat), repo owner, repo name, git reference (branch, etc.)
+- `gitlab.cee.redhat.com/oamg/leapp-tests/-/tree/master` set as default location for tests if `-g/--git` is not specified
+- git reference can be specified for leapp-repository tests
 ### Removed
+
 ## [2023.07.12]
 ### Added
 - `-s/--short` display short test and plan names

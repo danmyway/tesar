@@ -132,10 +132,8 @@ For copr: Specify the BUILD ID for required copr build.""",
     test.add_argument(
         "-g",
         "--git",
-        nargs="+",
-        default=["github", "oamg", "main"],
-        help="""Provide repository base (github, gitlab, gitlab.cee.redhat)\nowner of the repository\nand a branch containing the tests you want to run.
-Default: '%(default)s'""",
+        nargs=4,
+        help="""Provide repository base (github, gitlab, gitlab.cee.redhat) owner of the repository, repository name and a branch containing the tests you want to run.""",
     )
 
     test.add_argument(
