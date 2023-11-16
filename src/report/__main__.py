@@ -163,6 +163,13 @@ Skipping to next request."""
             os.makedirs(log_dir_path, exist_ok=True)
 
         xunit = request.json()["result"]["xunit"]
+        #TODO: possibly always use artifacts/results.xml url instead of xunit in the TF endpoint
+        if not xunit:
+            results_xml_url = request.json()["run"]["artifacts"] + "/results.xml"
+            results_xml_response = requests.get(results_xml_url)
+            if results_xml_response:
+                xunit = results_xml_response.text
+
         xml = lxml.etree.fromstring(xunit.encode())
 
         job_result_overall = xml.xpath("/testsuites/@overall-result")
