@@ -295,6 +295,15 @@ Accepts multiple space separated values, sends as a separate request.""",
         action="store_true",
         help="Skip PASSED results while showing table and while downloading logs.",
     )
+    report.add_argument(
+        "--compare",
+        action="store_true",
+        help="""Build a comparison table for several runs results""")
+    report.add_argument(
+        "-u",
+        "--unify-results",
+        action="append",
+        help="""Plans name to be treated as one in plan1=plan2 format, useful for runs comparison in case of renaming.""")
     tasks_source = report.add_mutually_exclusive_group()
     tasks_source.add_argument(
         "-lt",
