@@ -174,15 +174,15 @@ def parse_request_xunit(request_url_list=None, tasks_source=None, skip_pass=Fals
         if request.json()["state"] == "error":
             error_formatted = FormatText.bg_red + "ERROR" + FormatText.bg_default
             error_reason = request.json()["result"]["summary"]
-            message = f"""Request ended up in {error_formatted} state, because {error_reason}, thus won't be reported.
-See more details on the result page {url.replace(TESTING_FARM_ENDPOINT, ARTIFACT_BASE_URL)}
-Skipping to next request."""
+            message = (f"Request ended up in {error_formatted} state, because {error_reason}.\n"
+                       f"See more details on the result page {url.replace(TESTING_FARM_ENDPOINT, ARTIFACT_BASE_URL)}")
             print(FormatText.bold + message + FormatText.end)
-            update_reval(ERROR_HERE)
-            continue
+            update_retval(ERROR_HERE)
+            # NOTE(ivasilev) There is a way to retrieve results even when the xunit file is not there, so let's not
+            # skip tests processing upon error. Kudos to mmacura.
 
         xunit = request.json()["result"]["xunit"]
-        #TODO: possibly always use artifacts/results.xml url instead of xunit in the TF endpoint
+        #TODO(mmacura): possibly always use artifacts/results.xml url instead of xunit in the TF endpoint
         if not xunit:
             results_xml_url = request.json()["run"]["artifacts"] + "/results.xml"
             results_xml_response = requests.get(results_xml_url)
@@ -278,6 +278,91 @@ Skipping to next request."""
     return parsed_dict
 
 
+def _split_name(name, index):
+    name_raw = name.split("/")
+    name_raw.remove("")
+    return "/".join(name_raw[index:])
+
+
+def build_table_comparison():
+    planname_split_index = 0
+    testname_split_index = 0
+    if ARGS.short:
+        planname_split_index = -1
+        testname_split_index = -1
+    if ARGS.split_testname:
+        testname_split_index = ARGS.split_testname
+    if ARGS.split_planname:
+        planname_split_index = ARGS.split_planname
+
+    parsed_dict = parse_request_xunit()
+    result_table = PrettyTable()
+    uuids = list(parsed_dict.keys())
+    fields = ["Test Plan"] + uuids
+    result_table.field_names = fields
+    # plan_name -> uuid run result for particular plan
+    regroup_results_plans = {}
+    # plan_name -> test_name -> uuid run result for particular test
+    regroup_results_tests = {}
+    unified_names_map = {}
+    for plan_name in ARGS.unify_results or []:
+        name1, name2 = plan_name.split('=', 2)
+        unified_names_map[name1] = plan_name
+        unified_names_map[name2] = plan_name
+
+    def _get_plan_key(testsuite_data):
+        plan_key = _split_name(testsuite_data['testsuite_name'], planname_split_index)
+        # check against unifed map to combine results
+        return unified_names_map.get(plan_key) or plan_key
+
+    for task_uuid, data in parsed_dict.items():
+        for testsuite_data in data["testsuites"]:
+            res_uuid = {'result': testsuite_data['testsuite_result'],
+                        'testcases': sorted((x for x in testsuite_data['testcases']), key=lambda x: x['testcase_name'])}
+            plan_key = _get_plan_key(testsuite_data)
+            try:
+                regroup_results_plans[plan_key][task_uuid] = res_uuid
+            except KeyError:
+                regroup_results_plans[plan_key] = {task_uuid: res_uuid}
+            # Preparation for plans -> tests mapping
+            if plan_key not in regroup_results_tests:
+                regroup_results_tests[plan_key] = {}
+            # Now process testcases for easier level2 table processing
+            for testcase_data in testsuite_data['testcases']:
+                plan_key = _get_plan_key(testsuite_data)
+                test_key = _split_name(testcase_data['testcase_name'], testname_split_index)
+                if test_key not in regroup_results_tests[plan_key]:
+                    regroup_results_tests[plan_key][test_key] = {}
+                try:
+                    regroup_results_tests[plan_key][test_key][task_uuid] = testcase_data['testcase_result']
+                except KeyError:
+                    regroup_results_tests[plan_key][test_key] = {task_uuid: testcase_data['testcase_result']}
+
+    for plan_name, plan_data in regroup_results_plans.items():
+        if ARGS.level2:
+            # Append first row with plan name only
+            result_table.add_row([plan_name] + [''] * len(uuids))
+            result_table.add_row(['*'] + [''] * len(uuids))
+            for test_name, test_data in regroup_results_tests[plan_name].items():
+                row_data = [f'{"*" * 4} {test_name}']
+                for uuid in uuids:
+                    row_data.append(colorize(test_data.get(uuid, '-')))
+                result_table.add_row(row_data)
+        else:
+            row_data = [plan_name]
+            for uuid in uuids:
+                # Report just plans
+                if not uuid in plan_data:
+                    # this plan has not been executed for this run
+                    row_data.append('-')
+                else:
+                    row_data.append(colorize(plan_data[uuid]['result']))
+            result_table.add_row(row_data)
+    result_table.align = "l"
+
+    return result_table
+
+
 def build_table():
     parsed_dict = parse_request_xunit(skip_pass=ARGS.skip_pass)
 
@@ -323,24 +408,14 @@ def build_table():
     for task_uuid, data in parsed_dict.items():
         add_row(task_uuid, data["target_name"])
         for testsuite_data in data["testsuites"]:
-            testsuite_name_raw = testsuite_data["testsuite_name"].split("/")
-            testsuite_name_raw.remove("")
-            testsuite_name = "/".join(testsuite_name_raw[planname_split_index:])
             testsuite_result = testsuite_data["testsuite_result"]
-            add_row(
-                testplan=colorize(testsuite_result, testsuite_name),
-                result=colorize(testsuite_result),
-            )
-            if "Test Case" in fields:
+            add_row(testplan=colorize(testsuite_result, _split_name(testsuite_data["testsuite_name"], planname_split_index)),
+                    result=colorize(testsuite_result))
+            if 'Test Case' in fields:
                 for testcase in testsuite_data["testcases"]:
-                    testcase_name_raw = testcase["testcase_name"].split("/")
-                    testcase_name_raw.remove("")
-                    testcase_name = "/".join(testcase_name_raw[testname_split_index:])
                     testcase_result = testcase["testcase_result"]
-                    add_row(
-                        testcase=colorize(testcase_result, testcase_name),
-                        result=colorize(testcase_result),
-                    )
+                    add_row(testcase=colorize(testcase_result, _split_name(testcase["testcase_name"], testname_split_index)),
+                            result=colorize(testcase_result))
 
     result_table.align = "l"
 
@@ -371,7 +446,7 @@ def colorize(result, label=None, color_format_default=FormatText.end):
 
 def main(result_table=None):
     if result_table is None:
-        result_table = build_table()
+        result_table = build_table_comparison() if ARGS.compare else build_table()
     if result_table.rowcount > 0:
         print(result_table)
     else:
