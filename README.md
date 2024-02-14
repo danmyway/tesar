@@ -142,44 +142,39 @@ If for any reason you would need the raw payload, use `--dry-run` to get it prin
 
 ```shell
 ❯ tesar test --help
-usage: tesar test [-h] (-ref REFERENCE [REFERENCE ...] | -id TASK_ID [TASK_ID ...]) [-g GIT [GIT ...]] [-gp GIT_PATH] [-a ARCHITECTURE]
-                  (-p PLANS [PLANS ...] | -pf PLANFILTER [PLANFILTER ...] | -tf TESTFILTER [TESTFILTER ...])
-                  [-c {cos7,ol7,cos8,ol8,al86,al8,roc86,roc8} [{cos7,ol7,cos8,ol8,al86,al8,roc86,roc8} ...]] [-pw] [-w WAIT] [-nw] [-l] [--dry-run] [--dry-run-cli] [--debug]
+usage: tesar test [-h] (-ref REFERENCE [REFERENCE ...] | -id TASK_ID [TASK_ID ...]) [-g GIT [GIT ...]] [-gp GIT_PATH] [-a ARCHITECTURE] (-p PLANS [PLANS ...] | -pf PLANFILTER [PLANFILTER ...] | -tf TESTFILTER [TESTFILTER ...])
+                  [-t TARGET [TARGET ...]] [-pw] [-w WAIT] [-nw] [-l] [--dry-run] [--dry-run-cli] [--debug]
                   artifact_type package
 
 Send requests to the Testing Farm conveniently.
 
 positional arguments:
   artifact_type         Choose which type of artifact to test. Choices: brew, copr
-  package               Choose package to test. Choices: c2r, leapp
+  package               Choose package to test. Choices: c2r, leapp-repository
 
 options:
   -h, --help            show this help message and exit
   -ref REFERENCE [REFERENCE ...], --reference REFERENCE [REFERENCE ...]
-                        Mutually exclusive with respect to --task-id. For brew: Specify the reference version to find the correct artifact (e.g. 0.1-2, 0.1.2). For
-                        copr: Specify the pull request reference to find the correct artifact (e.g. pr123, main, master, ...).
+                        Mutually exclusive with respect to --task-id. For brew: Specify the reference version to find the correct artifact (e.g. 0.1-2, 0.1.2). For copr: Specify the pull request reference to find the correct
+                        artifact (e.g. pr123, main, master, ...).
   -id TASK_ID [TASK_ID ...], --task-id TASK_ID [TASK_ID ...]
-                        Mutually exclusive with respect to --reference. For brew: Specify the TASK ID for required brew build. NOTE: Double check, that you are
-                        passing TASK ID for copr builds, not BUILD ID otherwise testing farm will not install the package. For copr: Specify the BUILD ID for required
-                        copr build.
+                        Mutually exclusive with respect to --reference. For brew: Specify the TASK ID for required brew build. NOTE: Double check, that you are passing TASK ID for copr builds, not BUILD ID otherwise
+                        testing farm will not install the package. For copr: Specify the BUILD ID for required copr build.
   -g GIT [GIT ...], --git GIT [GIT ...]
-                        Provide repository base (github, gitlab, gitlab.cee.redhat) owner of the repository and a branch containing the tests you want to run. Default:
-                        '['github', 'oamg', 'main']'
+                        Provide repository base (github, gitlab, gitlab.cee.redhat) owner of the repository and a branch containing the tests you want to run. Default: '['github', 'oamg', 'main']'
   -gp GIT_PATH, --git-path GIT_PATH
                         Path to the metadata tree root. Should be relative to the git repository root provided in the url parameter. Default: '.'
   -a ARCHITECTURE, --architecture ARCHITECTURE
                         Choose suitable architecture. Default: 'x86_64'.
   -p PLANS [PLANS ...], --plans PLANS [PLANS ...]
-                        Specify a test plan or multiple plans to request at testing farm. To run whole set of tiers use /plans/tier*/ Accepts multiple space separated values,
-                        sends as a separate request.
+                        Specify a test plan or multiple plans to request at testing farm. To run whole set of tiers use /plans/tier*/ Accepts multiple space separated values, sends as a separate request.
   -pf PLANFILTER [PLANFILTER ...], --planfilter PLANFILTER [PLANFILTER ...]
-                        Filter plans. The specified plan filter will be used in tmt plan ls --filter <YOUR-FILTER> command. By default enabled: true filter is applied.
-                        Accepts multiple space separated values, sends as a separate request.
+                        Filter plans. The specified plan filter will be used in tmt plan ls --filter <YOUR-FILTER> command. By default enabled: true filter is applied. Accepts multiple space separated values, sends as a separate
+                        request.
   -tf TESTFILTER [TESTFILTER ...], --testfilter TESTFILTER [TESTFILTER ...]
-                        Filter tests. The specified plan filter will be used in tmt run discover plan test --filter <YOUR-FILTER> command. Accepts multiple space separated
-                        values, sends as a separate request.
-  -c {cos7,ol7,cos8,ol8,al86,al8,roc86,roc8} [{cos7,ol7,cos8,ol8,al86,al8,roc86,roc8} ...], --compose {cos7,ol7,cos8,ol8,al86,al8,roc86,roc8} [{cos7,ol7,cos8,ol8,al86,al8,roc86,roc8} ...]
-                        Choose composes to run tests on. Default: '['cos7', 'ol7', 'cos8', 'ol8', 'al86', 'al8', 'roc86', 'roc8']'.
+                        Filter tests. The specified plan filter will be used in tmt run discover plan test --filter <YOUR-FILTER> command. Accepts multiple space separated values, sends as a separate request.
+  -t TARGET [TARGET ...], --target TARGET [TARGET ...]
+                        Choose targeted test run. For c2r targeted OS, for leapp targeted upgrade path.
   -pw, --pool-workaround
                         Workarounds the AWS spot instances release.
   -w WAIT, --wait WAIT  Provide number of seconds to wait for successful response. Default: 20 seconds.
@@ -268,7 +263,7 @@ For convert2RHEL testing we are currently using this form of payload:
 > **_NOTE:_** <br> Some of the targeted instances disallow to use root login when connecting through the ssh.
 > Hardcoded post_install_script is sent with each request to enable root login on the target.
 ```json lines
-    payload = {
+    payload_raw = {
         "api_key": api_key,
         "test": {
             "fmf": {
@@ -285,6 +280,10 @@ For convert2RHEL testing we are currently using this form of payload:
                 "arch": architecture,
                 "os": {"compose": compose},
                 "pool": pool,
+                "variables": {
+                    "SOURCE_RELEASE": source_release,
+                    "TARGET_RELEASE": target_release,
+                },
                 "artifacts": [
                     {
                         "id": artifact_id,
@@ -294,8 +293,8 @@ For convert2RHEL testing we are currently using this form of payload:
                 ],
                 "settings": {
                     "provisioning": {
-                        "post_install_script": post_install_script,
-                        "tags": {"BusinessUnit": cloud_resources_tag},
+                        "post_install_script": POST_INSTALL_SCRIPT,
+                        "tags": {"BusinessUnit": CLOUD_RESOURCES_TAG},
                     }
                 },
                 "tmt": {
@@ -318,11 +317,13 @@ Sadly, there is no instance of any relevance for CentOS 8 latest available.
 ```
 # RHEL8 targets
 cos8: CentOS-8-latest
-ol8: OL8.7-x86_64-HVM-2023-03-07
+ol8: OL8.8-x86_64-HVM-2023-06-21
 al86: AlmaLinux OS 8.6.20220901 x86_64
-al8: AlmaLinux OS 8.8.20230524 x86_64
+al88: AlmaLinux OS 8.8.20230524 x86_64
+al8: AlmaLinux OS 8.9.20231123 x86_64
 roc86: Rocky-8-ec2-8.6-20220515.0.x86_64
-roc8: Rocky-8-EC2-Base-8.8-20230518.0.x86_64
+roc88: Rocky-8-EC2-Base-8.8-20230518.0.x86_64
+roc8: Rocky-8-EC2-Base-8.9-20231119.0.x86_64
 
 # RHEL7 targets
 cos7: CentOS-7-latest
