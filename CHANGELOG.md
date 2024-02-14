@@ -9,9 +9,11 @@ and this project adheres to [Calendar Versioning](https://calver.org).<br>
 ### Added
 
 ### Changed
-
+- `-c/--compose` to `-t/--target`
+- bump mapped convert2rhel composes/targets to Alma Linux and Rocky Linux 8.9, Oracle Linux 8.8
+   (8.9 is absent on the AWS marketplace)
 ### Removed
-### [2023.07.12]
+## [2023.07.12]
 ### Added
 - `-s/--short` display short test and plan names
 - `-stn/--split-testname` specify index from which the test name will be shortened
