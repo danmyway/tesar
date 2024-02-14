@@ -3,3 +3,4 @@
 Pipfile*
 *__pycache__/
 *.egg-info/
+tesar_latest_jobs_*
