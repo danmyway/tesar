@@ -251,17 +251,16 @@ def build_table():
     if ARGS.split_planname:
         planname_split_index = ARGS.split_planname
 
-
     def _gen_row(uuid="", target="", testplan="", testcase="", result=""):
-        if 'UUID' in fields:
+        if "UUID" in fields:
             yield uuid
-        if 'Target' in fields:
+        if "Target" in fields:
             yield target
-        if 'Test Plan' in fields:
+        if "Test Plan" in fields:
             yield testplan
-        if 'Test Case' in fields:
+        if "Test Case" in fields:
             yield testcase
-        if 'Result' in fields:
+        if "Result" in fields:
             yield result
 
     def add_row(*args, **kwargs):
@@ -274,14 +273,20 @@ def build_table():
             testsuite_name_raw.remove("")
             testsuite_name = "/".join(testsuite_name_raw[planname_split_index:])
             testsuite_result = testsuite_data["testsuite_result"]
-            add_row(testplan=colorize(testsuite_result, testsuite_name), result=colorize(testsuite_result))
-            if 'Test Case' in fields:
+            add_row(
+                testplan=colorize(testsuite_result, testsuite_name),
+                result=colorize(testsuite_result),
+            )
+            if "Test Case" in fields:
                 for testcase in testsuite_data["testcases"]:
                     testcase_name_raw = testcase["testcase_name"].split("/")
                     testcase_name_raw.remove("")
                     testcase_name = "/".join(testcase_name_raw[testname_split_index:])
                     testcase_result = testcase["testcase_result"]
-                    add_row(testcase=colorize(testcase_result, testcase_name), result=colorize(testcase_result))
+                    add_row(
+                        testcase=colorize(testcase_result, testcase_name),
+                        result=colorize(testcase_result),
+                    )
 
     result_table.align = "l"
 
