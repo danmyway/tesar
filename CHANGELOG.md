@@ -7,6 +7,7 @@ and this project adheres to [Calendar Versioning](https://calver.org).<br>
 
 ## [Unreleased]
 ### Added
+- Return code for report command
 
 ### Changed
 - `-c/--compose` to `-t/--target`

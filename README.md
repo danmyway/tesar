@@ -196,6 +196,14 @@ You can specify a different path to the file with `-f/--file` or pass the jobs t
 The tool is able to parse and report for multiple variants of values as long as they are separated by a new-line (in the files) or a `-c/--cmd` argument (on the commandline). Raw request_ids, artifact URLs (Testing Farm result page URLs) or request URLs are allowed.
 In case you want to get the log files stored locally, use `-d/--download-logs`. Log files for pytest runs will be stored in `/var/tmp/tesar/logs/{request_id}_log/`. In case there are multiple plans in one pipeline, the logs should get divided in their respective plan directories.
 
+Corresponding return code is set based on the results with following logic:
+ * 0 - The results are complete for each request and all are pass
+ * 1 - Python exception or bailout
+ * 2 - No error was hit, at least one fail was found
+ * 3 - At least one error was hit
+ * 4 - At least one request didn't have any result
+ * everything else - consult with Tesar maintainer(s)
+
 ```shell
 ❯ tesar report --help
 usage: tesar report [-h] [-l2] [--short] [-stn SPLIT_TESTNAME] [-spn SPLIT_PLANNAME] [-w] [-d] [-lt | -f FILE | -c CMD [CMD ...]]
