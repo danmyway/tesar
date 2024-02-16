@@ -165,7 +165,7 @@ Skipping to next request."""
         xunit = request.json()["result"]["xunit"]
         xml = lxml.etree.fromstring(xunit.encode())
 
-        job_result_overall = xml.xpath("/testsuites/@overall-result")
+        job_result_overall = xml.xpath("/testsuites/@overall-result")[0]
         job_test_suite = xml.xpath("//testsuite")
 
         if request_uuid not in parsed_dict:
