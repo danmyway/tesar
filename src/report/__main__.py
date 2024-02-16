@@ -17,6 +17,25 @@ from dispatch.dispatch_globals import (
 )
 
 ARGS = get_arguments()
+RETURN_VALUE = None
+"""
+ 0 - All pass
+ 1 - Python exception or bailout
+ 2 - No error at least one fail
+ 3 - At least one error
+ 4 - No result
+ everything else - consult with Tesar maintainer(s)
+"""
+ALL_PASS   = 0
+FAIL_HERE  = 2
+ERROR_HERE = 3
+NO_RESULT  = 4
+
+
+def update_retval(new_value):
+    global RETURN_VALUE
+    if RETURN_VALUE is None or new_value > RETURN_VALUE:
+        RETURN_VALUE = new_value
 
 
 def parse_tasks():
@@ -63,6 +82,7 @@ def parse_tasks():
             task = TESTING_FARM_ENDPOINT + "/" + task
         else:
             print(f"Unrecognized task {task}")
+            update_retval(NO_RESULT)
             continue
 
         # Validate UUID
@@ -114,6 +134,7 @@ def parse_request_xunit(request_url_list=None, tasks_source=None):
             request_state = FormatText.bg_cyan + request_state + FormatText.bg_default
         elif request_state == "ERROR":
             request_state = FormatText.bg_yellow + request_state + FormatText.bg_default
+            update_retval(ERROR_HERE)
         print(
             request.json()["environments_requested"][0]["os"]["compose"],
             request.json()["test"]["fmf"]["name"],
@@ -145,6 +166,7 @@ def parse_request_xunit(request_url_list=None, tasks_source=None):
                 print(
                     f"Request {url} is still running, wait for it to finish or use --wait.\nSkipping to next request."
                 )
+                update_retval(NO_RESULT)
                 continue
 
         if request.json()["state"] == "error":
@@ -154,6 +176,7 @@ def parse_request_xunit(request_url_list=None, tasks_source=None):
 See more details on the result page {url.replace(TESTING_FARM_ENDPOINT, ARTIFACT_BASE_URL)}
 Skipping to next request."""
             print(FormatText.bold + message + FormatText.end)
+            update_reval(ERROR_HERE)
             continue
 
         if ARGS.download_logs:
@@ -167,6 +190,14 @@ Skipping to next request."""
 
         job_result_overall = xml.xpath("/testsuites/@overall-result")[0]
         job_test_suite = xml.xpath("//testsuite")
+        if job_result_overall == "passed":
+            update_retval(ALL_PASS)
+        elif job_result_overall == "failed":
+            update_retval(FAIL_HERE)
+        elif job_result_overall == "error":
+            update_retval(ERROR_HERE)
+        else:
+            update_retval(99)
 
         if request_uuid not in parsed_dict:
             parsed_dict[request_uuid] = {
@@ -322,3 +353,4 @@ def main(result_table=None):
         print(result_table)
     else:
         print("Nothing to report!")
+    return RETURN_VALUE
