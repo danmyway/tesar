@@ -31,6 +31,7 @@ FAIL_HERE  = 2
 ERROR_HERE = 3
 NO_RESULT  = 4
 
+LOGGER = get_logging()
 
 def update_retval(new_value):
     global RETURN_VALUE
@@ -117,6 +118,7 @@ def parse_request_xunit(request_url_list=None, tasks_source=None, skip_pass=Fals
 
     print("Reporting for the requested tasks:")
     for url in request_url_list:
+        LOGGER.debug(f"Getting results of '{url}'")
         request = requests.get(url)
         request_state = request.json()["state"].upper()
         request_uuid = request.json()["id"]
@@ -195,7 +197,7 @@ Skipping to next request."""
 
 
         if skip_pass and job_result_overall.upper() == "PASSED":
-            # TODO add debug log
+            LOGGER.debug(f"Skipping '{url}' as the overall result is pass")
             continue
 
         if ARGS.download_logs:
@@ -218,9 +220,10 @@ Skipping to next request."""
             testsuite_result = elem.xpath("./@result")[0].upper()
             testsuite_test_count = elem.xpath("./@tests")
             testsuite_log_dir = testsuite_name.split("/")[-1]
+            LOGGER.debug(f"Processing results of testsuit '{testsuite_name}'")
 
             if skip_pass and testsuite_result == "PASSED":
-                # TODO add debug log
+                LOGGER.debug(f"Skipping testsuite '{testsuite_name}' as the result is pass")
                 continue
 
             testsuite_data = {
@@ -238,8 +241,9 @@ Skipping to next request."""
             for test in testsuite_testcase:
                 testcase_name = test.xpath("./@name")[0]
                 testcase_result = test.xpath("./@result")[0].upper()
+                LOGGER.debug(f"Processing result of test '{testsuite_name}/{testcase_name}'")
                 if skip_pass and testcase_result == "PASSED":
-                    # TODO add debug log
+                    LOGGER.debug(f"Skipping test '{testsuite_name}/{testcase_name}' as the result is pass")
                     continue
                 testcase_log_url = test.xpath('./logs/log[@name="testout.log"]/@href')[
                     0
