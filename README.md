@@ -204,9 +204,17 @@ Corresponding return code is set based on the results with following logic:
  * 4 - At least one request didn't have any result
  * everything else - consult with Tesar maintainer(s)
 
+The default way to show results is by showing each run details as a separate table. In order to combine test results of several different tft runs you can use comparison mode which is triggered by the `--compare` flag of `tesar report`.
+
+```shell
+❯ tesar report -c 8f4e2e3e-beb4-4d3a-9b0a-68a2f428dd1b -c c3726a72-8e6b-4c51-88d8-612556df7ac1 --short  --unify-results=tier2=tier2_7to8 --compare
+```
+
+
+
 ```shell
 ❯ tesar report --help
-usage: tesar report [-h] [-l2] [-s] [-stn SPLIT_TESTNAME] [-spn SPLIT_PLANNAME] [-w] [-d] [--skip-pass] [-lt | -f FILE | -c CMD]
+usage: tesar report [-h] [-l2] [-s] [-stn SPLIT_TESTNAME] [-spn SPLIT_PLANNAME] [-w] [-d] [--skip-pass] [--compare] [-u UNIFY_RESULTS] [-lt | -f FILE | -c CMD]
 
 Parses task IDs, Testing Farm artifact URLs or Testing Farm API request URLs from multiple sources.
 
@@ -221,9 +229,12 @@ options:
   -w, --wait            Wait for the job to complete. Print the table afterwards
   -d, --download-logs   Download logs for requested run(s).
   --skip-pass           Skip PASSED results while showing table and while downloading logs.
+  --compare             Build a comparison table for several runs results
+  -u UNIFY_RESULTS, --unify-results UNIFY_RESULTS
+                        Plans name to be treated as one in plan1=plan2 format, useful for runs comparison in case of renaming.
   -lt, --latest         Mutually exclusive with respect to --file and --cmd. Report latest jobs from /tmp/tesar_latest_jobs.
-  -f FILE, --file FILE  Mutually exclusive with respect to --latest and --cmd. Specify a different location than the default ./report_jobs of the file containing request_id's, artifact URLs or request
-                        URLs.
+  -f FILE, --file FILE  Mutually exclusive with respect to --latest and --cmd. Specify a different location than the default ./report_jobs of the file containing request_id's, artifact URLs
+                        or request URLs.
   -c CMD, --cmd CMD     Mutually exclusive with respect to --file and --latest. Parse request_ids, artifact URLs or request URLs from the command line.
 ```
 
