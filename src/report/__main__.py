@@ -123,6 +123,7 @@ def parse_request_xunit(request_url_list=None, tasks_source=None, skip_pass=Fals
         request_state = request.json()["state"].upper()
         request_uuid = request.json()["id"]
         request_target = request.json()["environments_requested"][0]["os"]["compose"]
+        request_arch = request.json()["environments_requested"][0]['arch']
         request_datetime_created = request.json()["created"]
         request_datetime_parsed = request_datetime_created.split(".")[0]
 
@@ -209,6 +210,7 @@ Skipping to next request."""
         if request_uuid not in parsed_dict:
             parsed_dict[request_uuid] = {
                 "target_name": request_target,
+                "arch": request_arch,
                 "testsuites": [],
             }
 
@@ -271,13 +273,34 @@ Skipping to next request."""
     return parsed_dict
 
 
+def make_stats(parsed_dict):
+    testsuite_stats = {} # [target_name, testsuite_name] = [result, ...]
+    testcase_stats = {} # [target_name, testsuite_name, testcase_name] = [result, ...]
+    for run in parsed_dict.values():
+        target_name = run['target_name']
+        for testsuite in run['testsuites']:
+            testsuite_name = testsuite['testsuite_name']
+            testsuite_stats.setdefault((target_name, testsuite_name), [])
+            testsuite_stats[(target_name, testsuite_name)].append(testsuite['testsuite_result'])
+            for testcase in testsuite['testcases']:
+                testcase_name = testcase['testcase_name']
+                testcase_stats.setdefault((target_name, testsuite_name, testcase_name), [])
+                testcase_stats[(target_name, testsuite_name, testcase_name)].append(testcase['testcase_result'])
+    return {'testsuite' : testsuite_stats, 'testcase' : testcase_stats}
+
 def build_table():
     parsed_dict = parse_request_xunit(skip_pass=ARGS.skip_pass)
+    stats = make_stats(parsed_dict)
 
     result_table = PrettyTable()
     # prepare field names
     fields = []
-    fields += ["UUID", "Target", "Test Plan"]
+    if not ARGS.stats:
+        fields += ["UUID"]
+    fields += ["Target"]
+    if ARGS.showarch:
+        fields += ["Arch"]
+    fields += ["Test Plan"]
     if ARGS.level2:
         fields += ["Test Case"]
     fields += ["Result"]
@@ -298,11 +321,14 @@ def build_table():
     if ARGS.split_planname:
         planname_split_index = ARGS.split_planname
 
-    def _gen_row(uuid="", target="", testplan="", testcase="", result=""):
+
+    def _gen_row(uuid="", target="", arch="", testplan="", testcase="", result=""):
         if "UUID" in fields:
             yield uuid
         if "Target" in fields:
             yield target
+        if "Arch" in fields:
+            yield arch
         if "Test Plan" in fields:
             yield testplan
         if "Test Case" in fields:
@@ -313,27 +339,54 @@ def build_table():
     def add_row(*args, **kwargs):
         result_table.add_row(tuple(_gen_row(*args, **kwargs)))
 
+    def stat_result(target_name, testsuite_name, testcase_name=None):
+        if testcase_name:
+            result = stats['testcase'][target_name, testsuite_name, testcase_name]
+        else:
+            result = stats['testsuite'][target_name, testsuite_name]
+        return (
+            colorize('PASSED', f"{result.count('PASSED')}") + "," +
+            colorize('FAILED', f"{result.count('FAILED')}") + "," +
+            colorize('ERROR', f"{result.count('ERROR')}") +
+            f"/{len(result)}"
+        )
+
+    shown = set()
     for task_uuid, data in parsed_dict.items():
-        add_row(task_uuid, data["target_name"])
+        add_row(task_uuid, data["target_name"], data["arch"])
         for testsuite_data in data["testsuites"]:
             testsuite_name_raw = testsuite_data["testsuite_name"].split("/")
             testsuite_name_raw.remove("")
             testsuite_name = "/".join(testsuite_name_raw[planname_split_index:])
             testsuite_result = testsuite_data["testsuite_result"]
-            add_row(
-                testplan=colorize(testsuite_result, testsuite_name),
-                result=colorize(testsuite_result),
-            )
+            stats_desc = data['target_name'], testsuite_data["testsuite_name"]
+            if stats_desc not in shown:
+                add_row(
+                    testplan=testsuite_name,
+                    result=stat_result(*stats_desc)
+                )
+                shown.add(stats_desc)
+            #add_row(
+            #    testplan=colorize(testsuite_result, testsuite_name),
+            #    result=colorize(testsuite_result)
+            #)
             if "Test Case" in fields:
                 for testcase in testsuite_data["testcases"]:
                     testcase_name_raw = testcase["testcase_name"].split("/")
                     testcase_name_raw.remove("")
                     testcase_name = "/".join(testcase_name_raw[testname_split_index:])
                     testcase_result = testcase["testcase_result"]
-                    add_row(
-                        testcase=colorize(testcase_result, testcase_name),
-                        result=colorize(testcase_result),
-                    )
+                    stats_desc = data['target_name'], testsuite_data["testsuite_name"], testcase["testcase_name"]
+                    if stats_desc not in shown:
+                        add_row(
+                            testcase=testcase_name,
+                            result=stat_result(*stats_desc)
+                        )
+                        shown.add(stats_desc)
+                    #add_row(
+                    #    testcase=colorize(testcase_result, testcase_name),
+                    #    result=colorize(testcase_result)
+                    #)
 
     result_table.align = "l"
 

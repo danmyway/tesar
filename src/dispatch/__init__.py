@@ -255,6 +255,11 @@ Accepts multiple space separated values, sends as a separate request.""",
     )
 
     report.add_argument(
+        "--showarch",
+        action="store_true",
+        help="""Display architecture. By default the architecture is not shown.""",
+    )
+    report.add_argument(
         "-l2",
         "--level2",
         action="store_true",
@@ -277,6 +282,11 @@ Accepts multiple space separated values, sends as a separate request.""",
         "--split-planname",
         type=int,
         help="""Specify an index from which will the plan name be shown. Passed to planname.split('/')[index:]""",
+    )
+    report.add_argument(
+        '--stats',
+        action='store_true',
+        help='Provide statistics how many times the same test plan and the same tests passed, failed or errored out.',
     )
     report.add_argument(
         "-w",

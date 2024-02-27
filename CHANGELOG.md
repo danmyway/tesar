@@ -9,6 +9,7 @@ and this project adheres to [Calendar Versioning](https://calver.org).<br>
 ### Added
 - Return code for report command
 - Report command option for downloading logs only for non-passed tests
+- `--showarch` option in `report` command displaying architecture in the table
 
 ### Changed
 - `-c/--compose` to `-t/--target`
