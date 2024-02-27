@@ -83,6 +83,10 @@ def main():
     elif ARGS.testfilter:
         iterate_over = ARGS.testfilter
 
+    boot_method = "bios"
+    if ARGS.uefi:
+        boot_method = "uefi"
+
     for item in iterate_over:
         plan = None
         planfilter = None
@@ -150,6 +154,7 @@ def main():
                 PACKAGE_MAPPING[ARGS.package],
                 build["distro"],
                 ARGS.architecture,
+                boot_method,
             )
 
 
