@@ -279,12 +279,24 @@ def parse_request_xunit(request_url_list=None, tasks_source=None, skip_pass=Fals
 
 
 def _split_name(name, index):
+    """A helper that splits a test name at the position given by index"""
     name_raw = name.split("/")
     name_raw.remove("")
     return "/".join(name_raw[index:])
 
 
 def build_table_comparison():
+    """
+    Generate a table holding comparable results of several tests.
+
+    This allows a clear comparison of several tft runs with particular test
+    results side by side in respectable columns.
+    Sample format:
+    **     tft_run_uuid1  tft_run_uuid2
+    test1   PASS            FAIL
+    test2   -               PASS
+    test3   PASS            PASS
+    """
     planname_split_index = 0
     testname_split_index = 0
     if ARGS.short:
