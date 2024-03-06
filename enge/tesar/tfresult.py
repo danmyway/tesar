@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 RESULTS = OrderedDict((
     (None, 'No valid result is available.'),
     ('PASS', 'The test has passed.'),
