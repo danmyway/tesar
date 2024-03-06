@@ -318,7 +318,7 @@ def build_table_comparison():
     if ARGS.split_planname:
         planname_split_index = ARGS.split_planname
 
-    parsed_dict = parse_request_xunit()
+    parsed_dict = parse_request_xunit(skip_pass=ARGS.skip_pass)
     result_table = PrettyTable()
     uuids = list(parsed_dict.keys())
     fields = ["Test Plan"] + uuids
