@@ -5,11 +5,15 @@ import requests
 
 from .tfresult import TFResult, TFResultsList
 
+class FrozenException(Exception):
+    def __init__(self):
+        super().__init__(self, f"Can't do that! FROZEN!")
+
 def frozen_after_send(wrapped):
     @functools.wraps(wrapped)
     def wrapper(self, *args, **kwargs):
-        if self._frozen:
-            raise Exception("Can't do that! FROZEN!")
+        if self.frozen:
+            raise FrozenException()
         return wrapped(self, *args, **kwargs)
     return wrapper
 
@@ -43,9 +47,25 @@ class TFRequest():
         self._request_id = request_id
         self._setup_properties(**kwargs)
 
+    @staticmethod
+    def _setup_class_properties():
+        for propname, default_value in TFRequest.PROPERTIES.items():
+            freezable_propname = f'_freezable_prop_{propname}'
+            setattr(
+                TFRequest,
+                propname,
+                property(
+                    fget=lambda self: getattr(self, freezable_propname),
+                    fset=frozen_after_send(
+                        lambda self, value: setattr(
+                            self, freezable_propname, value
+                        )
+                    ),
+                )
+            )
+            setattr(TFRequest, freezable_propname, default_value)
+
     def _setup_properties(self, **kwargs):
-        for propname, default_value in self.PROPERTIES.items():
-            setattr(self, propname, default_value)
         for key, value in kwargs.items():
             if not hasattr(self, key):
                 raise AttributeError(key)
@@ -64,7 +84,7 @@ class TFRequest():
     @property
     def frozen(self):
         return self._request_id is not None
-    
+
     @property
     def payload(self):
         if self._request_id is not None:
@@ -146,6 +166,9 @@ class TFRequest():
             if getattr(self, propname) != getattr(other, propname):
                 return False
         return True
+
+TFRequest._setup_class_properties()
+
 
 class TFRequestsList(list):
     def iter_results(self):
