@@ -12,6 +12,8 @@ and this project adheres to [Calendar Versioning](https://calver.org).<br>
 - Test results comparison mode introduced, can be controlled by the `--compare` option of `tesar report`.
 - `--showarch` option in `report` command displaying architecture in the table
 - `-u/--uefi` test option to request target with UEFI boot mode
+- CentOS Stream 8 target
+- `--parallel-limit` limit of plans to be run in parallel, default 42
 
 ### Changed
 - `-c/--compose` to `-t/--target`

@@ -53,6 +53,7 @@ def submit_test(
     tmt_distro,
     tmt_architecture,
     boot_method,
+    parallel_limit,
     api_key=TESTING_FARM_API_KEY,
 ):
     """
@@ -107,6 +108,7 @@ def submit_test(
                 },
             }
         ],
+        "settings": {"pipeline": {"parallel-limit": parallel_limit}},
     }
 
     if not (ARGS.dry_run or ARGS.dry_run_cli):

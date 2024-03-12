@@ -39,7 +39,7 @@ That is IMHO **exactly six times more**, than it should be.
 
 With this script, you will be able to do all of the above with just one command!
 
-```shell
+```
 tesar test copr c2r -ref pr123 -g github oamg main -p /plans/tier0/basic_sanity_checks /plans/tier1/rhsm -c cos84 cos7 ol8
 ```
 
@@ -141,49 +141,7 @@ Use `-w/--wait` to override the default 20 seconds waiting time for successful r
 If for any reason you would need the raw payload, use `--dry-run` to get it printed to the command line or use `--dry-run-cli` to print out the full usable `http POST` command.
 When no `-t/--target` option is specified, the request is sent for all mapped target composes for their respective tested packages.
 UEFI boot method can be requested by using the `-u/--uefi` option. Please note, that **only Alma and Rocky 8.9+** targets have the boot method available.
-```
-❯ tesar test --help
-usage: tesar test [-h] (-ref REFERENCE [REFERENCE ...] | -id TASK_ID [TASK_ID ...]) [-g GIT [GIT ...]] [-gp GIT_PATH] [-a ARCHITECTURE] (-p PLANS [PLANS ...] | -pf PLANFILTER [PLANFILTER ...] | -tf TESTFILTER [TESTFILTER ...]) [-t TARGET [TARGET ...]] [-pw] [-w WAIT] [-nw] [-l] [--dry-run] [--dry-run-cli]
-                  [--debug] [-u]
-                  artifact_type package
-
-Send requests to the Testing Farm conveniently.
-
-positional arguments:
-  artifact_type         Choose which type of artifact to test. Choices: brew, copr
-  package               Choose package to test. Choices: c2r, leapp-repository
-
-options:
-  -h, --help            show this help message and exit
-  -ref REFERENCE [REFERENCE ...], --reference REFERENCE [REFERENCE ...]
-                        Mutually exclusive with respect to --task-id. For brew: Specify the reference version to find the correct artifact (e.g. 0.1-2, 0.1.2). For copr: Specify the pull request reference to find the correct artifact (e.g. pr123, main, master, ...).
-  -id TASK_ID [TASK_ID ...], --task-id TASK_ID [TASK_ID ...]
-                        Mutually exclusive with respect to --reference. For brew: Specify the TASK ID for required brew build. NOTE: Double check, that you are passing TASK ID for copr builds, not BUILD ID otherwise testing farm will not install the package. For copr: Specify the BUILD ID
-                        for required copr build.
-  -g GIT [GIT ...], --git GIT [GIT ...]
-                        Provide repository base (github, gitlab, gitlab.cee.redhat) owner of the repository and a branch containing the tests you want to run. Default: '['github', 'oamg', 'main']'
-  -gp GIT_PATH, --git-path GIT_PATH
-                        Path to the metadata tree root. Should be relative to the git repository root provided in the url parameter. Default: '.'
-  -a ARCHITECTURE, --architecture ARCHITECTURE
-                        Choose suitable architecture. Default: 'x86_64'.
-  -p PLANS [PLANS ...], --plans PLANS [PLANS ...]
-                        Specify a test plan or multiple plans to request at testing farm. To run whole set of tiers use /plans/tier*/ Accepts multiple space separated values, sends as a separate request.
-  -pf PLANFILTER [PLANFILTER ...], --planfilter PLANFILTER [PLANFILTER ...]
-                        Filter plans. The specified plan filter will be used in tmt plan ls --filter <YOUR-FILTER> command. By default enabled: true filter is applied. Accepts multiple space separated values, sends as a separate request.
-  -tf TESTFILTER [TESTFILTER ...], --testfilter TESTFILTER [TESTFILTER ...]
-                        Filter tests. The specified plan filter will be used in tmt run discover plan test --filter <YOUR-FILTER> command. Accepts multiple space separated values, sends as a separate request.
-  -t TARGET [TARGET ...], --target TARGET [TARGET ...]
-                        Choose targeted test run. For c2r targeted OS, for leapp targeted upgrade path.
-  -pw, --pool-workaround
-                        Workarounds the AWS spot instances release.
-  -w WAIT, --wait WAIT  Provide number of seconds to wait for successful response. Default: 20 seconds.
-  -nw, --no-wait        Don't wait for successful response and get the artifact link ASAP.
-  -l, --log             Log test links or dry run output to a file.
-  --dry-run             Print out just the payload that would be sent to the testing farm. Do not actually send any request.
-  --dry-run-cli         Print out https shell command with requested payload. Do not actually send any request.
-  --debug               Print out additional information for each request.
-  -u, --uefi            Request UEFI in provisioning.
-```
+Default limit for plans to be run in parallel is 42, to override the default use the `--parallel-limit` option.
 
 ##### Report
 With the report command you are able to get the results of the requested jobs straight to the command line.<br>
@@ -210,34 +168,6 @@ The default way to show results is by showing each run details as a separate tab
 ❯ tesar report -c 8f4e2e3e-beb4-4d3a-9b0a-68a2f428dd1b -c c3726a72-8e6b-4c51-88d8-612556df7ac1 --short  --unify-results=tier2=tier2_7to8 --compare
 ```
 
-
-
-```
-❯ tesar report --help
-usage: tesar report [-h] [--showarch] [-l2] [-s] [-stn SPLIT_TESTNAME] [-spn SPLIT_PLANNAME] [-w] [-d] [--skip-pass] [--compare] [-u UNIFY_RESULTS] [-lt | -f FILE | -c CMD]
-
-Parses task IDs, Testing Farm artifact URLs or Testing Farm API request URLs from multiple sources.
-
-options:
-  -h, --help            show this help message and exit
-  --showarch            Display architecture. By default the architecture is not shown.
-  -l2, --level2         Display test view detail. By default the report shows only plan view.
-  -s, --short           Display short test and plan names.
-  -stn SPLIT_TESTNAME, --split-testname SPLIT_TESTNAME
-                        Specify an index from which will the test name be shown. Passed to testname.split('/')[index:]
-  -spn SPLIT_PLANNAME, --split-planname SPLIT_PLANNAME
-                        Specify an index from which will the plan name be shown. Passed to planname.split('/')[index:]
-  -w, --wait            Wait for the job to complete. Print the table afterwards
-  -d, --download-logs   Download logs for requested run(s).
-  --skip-pass           Skip PASSED results while showing table and while downloading logs.
-  --compare             Build a comparison table for several runs results
-  -u UNIFY_RESULTS, --unify-results UNIFY_RESULTS
-                        Plans name to be treated as one in plan1=plan2 format, useful for runs comparison in case of renaming.
-  -lt, --latest         Mutually exclusive with respect to --file and --cmd. Report latest jobs from /tmp/tesar_latest_jobs.
-  -f FILE, --file FILE  Mutually exclusive with respect to --latest and --cmd. Specify a different location than the default ./report_jobs of the file containing request_id's, artifact URLs or request
-                        URLs.
-  -c CMD, --cmd CMD     Mutually exclusive with respect to --file and --latest. Parse request_ids, artifact URLs or request URLs from the command line.
-```
 
 #### Examples
 
@@ -332,6 +262,7 @@ For convert2RHEL testing we are currently using this form of payload:
                 },
             }
         ],
+        "settings": {"pipeline": {"parallel-limit": parallel_limit}},
     }
 ```
 
@@ -351,6 +282,7 @@ al8: AlmaLinux OS 8.9.20231123 x86_64
 roc86: Rocky-8-ec2-8.6-20220515.0.x86_64
 roc88: Rocky-8-EC2-Base-8.8-20230518.0.x86_64
 roc8: Rocky-8-EC2-Base-8.9-20231119.0.x86_64
+str8: CentOS-Stream-8
 
 # RHEL7 targets
 cos7: CentOS-7-latest
