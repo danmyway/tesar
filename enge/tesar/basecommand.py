@@ -18,7 +18,7 @@ class BaseCommand(abc.ABC):
 
     def __init__(self, arguments):
         LOGGER.debug(f'Command "{self.command_name}" is being run with arguments: {arguments}')
-        self.arguments = arguments
+        self.args = arguments
 
     @abc.abstractmethod
     def __call__(self):

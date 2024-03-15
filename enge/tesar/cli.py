@@ -2,11 +2,13 @@ import argparse
 import logging
 
 from .dispatch.command import DispatchCommand
+from .raw_dispatch.command import RawDispatchCommand
 
 def main_parser():
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(required=True)
     DispatchCommand.add_command(subparsers)
+    RawDispatchCommand.add_command(subparsers)
     verbosity = parser.add_mutually_exclusive_group()
     verbosity.add_argument(
         '-d', '--debug',

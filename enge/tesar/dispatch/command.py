@@ -8,4 +8,4 @@ class DispatchCommand(BaseCommand):
         parser.add_argument('message')
 
     def __call__(self):
-        print(self.arguments.message)
+        print(self.args.message)
