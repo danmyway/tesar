@@ -1,22 +1,8 @@
-import functools
-
-import copy
 import json
 import requests
 
+from .common import Freezable, FrozenException, freezable
 from .tfresult import TFResult, TFResultsList
-
-class FrozenException(Exception):
-    def __init__(self):
-        super().__init__(self, f"Can't do that! FROZEN!")
-
-def frozen_after_send(wrapped):
-    @functools.wraps(wrapped)
-    def wrapper(self, *args, **kwargs):
-        if self.frozen:
-            raise FrozenException()
-        return wrapped(self, *args, **kwargs)
-    return wrapper
 
 class TFEnvironment():
     def __init__(self, arch, os_compose, pool=None, variables=None, artifacts=None, settings_provisioning_post_install_script=None, settings_provisioning_tags=None, tmt_context=None, parent_request=None):
@@ -36,8 +22,8 @@ class TFEnvironment():
             return False
         return self._parent_request.frozen
 
-class TFRequest():
-    PROPERTIES = {
+class TFRequest(Freezable):
+    FREEZABLE_PROPERTIES = {
         # test/fmf
         'git_url' : None,
         'git_branch' : None,
@@ -49,27 +35,17 @@ class TFRequest():
         'environments' : None,
     }
     def __init__(self, request_id=None, **kwargs):
-        super().__setattr__('_request_id', request_id)
+        super().__init__()
+        self._request_id = request_id
         self._setup_properties(**kwargs)
 
-    def __getattr__(self, attrname):
-        return self._properties[attrname]
-
-    def __setattr__(self, attrname, value):
-        if attrname not in self._properties:
-            return super().__setattr__(attrname, value)
-        if self.frozen:
-            raise FrozenException()
-        self._properties[attrname] = value
-
     def _setup_properties(self, **kwargs):
-        super().__setattr__('_properties', copy.deepcopy(self.PROPERTIES))
         for propname, value in kwargs.items():
             setattr(self, propname, value)
 
     def copy(self, **kwargs):
         copy_properties = kwargs.copy()
-        for propname in self.PROPERTIES:
+        for propname in self.FREEZABLE_PROPERTIES:
             copy_properties.setdefault(propname, getattr(self, propname))
         return TFRequest(**copy_properties)
 
@@ -158,7 +134,7 @@ class TFRequest():
     def __eq__(self, other):
         if self._request_id != other._request_id:
             return False
-        for propname in self.PROPERTIES:
+        for propname in self.FREEZABLE_PROPERTIES:
             if getattr(self, propname) != getattr(other, propname):
                 return False
         return True
