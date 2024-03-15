@@ -1,5 +1,6 @@
 import functools
 
+import copy
 import json
 import requests
 
@@ -18,18 +19,22 @@ def frozen_after_send(wrapped):
     return wrapper
 
 class TFEnvironment():
-    #  arch
-    #  os/compose
-    #  pool
-    #  variables
-    #  artifacts
-    #  settings/provisioning
-    #   post_install_script
-    #   tags/BusinessUnit
-    #  tmt/context
-    #   distro
-    #   arch
-    pass
+    def __init__(self, arch, os_compose, pool=None, variables=None, artifacts=None, settings_provisioning_post_install_script=None, settings_provisioning_tags=None, tmt_context=None, parent_request=None):
+        self._parent_request = parent_request
+        self._arch = arch
+        self._os_compose = os_compose
+        self._pool = pool
+        self._variables = variables
+        self._artifacts = artifacts
+        self._settings_provisioning_post_install_script = settings_provisioning_post_install_script
+        self._settings_provisioning_tags = settings_provisioning_tags
+        self._tmt_context = tmt_context # distro, arch
+
+    @property
+    def frozen(self):
+        if self._parent_request is None:
+            return False
+        return self._parent_request.frozen
 
 class TFRequest():
     PROPERTIES = {
@@ -44,32 +49,23 @@ class TFRequest():
         'environments' : None,
     }
     def __init__(self, request_id=None, **kwargs):
-        self._request_id = request_id
+        super().__setattr__('_request_id', request_id)
         self._setup_properties(**kwargs)
 
-    @staticmethod
-    def _setup_class_properties():
-        for propname, default_value in TFRequest.PROPERTIES.items():
-            freezable_propname = f'_freezable_prop_{propname}'
-            setattr(
-                TFRequest,
-                propname,
-                property(
-                    fget=lambda self: getattr(self, freezable_propname),
-                    fset=frozen_after_send(
-                        lambda self, value: setattr(
-                            self, freezable_propname, value
-                        )
-                    ),
-                )
-            )
-            setattr(TFRequest, freezable_propname, default_value)
+    def __getattr__(self, attrname):
+        return self._properties[attrname]
+
+    def __setattr__(self, attrname, value):
+        if attrname not in self._properties:
+            return super().__setattr__(attrname, value)
+        if self.frozen:
+            raise FrozenException()
+        self._properties[attrname] = value
 
     def _setup_properties(self, **kwargs):
-        for key, value in kwargs.items():
-            if not hasattr(self, key):
-                raise AttributeError(key)
-            setattr(self, key, value)
+        super().__setattr__('_properties', copy.deepcopy(self.PROPERTIES))
+        for propname, value in kwargs.items():
+            setattr(self, propname, value)
 
     def copy(self, **kwargs):
         copy_properties = kwargs.copy()
@@ -166,8 +162,6 @@ class TFRequest():
             if getattr(self, propname) != getattr(other, propname):
                 return False
         return True
-
-TFRequest._setup_class_properties()
 
 
 class TFRequestsList(list):
