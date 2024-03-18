@@ -6,13 +6,13 @@ from pprint import pprint
 
 import requests
 
-from dispatch import (
+from .__init__ import (
     FormatText,
     get_arguments,
     get_config,
     get_datetime,
 )
-from dispatch.dispatch_globals import (
+from .dispatch_globals import (
     ARTIFACT_BASE_URL,
     LATEST_TASKS_FILE,
     TESTING_FARM_ENDPOINT,

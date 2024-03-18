@@ -8,8 +8,8 @@ import lxml.etree
 import requests
 from prettytable import PrettyTable
 
-from dispatch import FormatText, get_arguments, get_logging
-from dispatch.dispatch_globals import (
+from ..dispatch import FormatText, get_arguments, get_logging
+from ..dispatch.dispatch_globals import (
     ARTIFACT_BASE_URL,
     TESTING_FARM_ENDPOINT,
     LATEST_TASKS_FILE,
