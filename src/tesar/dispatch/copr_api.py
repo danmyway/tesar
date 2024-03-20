@@ -4,8 +4,8 @@ from datetime import datetime
 
 from copr.v3 import BuildProxy
 
-from dispatch import dispatch_globals
-from dispatch import get_arguments, get_compose_mapping, get_logging, FormatText
+from . import dispatch_globals
+from . import get_arguments, get_compose_mapping, get_logging
 
 SESSION = BuildProxy(dispatch_globals.COPR_CONFIG)
 LOGGER = get_logging()

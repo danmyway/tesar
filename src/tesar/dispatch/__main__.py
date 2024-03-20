@@ -5,13 +5,13 @@ import sys
 
 import requests
 
-from dispatch import (
+from .__init__ import (
     get_arguments,
     get_compose_mapping,
     get_logging,
 )
-from dispatch.dispatch_globals import ARTIFACT_MAPPING, PACKAGE_MAPPING
-from dispatch.tf_send_request import submit_test
+from .dispatch_globals import ARTIFACT_MAPPING, PACKAGE_MAPPING
+from .tf_send_request import submit_test
 
 LOGGER = get_logging()
 ARGS = get_arguments()
@@ -59,10 +59,12 @@ def main():
         LOGGER.critical(index_err)
         sys.exit(99)
     try:
+        artifact_module_name = ARGS.artifact_type + "_api"
         artifact_module = importlib.import_module(
-            "dispatch." + ARGS.artifact_type + "_api"
+            "tesar.dispatch." + artifact_module_name
         )
-    except ImportError:
+    except ImportError as ie:
+        LOGGER.debug(ie)
         LOGGER.error("Artifact_module could not be loaded!")
         return 99
 
