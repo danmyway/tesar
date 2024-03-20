@@ -70,14 +70,14 @@ It is also recommended to install `python-kerberos`, `python-requests`, `python-
 
 Before installing the packages, it is advised to download the `rcm-tools-fedora.repo` to be able to install `brewkoji`
 
-```shell
+```
 sudo su
 curl -L https://download.devel.redhat.com/rel-eng/RCMTOOLS/rcm-tools-fedora.repo -o /etc/yum.repos.d/rcm-tools-fedora.repo
 ```
 
 Installing the packages
 
-```shell
+```
 dnf install brewkoji python-copr python-copr-doc python-kerberos python-requests python-requests-kerberos make krb5-devel gcc python3-devel redhat-rpm-config
 ```
 
@@ -87,7 +87,7 @@ dnf install brewkoji python-copr python-copr-doc python-kerberos python-requests
 
 #### Clone
 Clone repository to your local machine.
-```shell
+```
 # ssh
 git clone git@github.com:danmyway/tesar.git
 # https
@@ -95,7 +95,7 @@ git clone https://github.com/danmyway/tesar.git
 ```
 #### Install
 Change directory to the cloned folder, run virtual environment and install the package.
-```shell
+```
 cd ~/tesar
 pipenv --site-packages shell
 pip install .
@@ -103,11 +103,11 @@ pip install .
 #### Set up configuration file
 Set up config file with obtained Testing Farm API key and Cloud Resources Tag that helps with tracking cloud spend.
 
-```shell
+```
 touch ~/.config/tesar && printf "[testing-farm]\nAPI_KEY={your testing farm api key}\n[cloud-resources-tag]\nCLOUD_RESOURCES_TAG={tag}" > ~/.config/tesar
 ```
 or copy provided file and edit with your favourite editor, e.g.
-```shell
+```
 cp ./tesar.temp ~/.config/tesar
 vim ~/.config/tesar
 ```
@@ -140,10 +140,11 @@ You can look for possible [targeted OS' below](#mapped-composes), multiple can b
 Use `-w/--wait` to override the default 20 seconds waiting time for successful response from the endpoint, or `-nw/--no-wait` to skip the wait time.
 If for any reason you would need the raw payload, use `--dry-run` to get it printed to the command line or use `--dry-run-cli` to print out the full usable `http POST` command.
 When no `-t/--target` option is specified, the request is sent for all mapped target composes for their respective tested packages.
-```shell
+UEFI boot method can be requested by using the `-u/--uefi` option. Please note, that **only Alma and Rocky 8.9+** targets have the boot method available.
+```
 ❯ tesar test --help
-usage: tesar test [-h] (-ref REFERENCE [REFERENCE ...] | -id TASK_ID [TASK_ID ...]) [-g GIT [GIT ...]] [-gp GIT_PATH] [-a ARCHITECTURE] (-p PLANS [PLANS ...] | -pf PLANFILTER [PLANFILTER ...] | -tf TESTFILTER [TESTFILTER ...])
-                  [-t TARGET [TARGET ...]] [-pw] [-w WAIT] [-nw] [-l] [--dry-run] [--dry-run-cli] [--debug]
+usage: tesar test [-h] (-ref REFERENCE [REFERENCE ...] | -id TASK_ID [TASK_ID ...]) [-g GIT [GIT ...]] [-gp GIT_PATH] [-a ARCHITECTURE] (-p PLANS [PLANS ...] | -pf PLANFILTER [PLANFILTER ...] | -tf TESTFILTER [TESTFILTER ...]) [-t TARGET [TARGET ...]] [-pw] [-w WAIT] [-nw] [-l] [--dry-run] [--dry-run-cli]
+                  [--debug] [-u]
                   artifact_type package
 
 Send requests to the Testing Farm conveniently.
@@ -155,11 +156,10 @@ positional arguments:
 options:
   -h, --help            show this help message and exit
   -ref REFERENCE [REFERENCE ...], --reference REFERENCE [REFERENCE ...]
-                        Mutually exclusive with respect to --task-id. For brew: Specify the reference version to find the correct artifact (e.g. 0.1-2, 0.1.2). For copr: Specify the pull request reference to find the correct
-                        artifact (e.g. pr123, main, master, ...).
+                        Mutually exclusive with respect to --task-id. For brew: Specify the reference version to find the correct artifact (e.g. 0.1-2, 0.1.2). For copr: Specify the pull request reference to find the correct artifact (e.g. pr123, main, master, ...).
   -id TASK_ID [TASK_ID ...], --task-id TASK_ID [TASK_ID ...]
-                        Mutually exclusive with respect to --reference. For brew: Specify the TASK ID for required brew build. NOTE: Double check, that you are passing TASK ID for copr builds, not BUILD ID otherwise
-                        testing farm will not install the package. For copr: Specify the BUILD ID for required copr build.
+                        Mutually exclusive with respect to --reference. For brew: Specify the TASK ID for required brew build. NOTE: Double check, that you are passing TASK ID for copr builds, not BUILD ID otherwise testing farm will not install the package. For copr: Specify the BUILD ID
+                        for required copr build.
   -g GIT [GIT ...], --git GIT [GIT ...]
                         Provide repository base (github, gitlab, gitlab.cee.redhat) owner of the repository and a branch containing the tests you want to run. Default: '['github', 'oamg', 'main']'
   -gp GIT_PATH, --git-path GIT_PATH
@@ -169,8 +169,7 @@ options:
   -p PLANS [PLANS ...], --plans PLANS [PLANS ...]
                         Specify a test plan or multiple plans to request at testing farm. To run whole set of tiers use /plans/tier*/ Accepts multiple space separated values, sends as a separate request.
   -pf PLANFILTER [PLANFILTER ...], --planfilter PLANFILTER [PLANFILTER ...]
-                        Filter plans. The specified plan filter will be used in tmt plan ls --filter <YOUR-FILTER> command. By default enabled: true filter is applied. Accepts multiple space separated values, sends as a separate
-                        request.
+                        Filter plans. The specified plan filter will be used in tmt plan ls --filter <YOUR-FILTER> command. By default enabled: true filter is applied. Accepts multiple space separated values, sends as a separate request.
   -tf TESTFILTER [TESTFILTER ...], --testfilter TESTFILTER [TESTFILTER ...]
                         Filter tests. The specified plan filter will be used in tmt run discover plan test --filter <YOUR-FILTER> command. Accepts multiple space separated values, sends as a separate request.
   -t TARGET [TARGET ...], --target TARGET [TARGET ...]
@@ -183,6 +182,7 @@ options:
   --dry-run             Print out just the payload that would be sent to the testing farm. Do not actually send any request.
   --dry-run-cli         Print out https shell command with requested payload. Do not actually send any request.
   --debug               Print out additional information for each request.
+  -u, --uefi            Request UEFI in provisioning.
 ```
 
 ##### Report
@@ -206,13 +206,13 @@ Corresponding return code is set based on the results with following logic:
 
 The default way to show results is by showing each run details as a separate table. In order to combine test results of several different tft runs you can use comparison mode which is triggered by the `--compare` flag of `tesar report`.
 
-```shell
+```
 ❯ tesar report -c 8f4e2e3e-beb4-4d3a-9b0a-68a2f428dd1b -c c3726a72-8e6b-4c51-88d8-612556df7ac1 --short  --unify-results=tier2=tier2_7to8 --compare
 ```
 
 
 
-```shell
+```
 ❯ tesar report --help
 usage: tesar report [-h] [--showarch] [-l2] [-s] [-stn SPLIT_TESTNAME] [-spn SPLIT_PLANNAME] [-w] [-d] [--skip-pass] [--compare] [-u UNIFY_RESULTS] [-lt | -f FILE | -c CMD]
 
@@ -234,14 +234,14 @@ options:
   -u UNIFY_RESULTS, --unify-results UNIFY_RESULTS
                         Plans name to be treated as one in plan1=plan2 format, useful for runs comparison in case of renaming.
   -lt, --latest         Mutually exclusive with respect to --file and --cmd. Report latest jobs from /tmp/tesar_latest_jobs.
-  -f FILE, --file FILE  Mutually exclusive with respect to --latest and --cmd. Specify a different location than the default ./report_jobs of the file containing request_id's, artifact URLs
-                        or request URLs.
+  -f FILE, --file FILE  Mutually exclusive with respect to --latest and --cmd. Specify a different location than the default ./report_jobs of the file containing request_id's, artifact URLs or request
+                        URLs.
   -c CMD, --cmd CMD     Mutually exclusive with respect to --file and --latest. Parse request_ids, artifact URLs or request URLs from the command line.
 ```
 
 #### Examples
 
-```shell
+```
 # Test copr build for PR#123 with plan basic_sanity_check on CentOS 8.4
 $ tesar test copr c2r -ref pr123 -g github oamg main -p /plans/tier0/basic_sanity_checks -c cos84
 
@@ -256,7 +256,7 @@ $ tesar test brew c2r -ref 0.12-3 -git github oamg main -p /plans/tier0/basic_sa
 
 ```
 
-```shell
+```
 # Get results for the requests in the default file ./latest_jobs
 $ tesar report
 
@@ -322,6 +322,12 @@ For convert2RHEL testing we are currently using this form of payload:
                     "context": {
                         "distro": tmt_distro,
                         "arch": tmt_architecture,
+                        "boot_method": boot_method,
+                    }
+                },
+                "hardware": {
+                    "boot": {
+                        "method": boot_method,
                     }
                 },
             }
@@ -338,7 +344,7 @@ Sadly, there is no instance of any relevance for CentOS 8 latest available.
 ```
 # RHEL8 targets
 cos8: CentOS-8-latest
-ol8: OL8.8-x86_64-HVM-2023-06-21
+ol8: OL8.9-x86_64-HVM-2024-02-02
 al86: AlmaLinux OS 8.6.20220901 x86_64
 al88: AlmaLinux OS 8.8.20230524 x86_64
 al8: AlmaLinux OS 8.9.20231123 x86_64

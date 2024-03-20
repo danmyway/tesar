@@ -52,6 +52,7 @@ def submit_test(
     package,
     tmt_distro,
     tmt_architecture,
+    boot_method,
     api_key=TESTING_FARM_API_KEY,
 ):
     """
@@ -96,6 +97,12 @@ def submit_test(
                     "context": {
                         "distro": tmt_distro,
                         "arch": tmt_architecture,
+                        "boot_method": boot_method,
+                    }
+                },
+                "hardware": {
+                    "boot": {
+                        "method": boot_method,
                     }
                 },
             }

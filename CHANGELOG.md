@@ -8,9 +8,10 @@ and this project adheres to [Calendar Versioning](https://calver.org).<br>
 ## [Unreleased]
 ### Added
 - Return code for report command
-- Report command option for downloading logs only for non-passed tests
+- Report command option for showing results and/or downloading logs only for non-passed tests
 - Test results comparison mode introduced, can be controlled by the `--compare` option of `tesar report`.
 - `--showarch` option in `report` command displaying architecture in the table
+- `-u/--uefi` test option to request target with UEFI boot mode
 
 ### Changed
 - `-c/--compose` to `-t/--target`

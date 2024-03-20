@@ -248,6 +248,9 @@ Accepts multiple space separated values, sends as a separate request.""",
         help="Print out additional information for each request.",
     )
 
+    test.add_argument(
+        "-u", "--uefi", action="store_true", help="Request UEFI in provisioning."
+    )
     report = subparsers.add_parser(
         "report",
         help="Report results for requested tasks.",
@@ -296,7 +299,7 @@ Accepts multiple space separated values, sends as a separate request.""",
         help="""Download logs for requested run(s).""",
     )
     report.add_argument(
-        '--skip-pass',
+        "--skip-pass",
         action="store_true",
         help="Skip PASSED results while showing table and while downloading logs.",
     )

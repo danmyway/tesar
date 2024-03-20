@@ -61,7 +61,7 @@ C2R_COMPOSE_MAPPING = {
         "chroot": "epel-8-x86_64",
     },
     "ol8": {
-        "compose": "OL8.8-x86_64-HVM-2023-06-21",
+        "compose": "OL8.9-x86_64-HVM-2024-02-02",
         "distro": "oracle-8-latest",
         "chroot": "epel-8-x86_64",
     },
