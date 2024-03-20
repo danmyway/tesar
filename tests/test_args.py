@@ -3,7 +3,7 @@ Unit tests for command-line options
 """
 import pytest
 
-from dispatch import get_arguments
+from tesar.dispatch.__init__ import get_arguments
 
 
 def test_cmd_args_are_appended():

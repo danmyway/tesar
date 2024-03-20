@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import koji
 
-from dispatch import get_compose_mapping, get_arguments, get_logging
+from .__init__ import get_compose_mapping, get_arguments, get_logging
 
 LOGGER = get_logging()
 ARGS = get_arguments()

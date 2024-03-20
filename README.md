@@ -5,11 +5,11 @@
        1. [Testing farm API key](#testing-farm-api-key)
    2. [Cloud Resources Tag](#cloud-resources-tag)
    3. [Package dependencies](#package-dependencies)
-3. [Setup](#setup)
+3. [Setting up](#setting-up)
    1. [Installation](#installation)
        1. [Clone](#clone)
        2. [Install](#install)
-       3. [Set up configuration file](#set-up-configuration-file)
+       3. [Set up the configuration file](#set-up-configuration-file)
        4. [Config file template](#config-file-template)
    2. [Usage](#usage)
        1. [Commands](#commands)
@@ -60,47 +60,28 @@ Each team using the Testing Farm to run test efforts has a BusinessUnit tag assi
 Those are important to use for correct reporting efforts of a cloud spend for each team.<br>
 Ask peers in your team for the tag value.
 
-### Package dependencies
-
-To be able to get information for brew-builds and copr-builds this script uses the `brewkoji` and
-`python-copr` packages. <br>
-If needed, install `python-copr-doc` for code documentation for the python-copr package.<br>
-Documentation then will be available at `/usr/share/doc/python-copr/html/ClientV3.html`
-It is also recommended to install `python-kerberos`, `python-requests`, `python-requests-kerberos`, `make`, `krb5-devel`, `gcc`, `python3-devel`, `redhat-rpm-config` to be able to run the script.
-
-Before installing the packages, it is advised to download the `rcm-tools-fedora.repo` to be able to install `brewkoji`
-
-```
-sudo su
-curl -L https://download.devel.redhat.com/rel-eng/RCMTOOLS/rcm-tools-fedora.repo -o /etc/yum.repos.d/rcm-tools-fedora.repo
-```
-
-Installing the packages
-
-```
-dnf install brewkoji python-copr python-copr-doc python-kerberos python-requests python-requests-kerberos make krb5-devel gcc python3-devel redhat-rpm-config
-```
-
-# Setup
+# Setting up
 
 ### Installation
 
-#### Clone
-Clone repository to your local machine.
+#### Enable the copr repository
+
 ```
-# ssh
-git clone git@github.com:danmyway/tesar.git
-# https
-git clone https://github.com/danmyway/tesar.git
+sudo dnf copr enable danmyway/tesar
 ```
+
+If you are brave enough, though not advised, you can try out the development repository.
+
+```
+sudo dnf copr enable danmyway/tesar-devel
+```
+
 #### Install
-Change directory to the cloned folder, run virtual environment and install the package.
+
 ```
-cd ~/tesar
-pipenv --site-packages shell
-pip install .
+sudo dnf install tesar
 ```
-#### Set up configuration file
+#### Set up the configuration file
 Set up config file with obtained Testing Farm API key and Cloud Resources Tag that helps with tracking cloud spend.
 
 ```
@@ -120,8 +101,6 @@ API_KEY=
 CLOUD_RESOURCES_TAG=
 ```
 ### Usage
-If you installed the script via `pip install .` you should be able to run the script by running `tesar` command.<br>
-Otherwise run with `python3 __main__.py` from the `tesar/tesar` directory.
 
 #### Commands
 As of now tesar is able to perform two tasks.
@@ -168,7 +147,6 @@ The default way to show results is by showing each run details as a separate tab
 ```
 ❯ tesar report -c 8f4e2e3e-beb4-4d3a-9b0a-68a2f428dd1b -c c3726a72-8e6b-4c51-88d8-612556df7ac1 --short  --unify-results=tier2=tier2_7to8 --compare
 ```
-
 
 #### Examples
 
