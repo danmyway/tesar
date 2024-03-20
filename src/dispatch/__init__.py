@@ -154,35 +154,33 @@ Default: '%(default)s'""",
         help="""Choose suitable architecture.\nDefault: '%(default)s'.""",
     )
 
-    fmf_reference = test.add_mutually_exclusive_group(required=True)
-
-    fmf_reference.add_argument(
+    test.add_argument(
         "-p",
         "--plans",
+        required=True,
         nargs="+",
         help="""Specify a test plan or multiple plans to request at testing farm.
 To run whole set of tiers use /plans/tier*/
 Accepts multiple space separated values, sends as a separate request.""",
     )
 
-    fmf_reference.add_argument(
+    test.add_argument(
         "-pf",
         "--planfilter",
-        nargs="+",
+        nargs="?",
         help="""Filter plans.
 The specified plan filter will be used in tmt plan ls --filter <YOUR-FILTER> command.
 By default enabled: true filter is applied.
-Accepts multiple space separated values, sends as a separate request.
 """,
     )
 
-    fmf_reference.add_argument(
+    test.add_argument(
         "-tf",
         "--testfilter",
-        nargs="+",
+        nargs="?",
         help="""Filter tests.
-The specified plan filter will be used in tmt run discover plan test --filter <YOUR-FILTER> command.
-Accepts multiple space separated values, sends as a separate request.""",
+The specified test filter will be used in tmt run discover plan test --filter <YOUR-FILTER> command.
+""",
     )
 
     test.add_argument(

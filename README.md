@@ -135,7 +135,8 @@ The goal of tesar is to make requesting test jobs as easy as possible.<br>
 Instead of looking for build IDs to pass to the payload, all you need to know is a `--reference` for a pull request number associated with the build you need to test. For brew builds you just need to know the release version.<br>
 In case you have the Build ID handy, you can use that instead of the reference.<br>
 Use `-g/--git` to point from where the test metadata and code should be run. Specify the repository base e.g. github, repository owner and the branch from which the tests should run.<br>
-Multiple `--plans` can be specified and will be dispatched in separate jobs. The same applies to `--planfilter` and `--testfilter`.<br>
+Multiple `--plans` can be specified and will be dispatched in separate jobs.
+When using `--planfilter` or `--testfilter` to specify singular test it is disallowed to request multiple `--plans` in one command.<br>
 You can look for possible [targeted OS' below](#mapped-composes), multiple can be requested and will be dispatched in separate jobs.
 Use `-w/--wait` to override the default 20 seconds waiting time for successful response from the endpoint, or `-nw/--no-wait` to skip the wait time.
 If for any reason you would need the raw payload, use `--dry-run` to get it printed to the command line or use `--dry-run-cli` to print out the full usable `http POST` command.
