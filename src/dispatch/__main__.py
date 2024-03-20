@@ -70,28 +70,23 @@ def main():
         reference = ARGS.reference
     elif ARGS.task_id:
         reference = ARGS.task_id
-    else:
-        LOGGER.critical("There is something wrong with reference/build_id!")
-        sys.exit(99)
 
-    iterate_over = None
+    plans = ARGS.plans
 
-    if ARGS.plans:
-        iterate_over = ARGS.plans
-    elif ARGS.planfilter:
-        iterate_over = ARGS.planfilter
-    elif ARGS.testfilter:
-        iterate_over = ARGS.testfilter
+    # Exit if multiple plans requested with additional filter(s)
+    if len(plans) > 1 and (ARGS.planfilter or ARGS.testfilter):
+        LOGGER.critical(
+            "It is not advised to use testfilter or planfilter with multiple requested plans."
+            " Please specify one plan with additional filters per request."
+        )
+        sys.exit(2)
 
     boot_method = "bios"
     if ARGS.uefi:
         boot_method = "uefi"
 
-    for item in iterate_over:
-        plan = None
-        planfilter = None
-        testfilter = None
-        item = item.rstrip("/")
+    for plan in plans:
+        item = plan.rstrip("/")
         # Usually the best approach is to let Testing Farm to choose the most suitable pool.
         # Recently the AWS pools are releasing the guests during test execution.
         # If the pool-workaround option is passed, use the baseosci-openstack pool
@@ -101,19 +96,6 @@ def main():
             LOGGER.warning(
                 "Pool workaround option detected, requesting 'baseosci-openstack' pool for this run."
             )
-
-        if ARGS.plans:
-            plan = item
-            planfilter = ""
-            testfilter = ""
-        elif ARGS.planfilter:
-            plan = ""
-            planfilter = item
-            testfilter = ""
-        elif ARGS.testfilter:
-            plan = ""
-            planfilter = ""
-            testfilter = item
 
         if ARGS.target:
             info, build_reference = artifact_module.get_info(
@@ -142,8 +124,8 @@ def main():
                 ARGS.git[2],
                 ARGS.git_path,
                 plan,
-                planfilter,
-                testfilter,
+                ARGS.planfilter,
+                ARGS.testfilter,
                 ARGS.architecture,
                 build["compose"],
                 pool,
