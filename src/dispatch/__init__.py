@@ -113,7 +113,7 @@ def get_arguments(args=None):
     reference.add_argument(
         "-ref",
         "--reference",
-        nargs="+",
+        nargs=1,
         help=f"""{FormatText.bold}Mutually exclusive with respect to --task-id.{FormatText.end}
 For brew: Specify the reference version to find the correct artifact (e.g. 0.1-2, 0.1.2).
 For copr: Specify the pull request reference to find the correct artifact (e.g. pr123, main, master, ...).""",
@@ -122,7 +122,7 @@ For copr: Specify the pull request reference to find the correct artifact (e.g. 
     reference.add_argument(
         "-id",
         "--task-id",
-        nargs="+",
+        nargs=1,
         help=f"""{FormatText.bold}Mutually exclusive with respect to --reference.{FormatText.end}
 For brew: Specify the TASK ID for required brew build.
 {FormatText.bold}NOTE: Double check, that you are passing TASK ID for copr builds, not BUILD ID otherwise testing farm will not install the package.{FormatText.end}
