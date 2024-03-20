@@ -95,4 +95,9 @@ C2R_COMPOSE_MAPPING = {
         "distro": "rocky-8-latest",
         "chroot": "epel-8-x86_64",
     },
+    "str8": {
+        "compose": "CentOS-Stream-8",
+        "distro": "stream-8-latest",
+        "chroot": "epel-8-x86_64",
+    },
 }

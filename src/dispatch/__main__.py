@@ -155,6 +155,7 @@ def main():
                 build["distro"],
                 ARGS.architecture,
                 boot_method,
+                parallel_limit=ARGS.parallel_limit,
             )
 
 

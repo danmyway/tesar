@@ -214,6 +214,13 @@ Accepts multiple space separated values, sends as a separate request.""",
         help="""Don't wait for successful response and get the artifact link ASAP.""",
     )
 
+    test.add_argument(
+        "--parallel-limit",
+        type=int,
+        default=42,
+        help="""Redefine the limit of plans run in parallel.\nDefault: %(default)s.""",
+    )
+
     # TODO tesar file path
     # test.add_argument(
     #     "-cfg",
@@ -306,12 +313,14 @@ Accepts multiple space separated values, sends as a separate request.""",
     report.add_argument(
         "--compare",
         action="store_true",
-        help="""Build a comparison table for several runs results""")
+        help="""Build a comparison table for several runs results""",
+    )
     report.add_argument(
         "-u",
         "--unify-results",
         action="append",
-        help="""Plans name to be treated as one in plan1=plan2 format, useful for runs comparison in case of renaming.""")
+        help="""Plans name to be treated as one in plan1=plan2 format, useful for runs comparison in case of renaming.""",
+    )
     tasks_source = report.add_mutually_exclusive_group()
     tasks_source.add_argument(
         "-lt",
