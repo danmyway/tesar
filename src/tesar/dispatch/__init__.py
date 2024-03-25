@@ -75,7 +75,7 @@ def get_logging():
     if not logger.hasHandlers():
         console_handler = logging.StreamHandler()
         console_handler.setLevel(logging.INFO)
-        console_handler.setFormatter(logging.Formatter("%(levelname)s | %(message)s"))
+        console_handler.setFormatter(logging.Formatter("%(levelname)-8s | %(message)s"))
         logger.addHandler(console_handler)
     return logger
 
