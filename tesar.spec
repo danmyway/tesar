@@ -1,5 +1,5 @@
 Name: tesar
-Version: 2023.06.29
+Version: 2024.03.25
 Release: 1%{?dist}
 
 Summary: tesar

@@ -7,6 +7,13 @@ and this project adheres to [Calendar Versioning](https://calver.org).<br>
 
 ## [Unreleased]
 ### Added
+
+### Changed
+
+### Removed
+
+## [2024.03.25]
+### Added
 - Return code for report command
 - Report command option for showing results and/or downloading logs only for non-passed tests
 - Test results comparison mode introduced, can be controlled by the `--compare` option of `tesar report`.
@@ -17,7 +24,6 @@ and this project adheres to [Calendar Versioning](https://calver.org).<br>
 - query for task ID, warn and exit if build doesn't match requested test artifact
 - make builds available in the copr.fedorainfracloud.org repositories tesar and tesar-devel respectively
 
-
 ### Changed
 - `-c/--compose` to `-t/--target`
 - bump mapped convert2rhel composes/targets to Alma Linux and Rocky Linux 8.9, Oracle Linux 8.8
@@ -25,6 +31,7 @@ and this project adheres to [Calendar Versioning](https://calver.org).<br>
 - use all mapped compose targets when `-t/--target` not specified for the leapp-repository package
 - make `--plans`, `--planfilter` and `--testfilter` compatible
 ### Removed
+
 ## [2023.07.12]
 ### Added
 - `-s/--short` display short test and plan names
