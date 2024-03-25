@@ -127,6 +127,8 @@ def parse_request_xunit(request_url_list=None, tasks_source=None, skip_pass=Fals
         request_arch = request.json()["environments_requested"][0]["arch"]
         request_datetime_created = request.json()["created"]
         request_datetime_parsed = request_datetime_created.split(".")[0]
+        request_summary = request.json()["result"]["summary"]
+        request_result_overall = request.json()["result"]["overall"]
 
         log_dir = f"{request_uuid}_logs"
 
@@ -175,7 +177,7 @@ def parse_request_xunit(request_url_list=None, tasks_source=None, skip_pass=Fals
 
         if request.json()["state"] == "error":
             error_formatted = FormatText.bg_red + "ERROR" + FormatText.bg_default
-            error_reason = request.json()["result"]["summary"]
+            error_reason = request_summary
             message = (
                 f"Request ended up in {error_formatted} state, because {error_reason}.\n"
                 f"See more details on the result page {url.replace(TESTING_FARM_ENDPOINT, ARTIFACT_BASE_URL)}"
@@ -193,6 +195,18 @@ def parse_request_xunit(request_url_list=None, tasks_source=None, skip_pass=Fals
             if results_xml_response:
                 xunit = results_xml_response.text
             else:
+                LOGGER.critical("Unable to find the xml to parse.")
+                LOGGER.critical("Trying to fall back to the request results.")
+                if request_result_overall and request_summary:
+                    LOGGER.info(
+                        f"Result: {FormatText.bold}{request_result_overall}{FormatText.end}"
+                    )
+                    LOGGER.info(
+                        f"Summary: {FormatText.bold}{request_summary}{FormatText.end}"
+                    )
+                else:
+                    LOGGER.info("Couldn't find any valuable information.")
+                    LOGGER.info(f"Please consult with {url}")
                 update_retval(ERROR_HERE)
                 continue
 
@@ -200,12 +214,30 @@ def parse_request_xunit(request_url_list=None, tasks_source=None, skip_pass=Fals
 
         job_result_overall = xml.xpath("/testsuites/@overall-result")[0]
         job_test_suite = xml.xpath("//testsuite")
+
+        # If there is just a single test suite returned and the name of the test suite
+        # is pipeline, we can assume that the response contains only information about the pipeline.
+        # Set the potential_pipeline_error to True and hand over to the overall job result evaluation
+        potential_pipeline_error = False
+        if (
+            len(job_test_suite) == 1
+            and job_test_suite[0].xpath("./@name")[0] == "pipeline"
+        ):
+            potential_pipeline_error = True
+
         if job_result_overall == "passed":
             update_retval(ALL_PASS)
         elif job_result_overall == "failed":
             update_retval(FAIL_HERE)
         elif job_result_overall == "error":
             update_retval(ERROR_HERE)
+            # Bail out, when the potential pipeline error assessment returns True
+            if potential_pipeline_error:
+                LOGGER.critical(
+                    f"Potential pipeline ERROR, please verify the accuracy of the assessment at {url}"
+                )
+                LOGGER.critical(f"Result summary: {request_summary}")
+                continue
         else:
             update_retval(99)
 
@@ -513,5 +545,5 @@ def main(result_table=None):
     if result_table.rowcount > 0:
         print(result_table)
     else:
-        print("Nothing to report!")
+        LOGGER.info("Nothing to report!")
     return RETURN_VALUE
