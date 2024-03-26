@@ -127,8 +127,6 @@ def parse_request_xunit(request_url_list=None, tasks_source=None, skip_pass=Fals
         request_arch = request.json()["environments_requested"][0]["arch"]
         request_datetime_created = request.json()["created"]
         request_datetime_parsed = request_datetime_created.split(".")[0]
-        request_summary = request.json()["result"]["summary"]
-        request_result_overall = request.json()["result"]["overall"]
 
         log_dir = f"{request_uuid}_logs"
 
@@ -176,6 +174,8 @@ def parse_request_xunit(request_url_list=None, tasks_source=None, skip_pass=Fals
                 continue
 
         if request.json()["state"] == "error":
+            request_summary = request.json()["result"]["summary"]
+            request_result_overall = request.json()["result"]["overall"]
             error_formatted = FormatText.bg_red + "ERROR" + FormatText.bg_default
             error_reason = request_summary
             message = (
