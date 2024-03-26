@@ -1,6 +1,7 @@
 Name: tesar
 Version: 2024.03.25
 Release: 1%{?dist}
+Epoch: 1
 
 Summary: tesar
 License: MIT
