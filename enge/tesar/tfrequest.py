@@ -4,6 +4,7 @@ import requests
 from .common import Freezable, FrozenException, freezable
 from .tfresult import TFResult, TFResultsList
 
+
 class TFEnvironment(Freezable):
     FREEZABLE_PROPERTIES = {
         'parent_request' : None,
@@ -66,18 +67,20 @@ class TFEnvironment(Freezable):
             },
         }
 
+
 class TFRequest(Freezable):
     FREEZABLE_PROPERTIES = {
         # test/fmf
-        'git_url' : None,
-        'git_branch' : None,
-        'git_path' : None,
-        'plan_name' : None,
-        'plan_filter' : None,
-        'test_filter' : None,
+        'git_url': None,
+        'git_branch': None,
+        'git_path': None,
+        'plan_name': None,
+        'plan_filter': None,
+        'test_filter': None,
         # environments (list)
-        'environments' : None,
+        'environments': None,
     }
+
     def __init__(self, request_id=None, **kwargs):
         super().__init__()
         self._request_id = request_id
