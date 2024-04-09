@@ -35,6 +35,37 @@ class TFEnvironment(Freezable):
             return False
         return self._parent_request.frozen
 
+    @property
+    def payload(self):
+        return {
+            "arch": architecture,
+            "os": {"compose": compose},
+            "pool": pool,
+            "variables": {
+                "SOURCE_RELEASE": source_release,
+                "TARGET_RELEASE": target_release,
+            },
+            "artifacts": [
+                {
+                    "id": artifact_id,
+                    "type": artifact_type,
+                    "packages": [package],
+                }
+            ],
+            "settings": {
+                "provisioning": {
+                    "post_install_script": POST_INSTALL_SCRIPT,
+                    "tags": {"BusinessUnit": CLOUD_RESOURCES_TAG},
+                }
+            },
+            "tmt": {
+                "context": {
+                    "distro": tmt_distro,
+                    "arch": tmt_architecture,
+                }
+            },
+        }
+
 class TFRequest(Freezable):
     FREEZABLE_PROPERTIES = {
         # test/fmf
@@ -87,44 +118,15 @@ class TFRequest(Freezable):
             "api_key": api_key,
             "test": {
                 "fmf": {
-                    "url": git_url,
-                    "ref": git_branch,
-                    "path": git_path,
-                    "name": plan,
-                    "plan_filter": planfilter,
-                    "test_filter": testfilter,
+                    "url": self.git_url,
+                    "ref": self.git_branch,
+                    "path": self.git_path,
+                    "name": self.plan_name,
+                    "plan_filter": self.plan_filter,
+                    "test_filter": self.test_filter,
                 }
             },
-            "environments": [
-                {
-                    "arch": architecture,
-                    "os": {"compose": compose},
-                    "pool": pool,
-                    "variables": {
-                        "SOURCE_RELEASE": source_release,
-                        "TARGET_RELEASE": target_release,
-                    },
-                    "artifacts": [
-                        {
-                            "id": artifact_id,
-                            "type": artifact_type,
-                            "packages": [package],
-                        }
-                    ],
-                    "settings": {
-                        "provisioning": {
-                            "post_install_script": POST_INSTALL_SCRIPT,
-                            "tags": {"BusinessUnit": CLOUD_RESOURCES_TAG},
-                        }
-                    },
-                    "tmt": {
-                        "context": {
-                            "distro": tmt_distro,
-                            "arch": tmt_architecture,
-                        }
-                    },
-                }
-            ],
+            "environments": [environment.payload for environment in self.environments],
         }
 
     @property
