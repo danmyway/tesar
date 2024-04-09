@@ -62,6 +62,14 @@ class TFRequest(Freezable):
             copy_properties.setdefault(propname, getattr(self, propname))
         return TFRequest(**copy_properties)
 
+    @freezable
+    def add_environment(self, *args, **kwargs):
+        if self.environments is None:
+            self.environments = []
+        self.environments.append(
+            TFEnvironment(*args, **kwargs, parent_request=self)
+        )
+
     @property
     def id(self):
         return self.send()
