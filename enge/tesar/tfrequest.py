@@ -4,17 +4,30 @@ import requests
 from .common import Freezable, FrozenException, freezable
 from .tfresult import TFResult, TFResultsList
 
-class TFEnvironment():
+class TFEnvironment(Freezable):
+    FREEZABLE_PROPERTIES = {
+        'parent_request' : None,
+        'arch' : None,
+        'os_compose' : None,
+        'pool' : None,
+        'variables' : {},
+        'artifacts' : None,
+        'settings_provisioning_post_install_script' : None,
+        'settings_provisioning_tags' : {},
+        'tmt_context' : {},
+    }
+
     def __init__(self, arch, os_compose, pool=None, variables=None, artifacts=None, settings_provisioning_post_install_script=None, settings_provisioning_tags=None, tmt_context=None, parent_request=None):
-        self._parent_request = parent_request
-        self._arch = arch
-        self._os_compose = os_compose
-        self._pool = pool
-        self._variables = variables
-        self._artifacts = artifacts
-        self._settings_provisioning_post_install_script = settings_provisioning_post_install_script
-        self._settings_provisioning_tags = settings_provisioning_tags
-        self._tmt_context = tmt_context # distro, arch
+        super().__init__()
+        self.arch = arch
+        self.os_compose = os_compose
+        self.pool = pool
+        self.variables = variables
+        self.artifacts = artifacts
+        self.settings_provisioning_post_install_script = settings_provisioning_post_install_script
+        self.settings_provisioning_tags = settings_provisioning_tags
+        self.tmt_context = tmt_context # distro, arch
+        self.parent_request = parent_request # needs to be the last to allow creating TFEnvironment instance for already submitted request
 
     @property
     def frozen(self):
