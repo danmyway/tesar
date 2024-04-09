@@ -134,10 +134,7 @@ class TFRequest(Freezable):
     def __eq__(self, other):
         if self._request_id != other._request_id:
             return False
-        for propname in self.FREEZABLE_PROPERTIES:
-            if getattr(self, propname) != getattr(other, propname):
-                return False
-        return True
+        return super().__eq__(other)
 
 
 class TFRequestsList(list):

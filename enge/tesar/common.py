@@ -32,6 +32,12 @@ class Freezable(abc.ABC):
     def frozen(self):
         pass
 
+    def __eq__(self, other):
+        for propname in self.FREEZABLE_PROPERTIES:
+            if getattr(self, propname) != getattr(other, propname):
+                return False
+        return True
+
 def freezable(wrapped):
     @functools.wraps(wrapped)
     def wrapper(self, *args, **kwargs):
