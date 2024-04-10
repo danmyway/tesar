@@ -12,7 +12,8 @@ class BaseCommand(abc.ABC):
         command_parser.set_defaults(command_class=self)
         self.add_arguments(command_parser)
 
-    @abc.abstractclassmethod
+    @classmethod
+    @abc.abstractmethod
     def add_arguments(self, parser):
         pass
 

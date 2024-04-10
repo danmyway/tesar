@@ -2,9 +2,11 @@ import abc
 import copy
 import functools
 
+
 class FrozenException(Exception):
     def __init__(self):
         super().__init__(self, f"Can't do that! FROZEN!")
+
 
 class Freezable(abc.ABC):
     FREEZABLE_PROPERTIES = {}
@@ -38,6 +40,7 @@ class Freezable(abc.ABC):
             if getattr(self, propname) != getattr(other, propname):
                 return False
         return True
+
 
 def freezable(wrapped):
     @functools.wraps(wrapped)
