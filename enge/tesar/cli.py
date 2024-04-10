@@ -4,6 +4,7 @@ import logging
 from .dispatch.command import DispatchCommand
 from .raw_dispatch.command import RawDispatchCommand
 
+
 def main_parser():
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(required=True)
@@ -21,6 +22,7 @@ def main_parser():
         help="Run in quiet mode: show errors and failures only.",
     )
     return parser
+
 
 def main(in_args):
     args = main_parser().parse_args(in_args)
