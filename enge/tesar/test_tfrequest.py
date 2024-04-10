@@ -1,3 +1,4 @@
+import copy
 import unittest
 
 from .tfrequest import TFRequest, FrozenException
@@ -69,7 +70,7 @@ class TestEqual(unittest.TestCase):
                 original = TFRequest(**kwargs_set)
                 self.assertEqual(
                     original,
-                    original.copy()
+                    copy.deepcopy(original)
                 )
 
     def test_various_nonequals(self):
@@ -102,5 +103,5 @@ class TestCopy(unittest.TestCase):
     def test_copy_simple(self):
         self.assertEqual(
             self.r,
-            self.r.copy(),
+            copy.deepcopy(self.r),
         )

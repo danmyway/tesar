@@ -35,6 +35,16 @@ class Freezable(abc.ABC):
     def frozen(self):
         pass
 
+    def __copy__(self):
+        return self.__class__(**self._freezable_properties)
+
+    def __deepcopy__(self, memodict):
+        return self.__class__(**{
+            key:copy.deepcopy(value, memodict)
+            for key, value in
+            self._freezable_properties.items()
+        })
+
     def __eq__(self, other):
         for propname in self.FREEZABLE_PROPERTIES:
             if getattr(self, propname) != getattr(other, propname):

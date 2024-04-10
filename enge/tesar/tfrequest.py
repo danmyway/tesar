@@ -90,12 +90,6 @@ class TFRequest(Freezable):
         for propname, value in kwargs.items():
             setattr(self, propname, value)
 
-    def copy(self, **kwargs):
-        copy_properties = kwargs.copy()
-        for propname in self.FREEZABLE_PROPERTIES:
-            copy_properties.setdefault(propname, getattr(self, propname))
-        return TFRequest(**copy_properties)
-
     @freezable
     def add_environment(self, *args, **kwargs):
         if self.environments is None:
