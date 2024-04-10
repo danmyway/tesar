@@ -7,15 +7,15 @@ from .tfresult import TFResult, TFResultsList
 
 class TFEnvironment(Freezable):
     FREEZABLE_PROPERTIES = {
-        'parent_request' : None,
-        'arch' : None,
-        'os_compose' : None,
-        'pool' : None,
-        'variables' : {},
-        'artifacts' : None,
-        'settings_provisioning_post_install_script' : None,
-        'settings_provisioning_tags' : {},
-        'tmt_context' : {},
+        'parent_request': None,
+        'arch': None,
+        'os_compose': None,
+        'pool': None,
+        'variables': {},
+        'artifacts': None,
+        'settings_provisioning_post_install_script': None,
+        'settings_provisioning_tags': {},
+        'tmt_context': {},
     }
 
     def __init__(self, arch, os_compose, pool=None, variables=None, artifacts=None, settings_provisioning_post_install_script=None, settings_provisioning_tags=None, tmt_context=None, parent_request=None):
