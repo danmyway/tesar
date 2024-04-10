@@ -28,7 +28,8 @@ class Freezable(abc.ABC):
             copy.deepcopy(self.FREEZABLE_PROPERTIES)
         )
 
-    @abc.abstractproperty
+    @property
+    @abc.abstractmethod
     def frozen(self):
         pass
 
