@@ -147,10 +147,7 @@ def parse_request_xunit(request_url_list=None, tasks_source=None, skip_pass=Fals
         )
 
         if ARGS.wait:
-            while (
-                request.json()["state"] != "complete"
-                and request.json()["state"] != "error"
-            ):
+            while request.json()["state"] not in ("complete", "error", "canceled"):
                 print(end=clear_line)
                 print(
                     f"Waiting for the job to finish.{spacer}{loading_chars[index]}",
