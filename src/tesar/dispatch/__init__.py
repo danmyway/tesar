@@ -330,6 +330,7 @@ The specified test filter will be used in tmt run discover plan test --filter <Y
     tasks_source.add_argument(
         "-f",
         "--file",
+        action="append",
         help=f"""{FormatText.bold}Mutually exclusive with respect to --latest and --cmd.{FormatText.end}
         Specify a different location than the default {dispatch_globals.DEFAULT_TASKS_FILE} of the file containing request_id's, artifact URLs or request URLs.""",
     )

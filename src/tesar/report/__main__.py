@@ -14,6 +14,7 @@ from ..dispatch.dispatch_globals import (
     TESTING_FARM_ENDPOINT,
     LATEST_TASKS_FILE,
     DEFAULT_TASKS_FILE,
+    C2R_COMPOSE_MAPPING,
 )
 
 ARGS = get_arguments()
@@ -48,17 +49,26 @@ def parse_tasks():
             tasks_source = LATEST_TASKS_FILE
             tasks_source_data = open(tasks_source).readlines()
         else:
-            print(
-                f"The path to the latest jobs file {LATEST_TASKS_FILE} does not exist!\nDo not use --latest to parse the default {DEFAULT_TASKS_FILE} path.\nOR\nuse --file for custom path."
+            LOGGER.critical(
+                f"The path to the latest jobs file {LATEST_TASKS_FILE} does not exist!"
+            )
+            LOGGER.critical(
+                f"Do not use --latest option if you wish to parse values of the default {DEFAULT_TASKS_FILE} path."
+            )
+            LOGGER.critical(
+                "Or use the --file option with path to a file containing the job IDs."
             )
             sys.exit(1)
     elif ARGS.file:
-        if os.path.exists(str(ARGS.file)):
-            tasks_source = ARGS.file
-            tasks_source_data = open(tasks_source).readlines()
-        else:
-            print(f"Given path {ARGS.file} does not exist!")
-            sys.exit(1)
+        tasks_source = ARGS.file
+        tasks_source_data = []
+        for file in tasks_source:
+            if os.path.exists(file):
+                task_ids = open(file).readlines()
+                tasks_source_data.extend(task_ids)
+            else:
+                LOGGER.critical(f"Given path {ARGS.file} does not exist!")
+                sys.exit(1)
     elif ARGS.cmd:
         tasks_source_data = ARGS.cmd
     else:
@@ -66,8 +76,9 @@ def parse_tasks():
             tasks_source = DEFAULT_TASKS_FILE
             tasks_source_data = open(tasks_source).readlines()
         else:
-            print(
-                f"Default file containing tasks doesn't exist.\nPass the tasks with --url or create and feed the {DEFAULT_TASKS_FILE}"
+            LOGGER.critical(f"The default file containing tasks doesn't exist.")
+            LOGGER.critical(
+                f"Pass the job IDs with the --cmd option or create and feed the {DEFAULT_TASKS_FILE} with job IDs."
             )
             sys.exit(1)
 
@@ -83,7 +94,7 @@ def parse_tasks():
         elif task == str(uuid.UUID(task)):
             task = TESTING_FARM_ENDPOINT + "/" + task
         else:
-            print(f"Unrecognized task {task}")
+            LOGGER.warning(f"Unrecognized task {task}")
             update_retval(NO_RESULT)
             continue
 
@@ -105,8 +116,8 @@ def parse_request_xunit(request_url_list=None, tasks_source=None, skip_pass=Fals
     if request_url_list is None or tasks_source is None:
         request_url_list, tasks_source = parse_tasks()
     if len(request_url_list) == 0 or all(element == "" for element in request_url_list):
-        print("There are no tasks to report for.")
-        print(
+        LOGGER.critical("There are no tasks to report for.")
+        LOGGER.critical(
             f"Verify the {tasks_source} has at least one task in it or pass the values to the commandline with -c/--cmd."
         )
         sys.exit(1)
@@ -117,7 +128,7 @@ def parse_request_xunit(request_url_list=None, tasks_source=None, skip_pass=Fals
     loading_chars = ["/", "-", "\\", "|"]
     index = 0
 
-    print("Reporting for the requested tasks:")
+    LOGGER.info("Reporting for the requested tasks:")
     for url in request_url_list:
         LOGGER.debug(f"Getting results of '{url}'")
         request = requests.get(url)
@@ -127,6 +138,7 @@ def parse_request_xunit(request_url_list=None, tasks_source=None, skip_pass=Fals
         request_arch = request.json()["environments_requested"][0]["arch"]
         request_datetime_created = request.json()["created"]
         request_datetime_parsed = request_datetime_created.split(".")[0]
+        request_plan = request.json()["test"]["fmf"]["name"]
 
         log_dir = f"{request_uuid}_logs"
 
@@ -139,11 +151,11 @@ def parse_request_xunit(request_url_list=None, tasks_source=None, skip_pass=Fals
         elif request_state == "ERROR":
             request_state = FormatText.bg_yellow + request_state + FormatText.bg_default
             update_retval(ERROR_HERE)
-        print(
-            request.json()["environments_requested"][0]["os"]["compose"],
-            request.json()["test"]["fmf"]["name"],
-            url,
-            request_state,
+
+        compose_len = _eval_longest_compose()
+
+        LOGGER.info(
+            f"{FormatText.bold}{FormatText.blue}{str(request_target):<{compose_len}} {request_plan:<20}{FormatText.end} {url} {request_state}"
         )
 
         if ARGS.wait:
@@ -158,28 +170,31 @@ def parse_request_xunit(request_url_list=None, tasks_source=None, skip_pass=Fals
                 time.sleep(30)
                 request = requests.get(url)
             else:
-                print("Job finished!")
+                LOGGER.info("Job finished!")
         else:
             if (
                 request.json()["state"] != "complete"
                 and request.json()["state"] != "error"
             ):
-                print(
-                    f"Request {url} is still running, wait for it to finish or use --wait.\nSkipping to next request."
+                LOGGER.warning(
+                    f"Request {url} is still running, wait for it to finish or use --wait."
                 )
+                LOGGER.info("Skipping to the next request.")
+                print("\n")
                 update_retval(NO_RESULT)
                 continue
 
+        request_summary = request.json()["result"]["summary"]
+        request_result_overall = request.json()["result"]["overall"]
         if request.json()["state"] == "error":
-            request_summary = request.json()["result"]["summary"]
-            request_result_overall = request.json()["result"]["overall"]
+
             error_formatted = FormatText.bg_red + "ERROR" + FormatText.bg_default
             error_reason = request_summary
             message = (
                 f"Request ended up in {error_formatted} state, because {error_reason}.\n"
                 f"See more details on the result page {url.replace(TESTING_FARM_ENDPOINT, ARTIFACT_BASE_URL)}"
             )
-            print(FormatText.bold + message + FormatText.end)
+            LOGGER.critical(FormatText.bold + message + FormatText.end)
             update_retval(ERROR_HERE)
             # NOTE(ivasilev) There is a way to retrieve results even when the xunit file is not there, so let's not
             # skip tests processing upon error. Kudos to mmacura.
@@ -187,7 +202,7 @@ def parse_request_xunit(request_url_list=None, tasks_source=None, skip_pass=Fals
         xunit = request.json()["result"]["xunit"]
         # TODO(mmacura): possibly always use artifacts/results.xml url instead of xunit in the TF endpoint
         if not xunit:
-            results_xml_url = request.json()["run"]["artifacts"] + "/results.xml"
+            results_xml_url = request.json()["result"]["xunit_url"]
             results_xml_response = requests.get(results_xml_url)
             if results_xml_response:
                 xunit = results_xml_response.text
@@ -243,7 +258,7 @@ def parse_request_xunit(request_url_list=None, tasks_source=None, skip_pass=Fals
             continue
 
         if ARGS.download_logs:
-            print("  > Downloading the log files.")
+            LOGGER.info("  > Downloading the log files.")
             # Create the log directory path for the request
             log_dir_path = os.path.join(logs_base_directory, log_dir)
             os.makedirs(log_dir_path, exist_ok=True)
@@ -264,7 +279,7 @@ def parse_request_xunit(request_url_list=None, tasks_source=None, skip_pass=Fals
                     "./testing-environment/property[@name='arch']/@value"
                 )[0]
             except IndexError:
-                testsuite_arch = elem.xpath("./@name")[0].split(":")[1]
+                testsuite_arch = elem.xpath("./@name")[0].split(":")[-1]
             testsuite_result = elem.xpath("./@result")[0].upper()
             testsuite_test_count = elem.xpath("./@tests")
             testsuite_log_dir = testsuite_name.split("/")[-1]
@@ -321,7 +336,7 @@ def parse_request_xunit(request_url_list=None, tasks_source=None, skip_pass=Fals
                         logfile.write(log_data)
 
         if ARGS.download_logs:
-            print(f"    > Logfiles stored in {log_dir_path}")
+            LOGGER.info(f"    > Logfiles stored in {log_dir_path}")
 
     return parsed_dict
 
@@ -534,6 +549,22 @@ def colorize(result, label=None, color_format_default=FormatText.end):
     """
     label = label if label else result
     return get_color_format(result) + label + color_format_default
+
+
+def _eval_longest_compose():
+    """
+    Helper function evaluating the longest compose name in the mapping.
+    Returns len int of the longest.
+    """
+    compose_len = 0
+    for nest_dict in C2R_COMPOSE_MAPPING.values():
+        eval_compose_len = len(nest_dict.get("compose"))
+        if eval_compose_len > compose_len:
+            compose_len = len(nest_dict.get("compose"))
+
+    compose_len = compose_len + 5
+
+    return compose_len
 
 
 def main(result_table=None):
