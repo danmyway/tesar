@@ -9,9 +9,9 @@ and this project adheres to [Calendar Versioning](https://calver.org).<br>
 ### Added
 
 ### Changed
-
+* `-f/--file` can be passed multiple times, the task IDs get aggregated and reported in one table
 ### Removed
-
+* dropped Alma Linux and Rocky Linux 8.6 from the targets
 ## [2024.03.25]
 ### Added
 - Return code for report command

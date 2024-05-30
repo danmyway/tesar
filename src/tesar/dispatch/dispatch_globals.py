@@ -65,11 +65,6 @@ C2R_COMPOSE_MAPPING = {
         "distro": "oracle-8-latest",
         "chroot": "epel-8-x86_64",
     },
-    "al86": {
-        "compose": "AlmaLinux OS 8.6.20220901 x86_64",
-        "distro": "alma-8.6",
-        "chroot": "epel-8-x86_64",
-    },
     "al88": {
         "compose": "AlmaLinux OS 8.8.20230524 x86_64",
         "distro": "alma-8.8",
@@ -78,11 +73,6 @@ C2R_COMPOSE_MAPPING = {
     "al8": {
         "compose": "AlmaLinux OS 8.9.20231123 x86_64",
         "distro": "alma-8-latest",
-        "chroot": "epel-8-x86_64",
-    },
-    "roc86": {
-        "compose": "Rocky-8-ec2-8.6-20220515.0.x86_64",
-        "distro": "rocky-8.6",
         "chroot": "epel-8-x86_64",
     },
     "roc88": {

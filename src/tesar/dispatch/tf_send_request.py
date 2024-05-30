@@ -22,11 +22,6 @@ CLOUD_RESOURCES_TAG, TESTING_FARM_API_KEY = get_config()
 ARGS = get_arguments()
 OUTPUT_DIVIDER = 20 * "="
 
-# For some images (Alma, Rocky) we need to use post-install-script to enable root login.
-POST_INSTALL_SCRIPT = (
-    "#!/bin/bash\nsudo sed -i 's/^.*ssh-rsa/ssh-rsa/' /root/.ssh/authorized_keys"
-)
-
 if os.path.exists(LATEST_TASKS_FILE):
     os.unlink(LATEST_TASKS_FILE)
 
@@ -59,6 +54,13 @@ def submit_test(
     """
     Payload documentation > https://testing-farm.gitlab.io/api/#operation/requestsPost
     """
+
+    # We need to import new gpg key for Alma 8.8 to be able to test brew builds
+    if tmt_distro == "alma-8.8":
+        POST_INSTALL_SCRIPT = "#!/bin/bash\nsudo sed -i 's/^.*ssh-rsa/ssh-rsa/' /root/.ssh/authorized_keys; rpm --import https://repo.almalinux.org/almalinux/RPM-GPG-KEY-AlmaLinux"
+    else:
+        # For some images (Alma, Rocky) we need to use post-install-script to enable root login.
+        POST_INSTALL_SCRIPT = "#!/bin/bash\nsudo sed -i 's/^.*ssh-rsa/ssh-rsa/' /root/.ssh/authorized_keys"
 
     payload_raw = {
         "api_key": api_key,
