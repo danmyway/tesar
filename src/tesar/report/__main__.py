@@ -138,7 +138,7 @@ def parse_request_xunit(request_url_list=None, tasks_source=None, skip_pass=Fals
         request_arch = request.json()["environments_requested"][0]["arch"]
         request_datetime_created = request.json()["created"]
         request_datetime_parsed = request_datetime_created.split(".")[0]
-        request_plan = request.json()["test"]["fmf"]["name"]
+        request_plan = request.json()["test"]["fmf"]["name"] or ""
 
         log_dir = f"{request_uuid}_logs"
 
