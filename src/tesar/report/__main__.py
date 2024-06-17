@@ -91,12 +91,13 @@ def parse_tasks():
             task = task
         elif task.startswith(ARTIFACT_BASE_URL):
             task = task.replace(ARTIFACT_BASE_URL, TESTING_FARM_ENDPOINT)
-        elif task == str(uuid.UUID(task)):
-            task = TESTING_FARM_ENDPOINT + "/" + task
         else:
-            LOGGER.warning(f"Unrecognized task {task}")
-            update_retval(NO_RESULT)
-            continue
+            try:
+                task = TESTING_FARM_ENDPOINT + "/" + str(uuid.UUID([part for part in task.split('/') if part][-1]))
+            except ValueError:
+                LOGGER.warning(f"Unrecognized task {task}")
+                update_retval(NO_RESULT)
+                continue
 
         # Validate UUID
         try:
