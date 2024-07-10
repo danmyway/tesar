@@ -145,7 +145,7 @@ Corresponding return code is set based on the results with following logic:
 The default way to show results is by showing each run details as a separate table. In order to combine test results of several different tft runs you can use comparison mode which is triggered by the `--compare` flag of `tesar report`.
 
 ```
-❯ tesar report -c 8f4e2e3e-beb4-4d3a-9b0a-68a2f428dd1b -c c3726a72-8e6b-4c51-88d8-612556df7ac1 --short  --unify-results=tier2=tier2_7to8 --compare
+❯ tesar report -c 8f4e2e3e-beb4-4d3a-9b0a-68a2f428dd1b -c c3726a72-8e6b-4c51-88d8-612556df7ac1 --short --unify-results=tier2=tier2_7to8 --compare
 ```
 
 #### Examples
@@ -256,9 +256,9 @@ Sadly, there is no instance of any relevance for CentOS 8 latest available.
 cos8: CentOS-8-latest
 ol8: OL8.9-x86_64-HVM-2024-02-02
 al88: AlmaLinux OS 8.8.20230524 x86_64
-al8: AlmaLinux OS 8.9.20231123 x86_64
+al8: AlmaLinux OS 8.10.20240530 x86_64
 roc88: Rocky-8-EC2-Base-8.8-20230518.0.x86_64
-roc8: Rocky-8-EC2-Base-8.9-20231119.0.x86_64
+roc8: Rocky-8-EC2-Base-8.10-20240528.0.x86_64
 str8: CentOS-Stream-8
 
 # RHEL7 targets

@@ -71,7 +71,7 @@ C2R_COMPOSE_MAPPING = {
         "chroot": "epel-8-x86_64",
     },
     "al8": {
-        "compose": "AlmaLinux OS 8.9.20231123 x86_64",
+        "compose": "AlmaLinux OS 8.10.20240530 x86_64",
         "distro": "alma-8-latest",
         "chroot": "epel-8-x86_64",
     },
@@ -81,7 +81,7 @@ C2R_COMPOSE_MAPPING = {
         "chroot": "epel-8-x86_64",
     },
     "roc8": {
-        "compose": "Rocky-8-EC2-Base-8.9-20231119.0.x86_64",
+        "compose": "Rocky-8-EC2-Base-8.10-20240528.0.x86_64",
         "distro": "rocky-8-latest",
         "chroot": "epel-8-x86_64",
     },
