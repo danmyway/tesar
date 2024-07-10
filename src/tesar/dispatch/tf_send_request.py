@@ -57,10 +57,13 @@ def submit_test(
 
     # We need to import new gpg key for Alma 8.8 to be able to test brew builds
     if tmt_distro == "alma-8.8":
-        POST_INSTALL_SCRIPT = "#!/bin/bash\nsudo sed -i 's/^.*ssh-rsa/ssh-rsa/' /root/.ssh/authorized_keys; rpm --import https://repo.almalinux.org/almalinux/RPM-GPG-KEY-AlmaLinux"
+        post_install_script = "#!/bin/bash\nsudo sed -i 's/^.*ssh-rsa/ssh-rsa/' /root/.ssh/authorized_keys; rpm --import https://repo.almalinux.org/almalinux/RPM-GPG-KEY-AlmaLinux"
+    elif "centos" in tmt_distro:
+        # After the CentOS EOL the repositories were moved to the vault, modify the repofile to address the changes
+        post_install_script = "#!/bin/bash\nsudo sed -i 's/^.*ssh-rsa/ssh-rsa/' /root/.ssh/authorized_keys; sed -i -e 's|^\(mirrorlist=.*\)|#\1|' -e 's|^baseurl=\(.*\)|#baseurl=\1|' -e 's|^#baseurl=http://mirror\(.*\)|baseurl=http://vault\1|' /etc/yum.repos.d/CentOS-*"
     else:
         # For some images (Alma, Rocky) we need to use post-install-script to enable root login.
-        POST_INSTALL_SCRIPT = "#!/bin/bash\nsudo sed -i 's/^.*ssh-rsa/ssh-rsa/' /root/.ssh/authorized_keys"
+        post_install_script = "#!/bin/bash\nsudo sed -i 's/^.*ssh-rsa/ssh-rsa/' /root/.ssh/authorized_keys"
 
     payload_raw = {
         "api_key": api_key,
@@ -92,7 +95,7 @@ def submit_test(
                 ],
                 "settings": {
                     "provisioning": {
-                        "post_install_script": POST_INSTALL_SCRIPT,
+                        "post_install_script": post_install_script,
                         "tags": {"BusinessUnit": CLOUD_RESOURCES_TAG},
                     }
                 },
