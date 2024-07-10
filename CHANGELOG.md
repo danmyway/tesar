@@ -10,6 +10,7 @@ and this project adheres to [Calendar Versioning](https://calver.org).<br>
 
 ### Changed
 * `-f/--file` can be passed multiple times, the task IDs get aggregated and reported in one table
+* update the latest Alma and Rocky composes to 8.10
 ### Removed
 * dropped Alma Linux and Rocky Linux 8.6 from the targets
 ## [2024.03.25]
