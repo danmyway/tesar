@@ -345,7 +345,10 @@ def parse_request_xunit(request_url_list=None, tasks_source=None, skip_pass=Fals
 def _split_name(name, index):
     """A helper that splits a test name at the position given by index"""
     name_raw = name.split("/")
-    name_raw.remove("")
+    try:
+        name_raw.remove("")
+    except ValueError:
+        pass
     return "/".join(name_raw[index:])
 
 
