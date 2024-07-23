@@ -90,4 +90,24 @@ C2R_COMPOSE_MAPPING = {
         "distro": "stream-8-latest",
         "chroot": "epel-8-x86_64",
     },
+    "al9": {
+        "compose": "AlmaLinux OS 9.4.20240509 x86_64",
+        "distro": "alma-9-latest",
+        "chroot": "epel-9-x86_64",
+    },
+    "ol9": {
+        "compose": "OL9.3-x86_64-HVM-2024-02-02",
+        "distro": "oracle-9-latest",
+        "chroot": "epel-9-x86_64",
+    },
+    "roc9": {
+        "compose": "Rocky-9-EC2-Base-9.4-20240509.0.x86_64",
+        "distro": "rocky-9-latest",
+        "chroot": "epel-9-x86_64",
+    },
+    "str9": {
+        "compose": "CentOS-Stream-9",
+        "distro": "stream-9-latest",
+        "chroot": "epel-9-x86_64",
+    },
 }
