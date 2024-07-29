@@ -60,7 +60,7 @@ def submit_test(
         post_install_script = "#!/bin/bash\nsudo sed -i 's/^.*ssh-rsa/ssh-rsa/' /root/.ssh/authorized_keys; rpm --import https://repo.almalinux.org/almalinux/RPM-GPG-KEY-AlmaLinux"
     elif "centos" in tmt_distro:
         # After the CentOS EOL the repositories were moved to the vault, modify the repofile to address the changes
-        post_install_script = "#!/bin/bash\nsudo sed -i 's/^.*ssh-rsa/ssh-rsa/' /root/.ssh/authorized_keys; sed -i -e 's|^\(mirrorlist=.*\)|#\1|' -e 's|^baseurl=\(.*\)|#baseurl=\1|' -e 's|^#baseurl=http://mirror\(.*\)|baseurl=http://vault\1|' /etc/yum.repos.d/CentOS-*"
+        post_install_script = "#!/bin/bash\nsudo sed -i 's/^.*ssh-rsa/ssh-rsa/' /root/.ssh/authorized_keys; sed -i -e 's|^\(mirrorlist=.*\)|#\\1|' -e 's|^baseurl=\(.*\)|#baseurl=\\1|' -e 's|^#baseurl=http://mirror\(.*\)|baseurl=http://vault\\1|' /etc/yum.repos.d/CentOS-*"
     else:
         # For some images (Alma, Rocky) we need to use post-install-script to enable root login.
         post_install_script = "#!/bin/bash\nsudo sed -i 's/^.*ssh-rsa/ssh-rsa/' /root/.ssh/authorized_keys"
