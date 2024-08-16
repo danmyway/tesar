@@ -37,9 +37,9 @@ LP_COMPOSE_MAPPING = {
         "distro": "rhel-8.7",
         "chroot": "epel-8-x86_64",
     },
-    "88to92": {
-        "compose": "RHEL-8.8.0-Nightly",
-        "distro": "rhel-8.8",
+    "810to95": {
+        "compose": "RHEL-8.10.0-Nightly",
+        "distro": "rhel-8.10",
         "chroot": "epel-8-x86_64",
     },
 }
