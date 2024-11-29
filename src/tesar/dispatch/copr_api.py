@@ -91,14 +91,14 @@ def get_info(package, repository, reference, composes):
             )
             LOGGER.critical(f"Exiting.")
             sys.exit(99)
-        elif build_munch.state == "failed":
-            LOGGER.critical(
-                f"{FormatText.red+FormatText.bold}The build with the given ID failed!{FormatText.end}"
-            )
-            LOGGER.critical(
-                f"{FormatText.red+FormatText.bold}Please provide valid build ID.{FormatText.end}"
-            )
-            LOGGER.critical(f"{FormatText.red+FormatText.bold}Exiting.{FormatText.end}")
+        # elif build_munch.state == "failed":
+        #     LOGGER.critical(
+        #         f"{FormatText.red+FormatText.bold}The build with the given ID failed!{FormatText.end}"
+        #     )
+        #     LOGGER.critical(
+        #         f"{FormatText.red+FormatText.bold}Please provide valid build ID.{FormatText.end}"
+        #     )
+        #     LOGGER.critical(f"{FormatText.red+FormatText.bold}Exiting.{FormatText.end}")
         else:
             build = build_munch
         for build_info in get_build_dictionary(build, repository, package, composes):
@@ -159,14 +159,15 @@ def get_build_dictionary(
         if ARGS.package == "leapp-repository":
             source_release_raw = str(distro.split("to")[0])
             target_release_raw = str(distro.split("to")[1])
-            source_release = f"{source_release_raw[0]}.{source_release_raw[1]}"
-            target_release = f"{target_release_raw[0]}.{target_release_raw[1]}"
+            source_release = ".".join((source_release_raw[0], source_release_raw[1:]))
+            target_release = ".".join((target_release_raw[0], target_release_raw[1:]))
         copr_info_dict["compose"] = COMPOSE_MAPPING.get(distro).get("compose")
         copr_info_dict["distro"] = COMPOSE_MAPPING.get(distro).get("distro")
         copr_info_dict["source_release"] = source_release
         copr_info_dict["target_release"] = target_release
         for chroot in build.chroots:
-            if COMPOSE_MAPPING.get(distro).get("chroot") == chroot:
+            requested_chroot = COMPOSE_MAPPING.get(distro).get("chroot")
+            if requested_chroot == chroot:
                 copr_info_dict["chroot"] = COMPOSE_MAPPING.get(distro).get("chroot")
                 copr_info_dict["build_id"] = f"{build.id}:{chroot}"
                 LOGGER.info(
@@ -174,5 +175,10 @@ def get_build_dictionary(
                 )
 
                 build_info.append(copr_info_dict)
+        if not build_info:
+            LOGGER.critical(
+                f"There is not an available build for the requested chroot: {requested_chroot}"
+            )
+            sys.exit(99)
 
     return build_info
